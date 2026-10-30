@@ -180,7 +180,7 @@ M-Film ทำบน EOS M และใช้ได้จริงบนรุ่
 | **Mac ชิป Intel** | `Darkrooms-macos-intel.zip` | แตกไฟล์ ลากไปไว้ใน Applications แล้วเปิด ครั้งแรกไปที่ *System Settings → Privacy & Security → Open Anyway* (macOS 14 ลงไป: คลิกขวา → Open) |
 | **Mac ชิป Apple silicon** | `Darkrooms-macos-apple-silicon.zip` | เหมือนกัน |
 
-โหลดได้จาก **[release ล่าสุด](../../releases/latest)** ขนาดประมาณ 25–45 MB โปรแกรมยังไม่ได้ sign กับ Apple หรือ
+โหลดได้จาก **[release ของ Darkrooms](../../releases?q=Darkrooms&expanded=true)** (ตัวใหม่สุดอยู่บนสุด) ขนาดประมาณ 25–45 MB โปรแกรมยังไม่ได้ sign กับ Apple หรือ
 Microsoft ครั้งแรกจึงมีคำเตือน
 
 ---

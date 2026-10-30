@@ -22,4 +22,6 @@ card out, and the camera starts normally without it. Tell us (see TESTING.md).
 Remove: format the card in the camera, or delete autoexec.bin and ML/.
 Logs for a bug report: ML/FILMROLL.LOG on the card.
 
-Free software (GPL-2.0). Buy the developer a coffee: https://buy.stripe.com/7sY14p8d93QE5Ny5M58so02
+Free software (GPL-2.0, LICENSE.txt; the source is at https://github.com/HNGSeries/M-Film).
+Other parts and their licences, among them the Film-Luts colours: THIRD_PARTY.txt.
+Buy the developer a coffee: https://buy.stripe.com/7sY14p8d93QE5Ny5M58so02
