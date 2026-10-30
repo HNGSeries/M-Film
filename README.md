@@ -169,10 +169,11 @@ roll you shot with its film, and develops them at full resolution.
 | Rolls a day | 1 | as many as you like |
 | Every film, full size, EXIF, contact sheets | ✓ | ✓ |
 | Many rolls at once on every core | | ✓ |
-| Price | free | **$5.99 once**, updates included |
+| Price | free | **฿199 once** (about US$6; checkout shows your currency), updates included |
 
 The camera's own darkroom stays free and unlimited. Buy Darkrooms Full in the program
-(gear icon → *Get Full*); the licence key arrives by e-mail and works on your computers.
+(gear icon → *Get Full*); the licence key arrives by e-mail and works on one computer at a time
+(release it in Darkrooms to move it to another).
 
 ### Download
 
