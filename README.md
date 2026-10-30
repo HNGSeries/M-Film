@@ -169,7 +169,7 @@ roll you shot with its film, and develops them at full resolution.
 | Rolls a day | 1 | as many as you like |
 | Every film, full size, EXIF, contact sheets | ✓ | ✓ |
 | Many rolls at once on every core | | ✓ |
-| Price | free | **฿199 once** (about US$6; checkout shows your currency), updates included |
+| Price | free | **US$5.99 once** (checkout shows your currency), updates included |
 
 The camera's own darkroom stays free and unlimited. Buy Darkrooms Full in the program
 (gear icon → *Get Full*); the licence key arrives by e-mail and works on one computer at a time
@@ -183,7 +183,7 @@ The camera's own darkroom stays free and unlimited. Buy Darkrooms Full in the pr
 | **Mac with Intel** | `Darkrooms-macos-intel.zip` | Unzip, drag to Applications and open it. The first time: *System Settings → Privacy & Security → Open Anyway* (macOS 14 and older: right-click → Open). |
 | **Mac with Apple silicon** | `Darkrooms-macos-apple-silicon.zip` | Same. |
 
-From the **[latest release](../../releases/latest)**. About 25–45 MB. The program isn't signed with Apple or
+From the **[Darkrooms releases](../../releases?q=Darkrooms&expanded=true)** (the newest is at the top). About 25–45 MB. The program isn't signed with Apple or
 Microsoft yet, hence the warning the first time.
 
 ---

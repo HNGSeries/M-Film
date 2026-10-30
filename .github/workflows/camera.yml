@@ -51,6 +51,10 @@ jobs:
           p=${{ matrix.platform }}
           if [ "$p" = EOSM.202 ]; then d=ml-dev/out/fork; else d=ml-dev/out/fork-$p; fi
           cp ml-dev/CAMERA-README.txt "$d/M-FILM-README.txt"
+          # the licence and the notices travel with the binaries (GPL-2.0 section 1; the MIT notice of
+          # Film-Luts, whose LUTs the colour tables and samples in ML/ are made from)
+          cp LICENSE "$d/LICENSE.txt"
+          cp THIRD_PARTY.md "$d/THIRD_PARTY.txt"
           (cd "$d" && zip -qr "$GITHUB_WORKSPACE/M-Film-camera-$p.zip" .)
           ls -la M-Film-camera-$p.zip
       - uses: actions/upload-artifact@v4
@@ -79,6 +83,8 @@ jobs:
           tag_name: ${{ inputs.tag || github.ref_name }}
           name: M-Film ${{ inputs.tag || github.ref_name }}
           target_commitish: ${{ github.sha }}
+          # the README's Download links go to releases/latest; Darkrooms' releases here never take it
+          make_latest: true
           files: zips/*.zip
           body: |
             **On the camera** (`M-Film-camera-<camera>.zip`): the Film OS with Magic Lantern. Unzip it onto the card
