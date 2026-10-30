@@ -179,7 +179,7 @@ The camera's own darkroom stays free and unlimited. Buy Darkrooms Full in the pr
 | Your computer | Get | Open it |
 |---|---|---|
 | **Windows 10 / 11** | `Darkrooms-windows-x64.zip` | Unzip, run `Darkrooms.exe`. If Windows warns: *More info* → *Run anyway*. |
-| **Mac with Intel** | `Darkrooms-macos-intel.zip` | Unzip, drag to Applications, **right-click → Open** the first time. |
+| **Mac with Intel** | `Darkrooms-macos-intel.zip` | Unzip, drag to Applications and open it. The first time: *System Settings → Privacy & Security → Open Anyway* (macOS 14 and older: right-click → Open). |
 | **Mac with Apple silicon** | `Darkrooms-macos-apple-silicon.zip` | Same. |
 
 From the **[latest release](../../releases/latest)**. About 25–45 MB. The program isn't signed with Apple or

@@ -177,7 +177,7 @@ M-Film ทำบน EOS M และใช้ได้จริงบนรุ่
 | คอมของคุณ | ไฟล์ | เปิดยังไง |
 |---|---|---|
 | **Windows 10 / 11** | `Darkrooms-windows-x64.zip` | แตกไฟล์ แล้วเปิด `Darkrooms.exe` ถ้า Windows เตือน: *More info* → *Run anyway* |
-| **Mac ชิป Intel** | `Darkrooms-macos-intel.zip` | แตกไฟล์ ลากไปไว้ใน Applications ครั้งแรกให้ **คลิกขวา → Open** |
+| **Mac ชิป Intel** | `Darkrooms-macos-intel.zip` | แตกไฟล์ ลากไปไว้ใน Applications แล้วเปิด ครั้งแรกไปที่ *System Settings → Privacy & Security → Open Anyway* (macOS 14 ลงไป: คลิกขวา → Open) |
 | **Mac ชิป Apple silicon** | `Darkrooms-macos-apple-silicon.zip` | เหมือนกัน |
 
 โหลดได้จาก **[release ล่าสุด](../../releases/latest)** ขนาดประมาณ 25–45 MB โปรแกรมยังไม่ได้ sign กับ Apple หรือ
