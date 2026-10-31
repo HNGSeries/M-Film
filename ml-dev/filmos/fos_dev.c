@@ -771,12 +771,18 @@ static int setup_maps(struct fos_dev *d)
         {
             d->seg_piece[k] = n;
             int s0 = d->seg_x0[k], len = d->seg_x0[k + 1] - s0, odd = s0 & 1, pairs = (len - odd) >> 1;
+            /* the even column after the pairs: worked out before odd is
+             * cleared below, or a segment that starts on an odd column and
+             * takes more than one piece (portrait) gets a column too many,
+             * and the row's later pieces read one column off (on the camera,
+             * words not on a word boundary: lines across the picture) */
+            int tail = (len - odd) & 1;
             /* four pairs at most a piece; a longer segment (portrait) in more */
             do
             {
                 int p = pairs < 4 ? pairs : 4;
                 pairs -= p;
-                d->seg_desc[n] = (uint8_t) (p | (!pairs && ((len - odd) & 1)) << 6 | odd << 7);
+                d->seg_desc[n] = (uint8_t) (p | (!pairs && tail) << 6 | odd << 7);
                 d->desc_off[n++] = d->seg_off[k];
                 odd = 0;
             }
