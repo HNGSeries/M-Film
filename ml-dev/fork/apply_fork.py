@@ -83,6 +83,22 @@ if "lua dropped by film-mode fork" not in p.read_text():
     p.write_text(p.read_text().replace(
         "ML_MODULES = \\\n", "# lua dropped by film-mode fork (newlib header clash with gcc 14)\nML_MODULES = \\\n", 1))
 
+# 6D only: a bigger share of Canon's AllocateMemory pool for autoexec.bin.
+# ML takes 0x44C000-0x4E0000 (592K) of the pool's 9152K (0x44C000-0xD3C000,
+# checked in the 1.1.6 ROM); the fork needs ~722K at boot, and with more
+# boot.h refuses to start (card LED: 3 long, 3 short, forever).
+# 0x520000 gives 848K. A 6D running ML with 592K had 2192K of the pool
+# free (1503K while recording RAW), so ~1.9M stays free for Canon.
+# 100D and 70D keep 0x4E0000.
+edit("src/boot-d45-am.c",
+     "    #if defined(CONFIG_6D) || defined(CONFIG_100D) || defined(CONFIG_70D)\n",
+     "    #if defined(CONFIG_6D)\n"
+     "    /* film-mode fork: R0 0x44C000 -> 0x520000 => reserve 848K for ML (MOV R0, #0x520000) */\n"
+     "    addr_AllocMem_end[1] = 0xE3A00852;\n"
+     "    ml_reserved_mem = 0x520000 - RESTARTSTART;\n"
+     "    #elif defined(CONFIG_100D) || defined(CONFIG_70D)\n",
+     "film-mode fork: R0 0x44C000 -> 0x520000")
+
 def platform(name):
     """FEATURE_FILMROLL, our objects, and no lua, for one camera."""
     # build it in
