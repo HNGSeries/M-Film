@@ -12,6 +12,7 @@ STATUS = {
     "working": "✅ **Works**",
     "testing": "🧪 Builds, needs a tester",
     "planned": "⏳ Planned",
+    "memory": "🔧 Too big for its boot memory: being fixed",
     "no": "— Not yet",
 }
 WHY_NO = "Magic Lantern itself is still experimental on these"
@@ -20,6 +21,7 @@ STATUS_TH = {
     "working": "✅ **ใช้ได้**",
     "testing": "🧪 build ได้แล้ว รอคนทดสอบ",
     "planned": "⏳ วางแผนไว้",
+    "memory": "🔧 ใหญ่เกินหน่วยความจำตอนบูต: กำลังแก้",
 }
 WHY_TH = {
     WHY_NO: "Magic Lantern เองยังเป็นรุ่นทดลองบนกล้องเหล่านี้",
@@ -56,8 +58,8 @@ def main():
     def table(head, status, not_yet, why_text, end="."):
         rows = [head, "|---|---|---|---|"]
         for c in cams:
-            if c["status"] in ("working", "testing", "planned"):
-                dl = f"`M-Film-camera-{c['plat']}.zip`" if c["status"] != "planned" else ""
+            if c["status"] in ("working", "testing", "memory", "planned"):
+                dl = f"`M-Film-camera-{c['plat']}.zip`" if c["status"] in ("working", "testing") else ""
                 rows.append(f"| {c['name']} | {c['fw']} | {status[c['status']]} | {dl} |")
         # the ones Magic Lantern isn't ready on: one line, grouped by why
         why = {}
@@ -85,7 +87,7 @@ def main():
                   lambda m: m.group(1) + "[" + ", ".join(c["plat"] for c in built) + "]  # from ml-dev/cameras.txt", text, count=1)
     wf.write_text(text, encoding="utf-8")
     print(f"{len(cams)} cameras: {sum(c['status'] == 'working' for c in cams)} working, "
-          f"{sum(c['status'] == 'testing' for c in cams)} testing")
+          f"{sum(c['status'] == 'testing' for c in cams)} testing, {sum(c['status'] == 'memory' for c in cams)} too big at boot")
 
 
 if __name__ == "__main__":
