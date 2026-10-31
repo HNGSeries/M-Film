@@ -4,7 +4,7 @@
  * (fos_dark.c, fos_dev.c, fos_lab.c, fos_looks.c, fos_jpeg.c: about 60 KB).
  * Built with build_fork.sh --no-darkroom, those are replaced by this: the
  * Darkroom and Prints screens say where the rolls are developed instead
- * (Darkrooms, on a computer), and the shelf has no sample prints.
+ * (Darkrooms, on a computer). The shelf's samples still show (fos_print.c).
  */
 
 #include "fos_ui.h"
@@ -59,7 +59,3 @@ void prints_leave() {}
 void prints_key(int k) { nd_key(k); }
 int  prints_update(int dt) { return 0; }
 void prints_draw() { nd_draw(); }
-
-/* the shelf's sample prints are made by the darkroom's code */
-int  fos_print_load(const char *path, struct fos_print *p) { return 0; }
-void fos_print_free(struct fos_print *p) {}
