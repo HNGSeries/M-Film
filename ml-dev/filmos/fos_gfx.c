@@ -3,6 +3,7 @@
  * one-time palette build. */
 
 #include "fos_gfx.h"
+#include "fos_dev.h"
 #include <string.h>
 
 /* ---------------------------------------------------------------- ramps */
@@ -957,3 +958,13 @@ int fos_text_map(uint8_t *px, int pitch, int w, int h, const struct fos_font *f,
     }
     return ((pen + 8) >> 4) - x;
 }
+
+/* the overlay's colours over a photograph (a print, or the camera's own
+ * picture): black, a panel, greys up to white for text on it, the accent,
+ * red, a line, and a dim grey */
+const uint8_t fos_fixed_rgb[FOS_FIXED_N][3] =
+{
+    { 0, 0, 0 }, { 22, 21, 20 }, { 52, 50, 48 }, { 88, 85, 82 }, { 128, 124, 120 }, { 170, 166, 160 },
+    { 210, 206, 200 }, { 244, 241, 236 }, { 236, 168, 52 }, { 150, 104, 34 }, { 214, 64, 52 }, { 60, 58, 56 },
+    { 112, 108, 104 }, { 0, 0, 0 },
+};
