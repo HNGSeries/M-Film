@@ -15,7 +15,9 @@ import sys
 from pathlib import Path
 
 root = Path(sys.argv[1])
-PLATFORMS = sys.argv[2:] or ["EOSM.202"]
+# --no-darkroom: the film OS without its in-camera darkroom (fos_nodark.c in its place), ~60 KB less at boot
+NO_DARKROOM = "--no-darkroom" in sys.argv[2:]
+PLATFORMS = [a for a in sys.argv[2:] if not a.startswith("--")] or ["EOSM.202"]
 
 
 def edit(rel, old, new, marker):
@@ -93,8 +95,8 @@ def platform(name):
     # our objects. Rewritten every time (older versions of this fork
     # listed only filmroll.o), so the list always matches the sources.
     # (no fos_font: the fonts go on the card as ML/DATA/FOSFONT.BIN, see fos_gfx.h)
-    FOS_OBJS = ["filmroll", "fos_gfx", "fos_film", "fos_ui", "fos_shelf", "fos_pages", "fos_hud",
-                "fos_dark", "fos_dev", "fos_lab", "fos_looks", "fos_jpeg"]
+    FOS_OBJS = ["filmroll", "fos_gfx", "fos_film", "fos_ui", "fos_shelf", "fos_pages", "fos_hud"]
+    FOS_OBJS += ["fos_nodark"] if NO_DARKROOM else ["fos_dark", "fos_dev", "fos_lab", "fos_looks", "fos_jpeg"]
     p = root / f"platform/{name}/Makefile"
     lines = p.read_text().split("\n")
     out, skip = [], False

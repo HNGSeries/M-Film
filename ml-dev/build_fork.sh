@@ -4,6 +4,9 @@
 #
 #   build_fork.sh                 EOS M          -> ml-dev/out/fork/
 #   build_fork.sh 650D.104        another camera -> ml-dev/out/fork-650D.104/
+#   build_fork.sh 6D.116 --no-darkroom
+#                                 without the in-camera darkroom (~60 KB less at boot, for cameras
+#                                 that can't spare it) -> ml-dev/out/fork-6D.116-nodark/
 #
 # The cameras are the folders under platform/ in magiclantern_simplified; the
 # ones M-Film knows are listed in CAMERAS (ml-dev/cameras.txt).
@@ -12,8 +15,10 @@ set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 SRC="${ML_SRC:-$HOME/ml/magiclantern_simplified}"
 PLAT="${1:-EOSM.202}"
-if [ "$PLAT" = "EOSM.202" ]; then OUT="$HERE/out/fork"; else OUT="$HERE/out/fork-$PLAT"; fi
-LOG="${LOG:-$HOME/ml/build_fork_$PLAT.log}"
+NODARK=""
+[ "${2:-}" = "--no-darkroom" ] && NODARK="--no-darkroom"
+if [ "$PLAT" = "EOSM.202" ] && [ -z "$NODARK" ]; then OUT="$HERE/out/fork"; else OUT="$HERE/out/fork-$PLAT${NODARK:+-nodark}"; fi
+LOG="${LOG:-$HOME/ml/build_fork_$PLAT${NODARK:+-nodark}.log}"
 
 cp "$HERE"/fork/src/filmroll.{c,h} "$HERE"/filmos/fos*.{c,h} "$SRC/src/"
 sed -i 's/\r$//' "$SRC"/src/filmroll.{c,h} "$SRC"/src/fos*.{c,h}
@@ -21,7 +26,7 @@ sed -i 's/\r$//' "$SRC"/src/filmroll.{c,h} "$SRC"/src/fos*.{c,h}
 VERSION=$(tr -d ' \r\n' < "$HERE/../VERSION")
 printf '#define MFILM_VERSION "%s"\n' "$VERSION" > "$SRC/src/fos_version.h"
 echo "M-Film $VERSION"
-python3 "$HERE/fork/apply_fork.py" "$SRC" "$PLAT"
+python3 "$HERE/fork/apply_fork.py" "$SRC" "$PLAT" $NODARK
 
 cd "$SRC/platform/$PLAT"
 make clean >/dev/null
@@ -53,7 +58,7 @@ if [ -n "$LIMIT" ] && [ "$LIMIT" != "-" ]; then
 else
     echo "ML takes $USED bytes at boot (no limit known for $PLAT yet: if the camera hangs at power on, it is too big)"
 fi
-mkdir -p "$HERE/out" && echo "$USED" > "$HERE/out/.size-$PLAT"
+mkdir -p "$HERE/out" && echo "$USED" > "$HERE/out/.size-$PLAT${NODARK:+-nodark}"
 
 rm -rf "$OUT" && mkdir -p "$OUT"
 (cd "$OUT" && unzip -q "$SRC/platform/$PLAT/$ZIP")
@@ -70,6 +75,13 @@ python3 "$F/tools/genfilms.py" "$OUT/ML/data/FOSFILMS.BIN"
 # the donation links in donate.txt as QR codes (needs segno: pip install segno)
 python3 -c "import segno" 2>/dev/null || pip install -q segno
 python3 "$F/tools/genqr.py" "$HERE/donate.txt" "$OUT/ML/data/FOSQR.BIN"
+
+# with no darkroom, nothing below is used: the card is done
+if [ -n "$NODARK" ]; then
+    echo "== card files in $OUT (no darkroom) =="
+    (cd "$OUT" && find . -maxdepth 3 | sort | head -60)
+    exit 0
+fi
 
 # every film's colour table, so the darkroom never spends its first
 # develop of a film mixing one (the camera checks they match its looks):
