@@ -104,6 +104,7 @@ enum
     FS_HUD, FS_LEDS, FS_FOCUS, FS_WIND,
     FS_APKEYS, FS_LENS_WIDE, FS_FSTOP,
     FS_STARTUP, FS_PLAYLOCK, FS_BOOTANIM, FS_DEBUG,
+    FS_MODE,            /* film mode: 0 Basic (a finished roll goes straight to the darkroom), 1 Realistic (rewind it first) */
     FS_FILM, FS_EXP,
     FS_SCR_STD,         /* screen colour: 0 Canon's conversion, 1 Rec.709 */
     FS_SCR_SAT, FS_SCR_WARM, FS_SCR_BRIGHT,     /* -FOS_SCR_STEPS..FOS_SCR_STEPS */

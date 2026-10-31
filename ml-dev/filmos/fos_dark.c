@@ -64,7 +64,12 @@ static int roll_index(int number)
  * (developing again skips the prints already made) */
 /* developed: every frame printed, and every print in DCIM as a JPEG */
 static int is_developed(const struct fos_lab_roll *r) { return r->sheet && r->developed >= r->shot && r->jpegs >= r->developed; }
-static int is_waiting(const struct fos_lab_roll *r) { return !is_developed(r) && !r->in_camera && r->shot > 0; }
+/* Basic mode: a finished roll still in the camera waits too; developing it finishes it (fos_port_action) */
+static int finished_in_camera(const struct fos_lab_roll *r) { return r->in_camera && !ui_realistic() && r->shot >= r->exposures; }
+static int is_waiting(const struct fos_lab_roll *r)
+{
+    return !is_developed(r) && (!r->in_camera || finished_in_camera(r)) && r->shot > 0;
+}
 static int has_prints(const struct fos_lab_roll *r) { return r->sheet || r->developed > 0; }
 
 /* about how long a frame takes, measured while developing */
@@ -127,7 +132,8 @@ static void dark_bake()
     char b[96], eta[32];
     int frames, waiting = count_waiting(&frames);
     if (!nrolls)
-        snprintf(b, sizeof(b), "No rolls yet " T_MDASH " finish one, rewind it, and it waits here.");
+        snprintf(b, sizeof(b), ui_realistic() ? "No rolls yet " T_MDASH " finish one, rewind it, and it waits here."
+                                              : "No rolls yet " T_MDASH " finish one, and it waits here.");
     else if (waiting)
     {
         format_eta(eta, sizeof(eta), frames, 0);
@@ -192,7 +198,11 @@ static void dark_develop()
     int nm = count_marked();
     dark_queue_clear();
     for (int i = nrolls - 1; i >= 0; i--)
-        if (is_waiting(&rolls[i]) && (!nm || marked[i])) dark_queue_add(rolls[i].number);
+        if (is_waiting(&rolls[i]) && (!nm || marked[i]))
+        {
+            if (finished_in_camera(&rolls[i])) fos_port_action(FA_REWIND, 0, 0);    /* out of the camera first */
+            dark_queue_add(rolls[i].number);
+        }
     ui_go(SCR_DEVELOP, 0, GO_FADE);
 }
 
@@ -214,7 +224,9 @@ void dark_key(int k)
             break;
         case FK_SET: case FK_RIGHT:
             if (!r) break;
-            if (r->in_camera) ui_toast("Still in the camera " T_MDASH " rewind it first");
+            if (r->in_camera && !finished_in_camera(r))
+                ui_toast(ui_realistic() ? "Still in the camera " T_MDASH " rewind it first"
+                                        : "Still in the camera " T_MDASH " finish it on the Roll page first");
             else if (is_waiting(r) && k == FK_SET) marked[dk_sel] ^= 1;
             else if (has_prints(r)) ui_go(SCR_PRINTS, r->number, GO_FADE);
             break;
@@ -270,7 +282,7 @@ static void dark_row(int i, int y)
     snprintf(b, sizeof(b), "Roll %03d " T_DOT " %d frame%s " T_DOT " %s", r->number, r->shot, r->shot == 1 ? "" : "s", short_date(when));
     fos_text(cv, &fos_font_sm, x + 42, y + 48, b, C_TEXT3, OPAQUE, 0);
     fcol c;
-    if (r->in_camera) { snprintf(b, sizeof(b), "IN CAMERA"); c = C_TEXT3; }
+    if (r->in_camera && !finished_in_camera(r)) { snprintf(b, sizeof(b), "IN CAMERA"); c = C_TEXT3; }
     else if (is_developed(r)) { snprintf(b, sizeof(b), "DEVELOPED"); c = C_TEXT3; }
     else if (r->developed) { snprintf(b, sizeof(b), "%d OF %d DEVELOPED", r->developed, r->shot); c = C_ACCENT; }
     else { snprintf(b, sizeof(b), "TO DEVELOP"); c = C_ACCENT; }
@@ -299,7 +311,7 @@ void dark_draw()
     fos_clip(cv, 0, DK_Y, FOS_W, DK_Y + DK_ROWS * DK_ROW);
     if (!nrolls)
     {
-        fos_text_c(cv, &fos_font_md, 360, DK_Y + 120, "Shot rolls appear here once they are rewound.", C_TEXT3, OPAQUE, 0);
+        fos_text_c(cv, &fos_font_md, 360, DK_Y + 120, ui_realistic() ? "Shot rolls appear here once they are rewound." : "Shot rolls appear here once they are finished.", C_TEXT3, OPAQUE, 0);
         *cv = save;
         return;
     }

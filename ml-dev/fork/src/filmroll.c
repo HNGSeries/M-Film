@@ -64,6 +64,7 @@ static CONFIG_INT("filmroll.playlock",  play_lock,        1);
 static CONFIG_INT("filmroll.startup",   startup_picker,   2);   /* 0 off, 1 when no film, 2 always */
 static CONFIG_INT("filmroll.bootanim",  boot_anim,        1);
 static CONFIG_INT("filmroll.debug",     debug_log,        1);
+static CONFIG_INT("filmroll.mode",      film_mode,        0);   /* 0 Basic, 1 Realistic (FS_MODE) */
 static CONFIG_INT("filmroll.lens_wide", lens_widest,      6);   /* index into fos_fstops: f/1.8 */
 static CONFIG_INT("filmroll.fstop",     manual_fstop,     6);
 static CONFIG_INT("filmroll.ap_keys",   aperture_keys,    0);   /* 0 wheel in Av, 1 up/down, 2 menu only */
@@ -836,6 +837,7 @@ static int *setting_var(int s)
         case FS_PLAYLOCK:   return &play_lock;
         case FS_BOOTANIM:   return &boot_anim;
         case FS_DEBUG:      return &debug_log;
+        case FS_MODE:       return &film_mode;
         case FS_FILM:       return &film_sel;
         case FS_EXP:        return &exp_sel;
         case FS_SCR_STD:    return &scr_std;

@@ -90,7 +90,7 @@ static void film_card()
     if (left > 0)
         snprintf(b, sizeof(b), "%d shot " T_DOT " %d left", shot, left);
     else
-        snprintf(b, sizeof(b), "End of roll " T_DOT " rewind to load");
+        snprintf(b, sizeof(b), ui_realistic() ? "End of roll " T_DOT " rewind to load" : "End of roll " T_DOT " ready to develop");
     fos_text_c(cv, &fos_font_sm, cx, sy + 36, b, left > 0 ? C_TEXT2 : C_RED, OPAQUE, 0);
 }
 
@@ -202,7 +202,7 @@ static void home_row(int i, int y, int selected)
     switch (i)
     {
         case H_FILM:
-            snprintf(sub, sizeof(sub), "%s", roll_active() ? "Change film (rewinds this roll)" : "Choose a stock and load a roll");
+            snprintf(sub, sizeof(sub), "%s", roll_active() ? (ui_realistic() ? "Change film (rewinds this roll)" : "Change film (finishes this roll)") : "Choose a stock and load a roll");
             break;
         case H_ROLL:
             if (ui_roll.loaded)
@@ -225,7 +225,7 @@ static void home_row(int i, int y, int selected)
                 snprintf(sub, sizeof(sub), "%s", fos_port_lens_name());
             break;
         case H_SYSTEM:
-            snprintf(sub, sizeof(sub), "Screen colour, start screen, Canon menu");
+            snprintf(sub, sizeof(sub), "%s mode " T_DOT " screen colour " T_DOT " Canon menu", ui_realistic() ? "Realistic" : "Basic");
             break;
     }
     int x = LIST_X + 20;
@@ -302,6 +302,7 @@ struct item
 static const char *const wind_choices[] = { "Off", "Reminder", "Locks shutter" };
 static const char *const apkey_choices[] = { "Dial in Av", "Up / Down", "Menu only" };
 static const char *const start_choices[] = { "Off", "When no film", "Always" };
+static const char *const mode_choices[] = { "Basic", "Realistic" };
 
 static const struct item finder_items[] =
 {
@@ -321,6 +322,7 @@ static const struct item lens_items[] =
 
 static const struct item system_items[] =
 {
+    { "Film mode", IT_CHOICE, FS_MODE, mode_choices, 2, "Basic: a finished roll goes straight to the darkroom. Realistic: rewind it first." },
     { "Start screen", IT_CHOICE, FS_STARTUP, start_choices, 3, "The film shelf when the camera turns on." },
     { "Boot animation", IT_TOGGLE, FS_BOOTANIM, 0, 0, "The aperture opening on the name at power on." },
     { "Screen colour", IT_PAGE, PAGE_SCREEN, 0, 0, "Match these colours to what you see around you." },
@@ -347,7 +349,7 @@ static const struct { const char *title; const char *sub; const struct item *ite
 {
     { "Viewfinder", "What you see in LiveView while you shoot", finder_items, 4 },
     { "Lens", "Aperture for manual lenses", lens_items, 4 },
-    { "System", "Screen colour, start up and the Canon menu", system_items, 9 },
+    { "System", "Film mode, screen colour, start up and the Canon menu", system_items, 10 },
     { "Screen colour", "Live: the whole film OS changes as you go", screen_items, 5 },
 };
 
@@ -896,7 +898,7 @@ static void roll_bake()
     ui_bg_plain();
     ui_to_bg(1);
     ui_status_bar("ROLL");
-    struct hint h1[] = { { "SET", "Rewind roll" }, { "MENU", "Back" } };
+    struct hint h1[] = { { "SET", ui_realistic() ? "Rewind roll" : "Finish roll" }, { "MENU", "Back" } };
     struct hint h2[] = { { "SET", "Load film" }, { "MENU", "Back" } };
     if (ui_roll.loaded) ui_hints(h1, 2); else ui_hints(h2, 2);
     ui_to_bg(0);
@@ -922,7 +924,7 @@ void roll_key(int k)
         {
             asking_rewind = 0;
             rewinding = 1;
-            rewind_t = 0;
+            rewind_t = ui_realistic() ? 0 : 1500;       /* Basic: no rewinding to watch */
             rewind_then = k == FK_SET;
             rewind_number = ui_roll.number;
             fos_port_action(FA_REWIND, 0, 0);
@@ -1079,7 +1081,7 @@ void roll_draw()
         fos_text(cv, &fos_font_md, x + 140, y, b, C_TEXT3, OPAQUE, 0);
     }
 
-    if (rewinding)
+    if (rewinding && ui_realistic())
     {
         float t = clampf(rewind_t / 900.0f, 0, 1);
         fos_text_c(cv, &fos_font_lg, 360, 420, "Rewinding" T_ELLIPSIS, FC(RAMP_GRAY, (int) (240 * ease_out(t))), OPAQUE, 0);
@@ -1088,13 +1090,14 @@ void roll_draw()
     int left = ui_roll.exposures - ui_roll.shot;
     if (left > 0)
     {
-        snprintf(b, sizeof(b), "Rewind roll %03d?", ui_roll.number);
+        snprintf(b, sizeof(b), ui_realistic() ? "Rewind roll %03d?" : "Finish roll %03d?", ui_roll.number);
         snprintf(body, sizeof(body), "%d frames stay unexposed. Develop it now, or load a new roll first.", left);
     }
     else
     {
         snprintf(b, sizeof(b), "Roll %03d is finished", ui_roll.number);
-        snprintf(body, sizeof(body), "Rewind it, then develop it now or load a new roll first.");
+        snprintf(body, sizeof(body), ui_realistic() ? "Rewind it, then develop it now or load a new roll first."
+                                                    : "Develop it now, or load a new roll first.");
     }
     ui_sheet3(sheet.x, b, body, "Develop now", "New roll", left > 0 ? "Cancel" : "Not now");
 }

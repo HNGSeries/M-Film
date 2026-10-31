@@ -675,7 +675,7 @@ static void chips_layout()
 static void draw_static(int alpha)
 {
     struct hint h[] = { { "<>", "Film" }, { "^v", "Shelf" }, { "INFO", "Exposures" },
-                        { "SET", roll_in_progress() ? "Rewind & load" : "Load" }, { "MENU", "Back" },
+                        { "SET", roll_in_progress() ? (ui_realistic() ? "Rewind & load" : "Finish & load") : "Load" }, { "MENU", "Back" },
                         { "PLAY", "Sample" } };
     if (alpha >= OPAQUE) ui_hints(h, has_samples ? 6 : 5);
     /* the shelves, this one lit */
@@ -849,10 +849,10 @@ static void draw_info()
 static void draw_sheet()
 {
     char t[48], b[96];
-    snprintf(t, sizeof(t), "Rewind roll %03d?", ui_roll.number);
+    snprintf(t, sizeof(t), ui_realistic() ? "Rewind roll %03d?" : "Finish roll %03d?", ui_roll.number);
     snprintf(b, sizeof(b), "%d of %d frames on %s are still unexposed. They will be lost.",
              ui_roll.exposures - ui_roll.shot, ui_roll.exposures, fos_films[ui_roll.film].name);
-    ui_sheet(sheet.x, t, b, "Rewind and load", "Keep shooting");
+    ui_sheet(sheet.x, t, b, ui_realistic() ? "Rewind and load" : "Finish and load", "Keep shooting");
 }
 
 /* SET: the leader is drawn out of the canister across the stage, the
