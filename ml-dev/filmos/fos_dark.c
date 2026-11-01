@@ -523,7 +523,14 @@ static void next_job()
                 char msg[120];
                 snprintf(msg, sizeof(msg), "darkroom: roll %03d frame %d: no RAW file %s", cur_roll, f->no, f->cr2);
                 fos_port_log(msg);
-                snprintf(last_error, sizeof(last_error), "No RAW file " T_MDASH " shoot with Image quality RAW");
+                {
+                    const char *base = strrchr(f->cr2, '/');
+                    if (f->cr2[0])
+                        snprintf(last_error, sizeof(last_error), "%s isn't on the card " T_MDASH " was it shot in RAW?",
+                                 base ? base + 1 : f->cr2);
+                    else
+                        snprintf(last_error, sizeof(last_error), "No RAW file " T_MDASH " shoot with Image quality RAW");
+                }
                 failed_frames++;
                 done_frames++;
                 continue;

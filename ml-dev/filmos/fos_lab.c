@@ -357,6 +357,21 @@ int fos_lab_frames(int roll, struct fos_lab_frame *frames, int max)
     {
         if (!frames[i].cr2[0]) { frames[i].missing = 1; continue; }
         void *f = fos_port_open(frames[i].cr2, 0);
+        if (!f)
+        {
+            /* in Adobe RGB, Canon names the file _MG_0012.CR2, while the log
+             * (Magic Lantern's file prefix) says IMG_0012.CR2: the name's first
+             * letter becomes '_' */
+            char *base = strrchr(frames[i].cr2, '/');
+            base = base ? base + 1 : frames[i].cr2;
+            if (*base && *base != '_')
+            {
+                char was = *base;
+                *base = '_';
+                f = fos_port_open(frames[i].cr2, 0);
+                if (!f) *base = was;
+            }
+        }
         if (f) fos_port_close(f);
         else frames[i].missing = 1;
     }
