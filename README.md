@@ -40,14 +40,14 @@ the roll, then develop it and see what you got.
 </tr>
 <tr>
 <td><b>Load a roll.</b> A shelf of canisters that turn to face you. Pick one and the leader comes out of it.</td>
-<td><b>Count your frames.</b> A film camera's frame counter, from S to the last frame of the roll, and a rewind.</td>
+<td><b>Count your frames.</b> A film camera's frame counter, from S to the last frame of the roll.</td>
 </tr>
 <tr>
 <td><img src="ml-dev/filmos/preview/hud.png" alt="Viewfinder HUD"></td>
 <td><img src="ml-dev/filmos/preview/developing.png" alt="Developing in the camera"></td>
 </tr>
 <tr>
-<td><b>Shoot.</b> An SLR viewfinder: aperture scale, light meter needle, red seven-segment frame count.</td>
+<td><b>Shoot.</b> An SLR viewfinder over LiveView: aperture scale, light meter needle, red seven-segment frame count.</td>
 <td><b>Develop in the camera.</b> The darkroom develops the finished roll frame by frame, into JPEG folders on the card.</td>
 </tr>
 <tr>
@@ -61,6 +61,38 @@ the roll, then develop it and see what you got.
 </table>
 
 Every RAW is kept, so nothing is lost: you can develop the same roll again with another film later.
+
+### Basic or Realistic
+
+<table>
+<tr>
+<td width="50%"><img src="ml-dev/filmos/preview/system.png" alt="Film mode in Settings"></td>
+<td width="50%"><img src="ml-dev/filmos/preview/end-of-roll.png" alt="A finished roll in Basic mode"></td>
+</tr>
+<tr>
+<td><b>Choose how real.</b> <i>Settings → System → Film mode</i>.</td>
+<td><b>Basic</b> (the default): the last frame finishes the roll, and it goes straight to the darkroom. No rewinding.</td>
+</tr>
+</table>
+
+- **Basic:** shoot, then develop. Stop early with *Finish roll* on the Roll page.
+- **Realistic:** like a real film camera. Rewind the roll before it can be developed.
+- Either way the roll is the same on the card, so Darkrooms reads both.
+
+### On a DSLR: a top plate
+
+<p align="center"><img src="ml-dev/filmos/preview/plate.png" alt="The top plate on a DSLR's back screen" width="720"></p>
+
+A DSLR shoots through its optical viewfinder, so there is no LiveView to draw on. With a roll loaded and
+LiveView off, the back screen becomes a film camera's top plate:
+
+- shutter, aperture and frame in big seven-segment digits
+- the film and its ISO
+- a light meter from −2 to +2 stops, and a bar of the frames left
+- WIND ON when the next frame needs winding
+
+It goes off when you put your eye to the viewfinder, and LiveView brings the viewfinder HUD back.
+*New in 0.1.1, still waiting for a DSLR tester: see [Cameras](#cameras).*
 
 ---
 
