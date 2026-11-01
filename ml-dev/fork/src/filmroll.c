@@ -721,20 +721,33 @@ void *fos_port_open(const char *path, int write)
 }
 
 /* Canon reads files by DMA: into memory the CPU caches, it goes through
- * an uncached buffer */
+ * an uncached buffer. Taken at start (card_buffer), while there is memory
+ * for it: on a 5D Mark II, asked for only when the darkroom first read a
+ * roll's log, it wasn't there, and every read came back empty (#10). */
 #define BOUNCE (64 * 1024)
+static uint8_t *bounce = 0;
+static int bounce_size = 0;
+
+static int card_buffer()
+{
+    for (int size = BOUNCE; !bounce && size >= 4096; size /= 4)
+    {
+        bounce = fio_malloc(size);
+        if (bounce) bounce_size = size;
+        else dbg("read: no %d-byte buffer for card reads", size);
+    }
+    return bounce != 0;
+}
 
 int fos_port_read(void *f, void *buf, int size)
 {
     if (buf != CACHEABLE(buf))
         return FIO_ReadFile(f, buf, size);
-    static uint8_t *bounce = 0;
-    if (!bounce) bounce = fio_malloc(BOUNCE);
-    if (!bounce) return -1;
+    if (!card_buffer()) return -1;
     int done = 0;
     while (done < size)
     {
-        int n = MIN(size - done, BOUNCE);
+        int n = MIN(size - done, bounce_size);
         int got = FIO_ReadFile(f, UNCACHEABLE(bounce), n);
         if (got <= 0) break;
         memcpy((uint8_t *) buf + done, UNCACHEABLE(bounce), got);
@@ -1351,6 +1364,7 @@ static void filmroll_task()
 
     load_fonts();
     load_films();
+    dbg("read: %s", card_buffer() ? "card buffer ready" : "no card buffer: the darkroom can't read the card");
     startup_task();
     film_capture_check();
 

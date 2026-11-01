@@ -819,6 +819,20 @@ static int slow_symbol(const struct huff *h, uint32_t bitbuf, int vbits)
 }
 
 typedef uint32_t __attribute__((may_alias)) word;
+#ifdef FOS_ARM_UNALIGNED
+/* devtest -DFOS_ARM_UNALIGNED: a word load the way ARMv5 does one off its
+ * boundary (the aligned word, rotated), to find reads the PC gets right by luck */
+static uint32_t arm_load(const word *p)
+{
+    uintptr_t a = (uintptr_t) p;
+    uint32_t v = *(const word *) (a & ~(uintptr_t) 3);
+    int r = (int) (a & 3) * 8;
+    return r ? v >> r | v << (32 - r) : v;
+}
+#define LOADW(q, i) arm_load((q) + (i))
+#else
+#define LOADW(q, i) ((q)[i])
+#endif
 
 /* a byte of w is 0xFF: a zero byte of ~w, (~w - 0x01010101) & w & 0x80808080,
  * and ~w - k is ~(w + k) */
@@ -1061,10 +1075,10 @@ static __attribute__((noinline)) void sum_row(const uint16_t *v, const uint8_t *
         uint32_t w = 0;
         switch (k & 7)
         {
-            case 4: w += q[3];  /* fall through */
-            case 3: w += q[2];  /* fall through */
-            case 2: w += q[1];  /* fall through */
-            case 1: w += q[0];  /* fall through */
+            case 4: w += LOADW(q, 3);   /* fall through */
+            case 3: w += LOADW(q, 2);   /* fall through */
+            case 2: w += LOADW(q, 1);   /* fall through */
+            case 1: w += LOADW(q, 0);   /* fall through */
             default: break;
         }
         v += 2 * (k & 7);

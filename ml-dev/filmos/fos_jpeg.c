@@ -192,6 +192,33 @@ static void block(struct jw *w, int32_t *d, int t, int *dc_prev)
 
 /* a tiny TIFF: IFD0 (description, make, model, software, date) and the
  * EXIF IFD (date taken, f-number) */
+/* text for XML: the few characters that can't stand as they are */
+static int xml_text(char *out, int size, const char *s)
+{
+    int n = 0;
+    for (; *s && n < size - 6; s++)
+    {
+        const char *e = *s == '&' ? "&amp;" : *s == '<' ? "&lt;" : *s == '>' ? "&gt;" : 0;
+        if (e) { int l = (int) strlen(e); memcpy(out + n, e, l); n += l; }
+        else out[n++] = *s;
+    }
+    out[n] = 0;
+    return n;
+}
+
+static int xmp(char *out, int size, const char *film)
+{
+    char f[160];
+    xml_text(f, sizeof(f), film);
+    int n = snprintf(out, size,
+        "<x:xmpmeta xmlns:x=\"adobe:ns:meta/\"><rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"
+        "<rdf:Description rdf:about=\"\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\">"
+        "<dc:description><rdf:Alt><rdf:li xml:lang=\"x-default\">%s</rdf:li></rdf:Alt></dc:description>"
+        "<dc:subject><rdf:Bag><rdf:li>%s</rdf:li><rdf:li>M-Film</rdf:li><rdf:li>film simulation</rdf:li></rdf:Bag></dc:subject>"
+        "</rdf:Description></rdf:RDF></x:xmpmeta>", f, f);
+    return n < size ? n : size - 1;
+}
+
 static int exif(uint8_t *out, const struct fos_jpeg_meta *m)
 {
     char date[20] = "";
@@ -290,6 +317,18 @@ int fos_jpeg_write(const char *path, const uint8_t *rgb, int stride, int width, 
         static const uint8_t tag[6] = { 'E', 'x', 'i', 'f', 0, 0 };
         for (int i = 0; i < 6; i++) put8(w, tag[i]);
         for (int i = 0; i < n; i++) put8(w, ex[i]);
+        /* XMP: the film as the caption and as keywords, where photo apps
+         * (Lightroom, Photos, Bridge) look for them; EXIF's ImageDescription
+         * above is the same caption for the ones that read only EXIF */
+        if (meta->desc && *meta->desc)
+        {
+            static char x[1024];
+            int k = xmp(x, sizeof(x), meta->desc);
+            static const char ns[] = "http://ns.adobe.com/xap/1.0/";
+            put16(w, 0xFFE1); put16(w, 2 + (int) sizeof(ns) + k);
+            for (int i = 0; i < (int) sizeof(ns); i++) put8(w, (uint8_t) ns[i]);    /* with its 0 */
+            for (int i = 0; i < k; i++) put8(w, (uint8_t) x[i]);
+        }
     }
     /* quantisation, frame, Huffman tables */
     for (int t = 0; t < 2; t++)

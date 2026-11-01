@@ -177,6 +177,9 @@ The camera's own darkroom stays free and unlimited. Buy Darkrooms Full in the pr
 
 ### Download
 
+> **Not released yet.** Darkrooms comes out together with Darkrooms Full; until then the files below
+> aren't in the releases. The camera's own darkroom develops your rolls in the meantime.
+
 | Your computer | Get | Open it |
 |---|---|---|
 | **Windows 10 / 11** | `Darkrooms-windows-x64.zip` | Unzip, run `Darkrooms.exe`. If Windows warns: *More info* → *Run anyway*. |

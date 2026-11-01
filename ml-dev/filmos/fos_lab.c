@@ -119,6 +119,12 @@ static void read_log(const char *path, const struct log_reader *r)
     void *f = fos_port_open(path, 0);
     int n = f ? fos_port_read(f, buf, LOG_MAX) : 0;
     if (f) fos_port_close(f);
+    if (n <= 0)
+    {
+        char msg[96];
+        snprintf(msg, sizeof(msg), "lab: can't read %s (%s)", path, f ? "read failed" : "can't open");
+        fos_port_log(msg);
+    }
     buf[n > 0 ? n : 0] = 0;
     for (char *line = buf; *line; )
     {

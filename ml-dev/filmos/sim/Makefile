@@ -29,3 +29,9 @@ DEV = devtest.c port_files.c films.c ../fos_dev.c ../fos_print.c ../fos_looks.c 
 out/devtest: $(DEV) ../*.h out/FOSFILMS.BIN
 	mkdir -p out
 	$(CC) $(CFLAGS) -DFOS_DEV_TEST -o $@ $(DEV) -lm
+
+# the same, loading words off their boundary the way the camera's ARM does (rotated):
+# a print that differs from out/devtest's has a read the camera gets wrong (lines, #6)
+out/devtest-arm: $(DEV) ../*.h out/FOSFILMS.BIN
+	mkdir -p out
+	$(CC) $(CFLAGS) -DFOS_DEV_TEST -DFOS_ARM_UNALIGNED -o $@ $(DEV) -lm
