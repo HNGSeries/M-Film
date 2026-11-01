@@ -819,6 +819,20 @@ static int slow_symbol(const struct huff *h, uint32_t bitbuf, int vbits)
 }
 
 typedef uint32_t __attribute__((may_alias)) word;
+#ifdef FOS_ARM_UNALIGNED
+/* devtest -DFOS_ARM_UNALIGNED: a word load the way ARMv5 does one off its
+ * boundary (the aligned word, rotated), to find reads the PC gets right by luck */
+static uint32_t arm_load(const word *p)
+{
+    uintptr_t a = (uintptr_t) p;
+    uint32_t v = *(const word *) (a & ~(uintptr_t) 3);
+    int r = (int) (a & 3) * 8;
+    return r ? v >> r | v << (32 - r) : v;
+}
+#define LOADW(q, i) arm_load((q) + (i))
+#else
+#define LOADW(q, i) ((q)[i])
+#endif
 
 /* a byte of w is 0xFF: a zero byte of ~w, (~w - 0x01010101) & w & 0x80808080,
  * and ~w - k is ~(w + k) */
@@ -1061,10 +1075,10 @@ static __attribute__((noinline)) void sum_row(const uint16_t *v, const uint8_t *
         uint32_t w = 0;
         switch (k & 7)
         {
-            case 4: w += q[3];  /* fall through */
-            case 3: w += q[2];  /* fall through */
-            case 2: w += q[1];  /* fall through */
-            case 1: w += q[0];  /* fall through */
+            case 4: w += LOADW(q, 3);   /* fall through */
+            case 3: w += LOADW(q, 2);   /* fall through */
+            case 2: w += LOADW(q, 1);   /* fall through */
+            case 1: w += LOADW(q, 0);   /* fall through */
             default: break;
         }
         v += 2 * (k & 7);
@@ -1403,26 +1417,15 @@ static __attribute__((noinline)) int nearest(struct fos_dev *d, int cell)
 
 /* ---------------------------------------------------------------- files */
 
-/* A print is an 8-bit BMP, so it also opens on a PC: the file and info
- * headers, 256 palette entries (1..240 the print's), our own header with
- * the frame's details, the pixels top row first, then the thumbnail. */
-#define BMP_PAL     (14 + 40)
-#define BMP_META    (BMP_PAL + 256 * 4)
-#define META_SIZE   64
-#define BMP_PIXELS  (BMP_META + META_SIZE)
-#define BMP_THUMB   (BMP_PIXELS + FOS_PRINT_W * FOS_PRINT_H)
-#define THUMB_SIZE  (FOS_THUMB_W * FOS_THUMB_H * 3)
-#define BMP_SIZE    (BMP_THUMB + THUMB_SIZE)
-
 
 static int write_print(const char *path, int film, int frame, const char *when, const char *fstop,
                        const uint8_t pal[][3], int npal, const uint8_t *px, const uint8_t *thumb, int x0, int w)
 {
-    static uint8_t h[BMP_PIXELS];
+    static uint8_t h[FOS_BMP_PIXELS];
     memset(h, 0, sizeof(h));
     h[0] = 'B'; h[1] = 'M';
-    put32(h + 2, BMP_SIZE);
-    put32(h + 10, BMP_PIXELS);
+    put32(h + 2, FOS_BMP_SIZE);
+    put32(h + 10, FOS_BMP_PIXELS);
     put32(h + 14, 40);
     put32(h + 18, FOS_PRINT_W);
     put32(h + 22, (uint32_t) -FOS_PRINT_H);         /* top-down */
@@ -1432,10 +1435,10 @@ static int write_print(const char *path, int film, int frame, const char *when, 
     put32(h + 46, 256);
     for (int i = 0; i < npal && i < FOS_PRINT_COLOURS; i++)
     {
-        uint8_t *q = h + BMP_PAL + 4 * (i + 1);
+        uint8_t *q = h + FOS_BMP_PAL + 4 * (i + 1);
         q[0] = pal[i][2]; q[1] = pal[i][1]; q[2] = pal[i][0];
     }
-    uint8_t *m = h + BMP_META;
+    uint8_t *m = h + FOS_BMP_META;
     memcpy(m, "FOP2", 4);
     m[4] = (uint8_t) film;
     m[6] = (uint8_t) frame; m[7] = (uint8_t) (frame >> 8);
@@ -1446,64 +1449,11 @@ static int write_print(const char *path, int film, int frame, const char *when, 
 
     void *f = fos_port_open(path, 1);
     if (!f) return 0;
-    int ok = fos_port_write(f, h, BMP_PIXELS) == BMP_PIXELS
+    int ok = fos_port_write(f, h, FOS_BMP_PIXELS) == FOS_BMP_PIXELS
           && fos_port_write(f, px, FOS_PRINT_W * FOS_PRINT_H) == FOS_PRINT_W * FOS_PRINT_H
-          && fos_port_write(f, thumb, THUMB_SIZE) == THUMB_SIZE;
+          && fos_port_write(f, thumb, FOS_THUMB_SIZE) == FOS_THUMB_SIZE;
     fos_port_close(f);
     return ok;
-}
-
-static int is_print(const uint8_t *h)
-{
-    return h[0] == 'B' && h[1] == 'M' && u32le(h + 10) == BMP_PIXELS && u32le(h + 18) == FOS_PRINT_W
-        && !memcmp(h + BMP_META, "FOP2", 4);
-}
-
-int fos_print_thumb(const char *path, uint8_t *thumb)
-{
-    void *f = fos_port_open(path, 0);
-    if (!f) return 0;
-    static uint8_t h[BMP_PIXELS];
-    int ok = fos_port_read(f, h, BMP_PIXELS) == BMP_PIXELS && is_print(h)
-          && fos_port_seek(f, BMP_THUMB) >= 0 && fos_port_read(f, thumb, THUMB_SIZE) == THUMB_SIZE;
-    fos_port_close(f);
-    return ok;
-}
-
-int fos_print_load(const char *path, struct fos_print *p)
-{
-    memset(p, 0, sizeof(*p));
-    void *f = fos_port_open(path, 0);
-    if (!f) return 0;
-    static uint8_t h[BMP_PIXELS];
-    int ok = fos_port_read(f, h, BMP_PIXELS) == BMP_PIXELS && is_print(h);
-    if (ok)
-    {
-        const uint8_t *m = h + BMP_META;
-        p->film = m[4];
-        p->frame = u16le(m + 6);
-        memcpy(p->when, m + 8, 19);
-        memcpy(p->fstop, m + 28, 7);
-        p->x0 = u16le(m + 36);
-        p->w = u16le(m + 38);
-        if (!p->w || p->x0 + p->w > FOS_PRINT_W) p->x0 = 0, p->w = FOS_PRINT_W;
-        for (int i = 0; i < FOS_PRINT_COLOURS; i++)
-        {
-            const uint8_t *q = h + BMP_PAL + 4 * (i + 1);
-            p->pal[i][0] = q[2]; p->pal[i][1] = q[1]; p->pal[i][2] = q[0];
-        }
-        p->px = fos_port_alloc(FOS_PRINT_W * FOS_PRINT_H);
-        ok = p->px && fos_port_read(f, p->px, FOS_PRINT_W * FOS_PRINT_H) == FOS_PRINT_W * FOS_PRINT_H;
-    }
-    fos_port_close(f);
-    if (!ok) fos_print_free(p);
-    return ok;
-}
-
-void fos_print_free(struct fos_print *p)
-{
-    fos_port_free(p->px);
-    p->px = 0;
 }
 
 /* ---------------------------------------------------------------- quantize an RGB print */

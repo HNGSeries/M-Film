@@ -66,6 +66,18 @@ enum { PX_BLACK = FOS_FIXED_BASE, PX_PANEL, PX_G1, PX_G2, PX_G3, PX_G4, PX_G5, P
        PX_AMBER, PX_AMBER2, PX_RED, PX_LINE, PX_DIM, PX_SPARE };
 extern const uint8_t fos_fixed_rgb[FOS_FIXED_N][3];
 
+/* A print is an 8-bit BMP, so it also opens on a PC: the file and info
+ * headers, 256 palette entries (1..240 the print's), our own header with
+ * the frame's details, the pixels top row first, then the thumbnail. */
+#define FOS_BMP_PAL     (14 + 40)
+#define FOS_BMP_META    (FOS_BMP_PAL + 256 * 4)
+#define FOS_META_SIZE   64
+#define FOS_BMP_PIXELS  (FOS_BMP_META + FOS_META_SIZE)
+#define FOS_BMP_THUMB   (FOS_BMP_PIXELS + FOS_PRINT_W * FOS_PRINT_H)
+#define FOS_THUMB_SIZE  (FOS_THUMB_W * FOS_THUMB_H * 3)
+#define FOS_BMP_SIZE    (FOS_BMP_THUMB + FOS_THUMB_SIZE)
+
+/* in fos_print.c, which every build has (the shelf's samples are prints too) */
 int  fos_print_load(const char *path, struct fos_print *p);     /* allocates p->px; 0 on failure */
 void fos_print_free(struct fos_print *p);
 int  fos_print_thumb(const char *path, uint8_t *thumb);         /* FOS_THUMB_W x FOS_THUMB_H RGB */

@@ -64,6 +64,7 @@ static CONFIG_INT("filmroll.playlock",  play_lock,        1);
 static CONFIG_INT("filmroll.startup",   startup_picker,   2);   /* 0 off, 1 when no film, 2 always */
 static CONFIG_INT("filmroll.bootanim",  boot_anim,        1);
 static CONFIG_INT("filmroll.debug",     debug_log,        1);
+static CONFIG_INT("filmroll.mode",      film_mode,        0);   /* 0 Basic, 1 Realistic (FS_MODE) */
 static CONFIG_INT("filmroll.lens_wide", lens_widest,      6);   /* index into fos_fstops: f/1.8 */
 static CONFIG_INT("filmroll.fstop",     manual_fstop,     6);
 static CONFIG_INT("filmroll.ap_keys",   aperture_keys,    0);   /* 0 wheel in Av, 1 up/down, 2 menu only */
@@ -720,20 +721,33 @@ void *fos_port_open(const char *path, int write)
 }
 
 /* Canon reads files by DMA: into memory the CPU caches, it goes through
- * an uncached buffer */
+ * an uncached buffer. Taken at start (card_buffer), while there is memory
+ * for it: on a 5D Mark II, asked for only when the darkroom first read a
+ * roll's log, it wasn't there, and every read came back empty (#10). */
 #define BOUNCE (64 * 1024)
+static uint8_t *bounce = 0;
+static int bounce_size = 0;
+
+static int card_buffer()
+{
+    for (int size = BOUNCE; !bounce && size >= 4096; size /= 4)
+    {
+        bounce = fio_malloc(size);
+        if (bounce) bounce_size = size;
+        else dbg("read: no %d-byte buffer for card reads", size);
+    }
+    return bounce != 0;
+}
 
 int fos_port_read(void *f, void *buf, int size)
 {
     if (buf != CACHEABLE(buf))
         return FIO_ReadFile(f, buf, size);
-    static uint8_t *bounce = 0;
-    if (!bounce) bounce = fio_malloc(BOUNCE);
-    if (!bounce) return -1;
+    if (!card_buffer()) return -1;
     int done = 0;
     while (done < size)
     {
-        int n = MIN(size - done, BOUNCE);
+        int n = MIN(size - done, bounce_size);
         int got = FIO_ReadFile(f, UNCACHEABLE(bounce), n);
         if (got <= 0) break;
         memcpy((uint8_t *) buf + done, UNCACHEABLE(bounce), got);
@@ -836,6 +850,7 @@ static int *setting_var(int s)
         case FS_PLAYLOCK:   return &play_lock;
         case FS_BOOTANIM:   return &boot_anim;
         case FS_DEBUG:      return &debug_log;
+        case FS_MODE:       return &film_mode;
         case FS_FILM:       return &film_sel;
         case FS_EXP:        return &exp_sel;
         case FS_SCR_STD:    return &scr_std;
@@ -961,6 +976,14 @@ static int hud_visible()
     return hud_enabled && roll_loaded && lv && display_idle() && !is_movie_mode() && !ui_running;
 }
 
+/* a DSLR shooting through the viewfinder: the back screen shows Canon's
+ * settings display, and the top plate (fos_hud_plate) goes over it */
+static int plate_visible()
+{
+    return !FOS_LV_ONLY && hud_enabled && roll_loaded && !lv && display_is_on() && display_idle()
+        && !is_movie_mode() && !ui_running;
+}
+
 /* Magic Lantern's own LiveView overlays never draw: the film OS (or
  * Canon's clean screen) is all you see */
 int filmroll_overlays_active()
@@ -998,7 +1021,7 @@ static void shutter_led(char *buf, int size)
     buf[n] = 0;
 }
 
-static void hud_draw(int lit, int blink)
+static void hud_draw(int lit, int blink, int plate)
 {
     struct fos_hud h;
     memset(&h, 0, sizeof(h));
@@ -1019,9 +1042,13 @@ static void hud_draw(int lit, int blink)
     h.need_wind = need_wind;
     h.focus_screen = focus_screen;
     h.film = fos_films[COERCE(roll_film, 0, fos_nfilms - 1)].name;
+    h.iso = fos_films[COERCE(roll_film, 0, fos_nfilms - 1)].box_iso;
     uint8_t *vram = bmp_vram();
-    if (vram)
-        fos_hud_draw(vram, BMPPITCH, &h, &hud_pal);
+#if !FOS_LV_ONLY
+    if (vram && plate) fos_hud_plate(vram, BMPPITCH, &h, &hud_pal);
+    else
+#endif
+    if (vram) fos_hud_draw(vram, BMPPITCH, &h, &hud_pal);
 }
 
 static void hud_clear()
@@ -1038,15 +1065,28 @@ static void hud_step()
     static int last_draw = 0;
     static int drawn = 0;
     static int was_visible = -1;
+    static int plate_drawn = 0;
 
-    int visible = hud_visible();
-    if (visible != was_visible)
+    int plate = plate_visible();
+    int visible = hud_visible() || plate;
+    if (visible * 2 + plate != was_visible)
     {
-        dbg("hud: visible %d (enabled %d roll %d lv %d movie %d ui %d)",
-            visible, hud_enabled, roll_loaded, lv, is_movie_mode(), ui_running);
-        was_visible = visible;
+        dbg("hud: visible %d plate %d (enabled %d roll %d lv %d movie %d ui %d)",
+            visible, plate, hud_enabled, roll_loaded, lv, is_movie_mode(), ui_running);
+        was_visible = visible * 2 + plate;
     }
     hud_showing = visible;
+
+    /* the plate off (LiveView on, or a Canon menu over it): hand the screen back */
+    if (plate_drawn && !plate)
+    {
+#if !FOS_LV_ONLY
+        uint8_t *vram = bmp_vram();
+        if (vram && display_idle() && !ui_running) fos_hud_plate_clear(vram, BMPPITCH, &hud_pal);
+#endif
+        plate_drawn = 0;
+        last_sig = -1;
+    }
 
     if (!visible)
     {
@@ -1075,7 +1115,8 @@ static void hud_step()
         hud_dirty = 0;
         last_sig = sig;
         last_draw = now;
-        hud_draw(lit, blink);
+        hud_draw(lit, blink, plate);
+        plate_drawn = plate;
     }
 }
 
@@ -1349,6 +1390,7 @@ static void filmroll_task()
 
     load_fonts();
     load_films();
+    dbg("read: %s", card_buffer() ? "card buffer ready" : "no card buffer: the darkroom can't read the card");
     startup_task();
     film_capture_check();
 

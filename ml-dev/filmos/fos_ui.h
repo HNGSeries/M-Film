@@ -29,6 +29,10 @@ extern uint8_t *ui_bg;              /* background of the current screen, same la
 extern int ui_now;                  /* ms */
 extern struct fos_roll ui_roll;
 
+/* film mode (System > Film mode): Realistic rewinds a roll before it can be developed, like a film
+ * camera; Basic just finishes it (the same in the roll's log), with no rewind to explain */
+#define ui_realistic() (fos_port_get(FS_MODE) == 1)
+
 /* set when something else drew over the canvas (the shutter, a screen
  * change): screens that redraw only what moved must redraw it all */
 extern int ui_clobbered;

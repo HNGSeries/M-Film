@@ -77,10 +77,13 @@ static int seg_bits(int ch)
     return 0;
 }
 
-#define DIG_W   15
-#define DIG_H   26
-#define SEG_T   3
-#define DIG_GAP 6
+/* the digits' size: the HUD's, or the top plate's bigger ones (seg_size) */
+static int DIG_W = 15, DIG_H = 26, SEG_T = 3, DIG_GAP = 6;
+
+static void seg_size(int w, int h, int t, int gap)
+{
+    DIG_W = w; DIG_H = h; SEG_T = t; DIG_GAP = gap;
+}
 
 /* one slanted digit; off segments are drawn faintly, like the unlit LEDs
  * you can just see behind a real viewfinder mask */
@@ -89,7 +92,7 @@ static void seg_digit(int x, int y, int bits, uint8_t on, uint8_t off)
     int half = DIG_H / 2;
     for (int r = 0; r < DIG_H; r++)
     {
-        int slant = (DIG_H - 1 - r) * 3 / DIG_H;    /* leans right like the real ones */
+        int slant = (DIG_H - 1 - r) * (DIG_H * 3 / 26) / DIG_H;    /* leans right like the real ones */
         int yy = y + r;
         /* horizontals: a at the top, g in the middle, d at the bottom */
         int hseg = -1;
@@ -99,7 +102,7 @@ static void seg_digit(int x, int y, int bits, uint8_t on, uint8_t off)
         if (hseg >= 0)
         {
             /* chamfered ends: shorter where the segment meets the verticals */
-            int inset = hseg == 6 ? 2 : (r == 0 || r == DIG_H - 1) ? 2 : 1;
+            int inset = (hseg == 6 ? 2 : (r == 0 || r == DIG_H - 1) ? 2 : 1) * SEG_T / 3;
             fill(x + slant + inset + 1, yy, DIG_W - 2 * inset - 2, 1, (bits >> hseg) & 1 ? on : off);
         }
         /* verticals: f and b above the middle, e and c below */
@@ -129,9 +132,9 @@ static int seg_text(int x, int y, const char *s, int lit)
         }
         if (*s == '"')
         {
-            fill(x - 2, y, 2, 6, on);
-            fill(x + 2, y, 2, 6, on);
-            x += 8;
+            fill(x - 2, y, SEG_T * 2 / 3, DIG_H / 4, on);
+            fill(x + SEG_T * 2 / 3, y, SEG_T * 2 / 3, DIG_H / 4, on);
+            x += DIG_H / 3;
             continue;
         }
         seg_digit(x, y, seg_bits(*s), on, off);
@@ -260,3 +263,109 @@ void fos_hud_clear(uint8_t *vram, int pitch, const struct fos_hud_palette *p)
     fill(0, VIEW_H, W, BAR_H, p->clear);
     fill(VIEW_W / 2 - 64, VIEW_H / 2 - 64, 129, 129, p->clear);
 }
+
+/* ---------------------------------------------------------------- the top plate */
+
+/* not on the EOS M: it has no viewfinder to shoot through, and its boot
+ * memory is short (MEMORY.md) */
+#ifndef CONFIG_EOSM
+
+/* What a DSLR shows when you shoot through the viewfinder and the screen
+ * on the back is Canon's settings display: a film camera's top plate in
+ * its place, lit like the HUD's LEDs. Shutter, aperture and the frame
+ * counter in big red digits, the meter's needle on a scale of stops, the
+ * film and its speed. */
+void fos_hud_plate(uint8_t *vram, int pitch, const struct fos_hud *h, const struct fos_hud_palette *p)
+{
+    vr = vram; vp = pitch; pal = p;
+    char b[24];
+    fill(0, 0, W, H, p->black);
+
+    /* the maker's plate: name, and the film loaded */
+    text_gray(&fos_font_sm, 28, 40, "M" "\x80" "FILM", 46, 40);
+    if (h->film)
+    {
+        int w = fos_text_w(&fos_font_lg, h->film, 0);
+        text_gray(&fos_font_lg, W - 28 - w, 46, h->film, 100, 0);
+    }
+    if (h->iso)
+    {
+        snprintf(b, sizeof(b), "ISO %d", h->iso);
+        int w = fos_text_w(&fos_font_sm, b, 24);
+        text_gray(&fos_font_sm, W - 28 - w, 74, b, 55, 24);
+    }
+    fill(28, 92, W - 56, 1, p->gray[18]);
+
+    /* three windows: shutter, aperture, frames */
+    static const char *const names[3] = { "SHUTTER", "APERTURE", "FRAME" };
+    const int col[3] = { 28, 268, 488 };
+    for (int i = 0; i < 3; i++)
+        text_gray(&fos_font_xs, col[i], 132, names[i], 40, 48);
+    seg_size(36, 64, 7, 12);
+    int ty = 150;
+    seg_text(col[0], ty, h->shutter, h->lit);
+    fos_format_fstop(b, sizeof(b), h->fstop);
+    int w = seg_text(col[1] + 22, ty, b, h->lit);
+    text_gray(&fos_font_md, col[1], ty + 62, "f", h->lit ? 70 : 30, 0);
+    (void) w;
+    if (h->finished)
+        seg_text(col[2], ty, h->blink ? "End" : "   ", 1);
+    else
+    {
+        snprintf(b, sizeof(b), "%d", h->frame);
+        int fw = seg_text(col[2], ty, b, 1);
+        snprintf(b, sizeof(b), "/%d", h->exposures);
+        text_gray(&fos_font_md, col[2] + fw + 4, ty + 62, b, 55, 0);
+    }
+    seg_size(15, 26, 3, 6);
+
+    /* the meter: -2 .. +2 stops in thirds, the needle where the light is */
+    int my = 286, mx0 = 120, mx1 = W - 120, mc = (mx0 + mx1) / 2, step = (mx1 - mx0) / 12;
+    fill(mx0, my, mx1 - mx0, 1, p->gray[30]);
+    for (int t = -6; t <= 6; t++)
+    {
+        int x = mc + t * step, big = t % 3 == 0;
+        fill(x, my - (big ? 10 : 5), t == 0 ? 3 : 1, big ? 20 : 10, p->gray[t == 0 ? 70 : big ? 45 : 25]);
+        if (big && t)
+        {
+            snprintf(b, sizeof(b), "%+d", t / 3);
+            int tw = fos_text_w(&fos_font_xs, b, 0);
+            text_gray(&fos_font_xs, x - tw / 2, my + 30, b, 40, 0);
+        }
+    }
+    text_gray(&fos_font_xs, mx0 - 70, my + 5, "UNDER", 30, 24);
+    text_gray(&fos_font_xs, mx1 + 16, my + 5, "OVER", 30, 24);
+    if (h->lit && h->meter)
+    {
+        int thirds = h->fstop - h->want;            /* + : more light than the aperture set wants */
+        int out = thirds > 6 || thirds < -6;
+        thirds = thirds > 6 ? 6 : thirds < -6 ? -6 : thirds;
+        if (!out || h->blink)
+        {
+            int x = mc + thirds * step;
+            for (int r = 0; r < 14; r++)
+                fill(x - (14 - r) / 2, my - 26 + r, 14 - r + 1, 1, p->red);
+        }
+    }
+
+    /* the frames left, like the marks on a film counter */
+    int n = h->exposures > 0 ? h->exposures : 36, done = h->finished ? n : h->frame - 1;
+    int fx = 28, fw = (W - 56) / n;
+    for (int i = 0; i < n; i++)
+        fill(fx + i * fw, 364, fw - 3 > 1 ? fw - 3 : 1, 10, i < done ? p->gray[60] : i == done ? p->red : p->gray[14]);
+    if (h->need_wind)
+        text_led(&fos_font_mdb, 28, 420, "WIND ON", h->blink, 24);
+
+    /* the way back to the film OS */
+    const char *hint = "TRASH  Home     PLAY  Prints";
+    int hw = fos_text_w(&fos_font_xs, hint, 24);
+    text_gray(&fos_font_xs, W - 28 - hw, H - 22, hint, 36, 24);
+}
+
+/* the plate off: Canon's screen shows again */
+void fos_hud_plate_clear(uint8_t *vram, int pitch, const struct fos_hud_palette *p)
+{
+    vr = vram; vp = pitch; pal = p;
+    fill(0, 0, W, H, p->clear);
+}
+#endif

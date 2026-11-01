@@ -1,5 +1,5 @@
 # film OS simulator: make && ./out/sim scenes/shelf.txt out/frames/shelf
-SRC = sim.c port_files.c fonts.c films.c ../fos_gfx.c ../fos_film.c ../fos_ui.c ../fos_shelf.c ../fos_pages.c ../fos_hud.c \
+SRC = sim.c port_files.c fonts.c films.c ../fos_gfx.c ../fos_film.c ../fos_ui.c ../fos_shelf.c ../fos_pages.c ../fos_hud.c ../fos_print.c \
       ../fos_dark.c ../fos_dev.c ../fos_lab.c ../fos_looks.c ../fos_jpeg.c
 CFLAGS = -O2 -g -Wall -Wextra -Wno-unused-parameter -Wdouble-promotion -std=gnu99
 # M-Film's version, as the camera build gets it (VERSION at the top of the repository)
@@ -25,7 +25,13 @@ clean:
 	rm -rf out
 
 # developing film: ./out/devtest [-f film] [-r raw.u16] in.CR2 out.FOP out.ppm
-DEV = devtest.c port_files.c films.c ../fos_dev.c ../fos_looks.c ../fos_film.c ../fos_gfx.c ../fos_jpeg.c
+DEV = devtest.c port_files.c films.c ../fos_dev.c ../fos_print.c ../fos_looks.c ../fos_film.c ../fos_gfx.c ../fos_jpeg.c
 out/devtest: $(DEV) ../*.h out/FOSFILMS.BIN
 	mkdir -p out
 	$(CC) $(CFLAGS) -DFOS_DEV_TEST -o $@ $(DEV) -lm
+
+# the same, loading words off their boundary the way the camera's ARM does (rotated):
+# a print that differs from out/devtest's has a read the camera gets wrong (lines, #6)
+out/devtest-arm: $(DEV) ../*.h out/FOSFILMS.BIN
+	mkdir -p out
+	$(CC) $(CFLAGS) -DFOS_DEV_TEST -DFOS_ARM_UNALIGNED -o $@ $(DEV) -lm

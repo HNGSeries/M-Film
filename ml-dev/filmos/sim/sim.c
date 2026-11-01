@@ -37,7 +37,7 @@ static int nev, next_ev, end_t = 4000;
 static int settings[FS_COUNT] = {
     [FS_HUD] = 1, [FS_LEDS] = 1, [FS_FOCUS] = 1, [FS_WIND] = 1,
     [FS_APKEYS] = 0, [FS_LENS_WIDE] = 6, [FS_FSTOP] = 10,
-    [FS_STARTUP] = 2, [FS_PLAYLOCK] = 1, [FS_BOOTANIM] = 1, [FS_DEBUG] = 0,
+    [FS_STARTUP] = 2, [FS_PLAYLOCK] = 1, [FS_BOOTANIM] = 1, [FS_DEBUG] = 0, [FS_MODE] = 0,
     [FS_FILM] = 0, [FS_EXP] = 0,
 };
 static struct fos_roll roll = { 1, 12, 1, 36, 14, 0, "2026-10-21 18:02", 3,
@@ -182,6 +182,7 @@ int main(int argc, char **argv)
     if (argc < 3) { fprintf(stderr, "usage: sim script outdir\n"); return 1; }
     outdir = argv[2];
     if (strcmp(outdir, "-")) mkdir(outdir, 0755);
+    if (getenv("FOS_MODE")) settings[FS_MODE] = atoi(getenv("FOS_MODE"));     /* 1: Realistic */
     int open = FOS_OPEN_SHELF;
     FILE *f = fopen(argv[1], "r");
     if (!f) { perror(argv[1]); return 1; }

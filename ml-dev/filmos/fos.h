@@ -104,6 +104,7 @@ enum
     FS_HUD, FS_LEDS, FS_FOCUS, FS_WIND,
     FS_APKEYS, FS_LENS_WIDE, FS_FSTOP,
     FS_STARTUP, FS_PLAYLOCK, FS_BOOTANIM, FS_DEBUG,
+    FS_MODE,            /* film mode: 0 Basic (a finished roll goes straight to the darkroom), 1 Realistic (rewind it first) */
     FS_FILM, FS_EXP,
     FS_SCR_STD,         /* screen colour: 0 Canon's conversion, 1 Rec.709 */
     FS_SCR_SAT, FS_SCR_WARM, FS_SCR_BRIGHT,     /* -FOS_SCR_STEPS..FOS_SCR_STEPS */
@@ -198,6 +199,7 @@ struct fos_hud
     int frame, exposures, finished, need_wind;
     int focus_screen;
     const char *film;
+    int iso;                    /* the film's speed (the top plate shows it) */
 };
 
 struct fos_hud_palette
@@ -208,6 +210,9 @@ struct fos_hud_palette
 
 void fos_hud_draw(uint8_t *vram, int pitch, const struct fos_hud *h, const struct fos_hud_palette *p);
 void fos_hud_clear(uint8_t *vram, int pitch, const struct fos_hud_palette *p);
+/* the top plate: a DSLR's back screen while you shoot through the viewfinder */
+void fos_hud_plate(uint8_t *vram, int pitch, const struct fos_hud *h, const struct fos_hud_palette *p);
+void fos_hud_plate_clear(uint8_t *vram, int pitch, const struct fos_hud_palette *p);
 
 /* ---------------------------------------------------------------- the UI */
 

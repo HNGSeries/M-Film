@@ -14,7 +14,7 @@
 [![เลี้ยงกาแฟผู้พัฒนา](https://img.shields.io/badge/%E0%B9%80%E0%B8%A5%E0%B8%B5%E0%B9%89%E0%B8%A2%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B9%81%E0%B8%9F%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%9E%E0%B8%B1%E0%B8%92%E0%B8%99%E0%B8%B2-ffdd00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buy.stripe.com/7sY14p8d93QE5Ny5M58so02)
 
 [![License GPL-2.0](https://img.shields.io/badge/license-GPL--2.0-3b352f)](LICENSE)
-[![Cameras](https://img.shields.io/badge/cameras-1%20works%20%C2%B7%2014%20in%20testing-3b352f)](#กล้องที่รองรับ)
+[![Cameras](https://img.shields.io/badge/cameras-1%20works%20%C2%B7%209%20in%20testing-3b352f)](#กล้องที่รองรับ)
 [![Films](https://img.shields.io/badge/films-72-3b352f)](FILMS.md)
 
 [English](README.md) · **ภาษาไทย** · [ฟิล์ม](#ฟิล์ม-72-แบบ) · [กล้องที่รองรับ](#กล้องที่รองรับ) · [Darkrooms](#ล้างบนคอม-darkrooms) · [คู่มือในกล้อง](docs/MANUAL.th.md) · [ทำต่อยอด](PORTING.md)
@@ -106,17 +106,17 @@ M-Film ทำบน EOS M และใช้ได้จริงบนรุ่
 | กล้อง | เฟิร์มแวร์ Canon | สถานะ | ไฟล์ลงการ์ด |
 |---|---|---|---|
 | Canon EOS M | 2.0.2 | ✅ **ใช้ได้** | `M-Film-camera-EOSM.202.zip` |
-| Canon EOS 100D / Rebel SL1 / Kiss X7 | 1.0.1 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-100D.101.zip` |
+| Canon EOS 100D / Rebel SL1 / Kiss X7 | 1.0.1 | 🔧 ใหญ่เกินหน่วยความจำตอนบูต: กำลังแก้ |  |
 | Canon EOS 650D / Rebel T4i / Kiss X6i | 1.0.4 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-650D.104.zip` |
 | Canon EOS 700D / Rebel T5i / Kiss X7i | 1.1.5 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-700D.115.zip` |
 | Canon EOS 6D | 1.1.6 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-6D.116.zip` |
-| Canon EOS 70D | 1.1.2 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-70D.112.zip` |
+| Canon EOS 70D | 1.1.2 | 🔧 ใหญ่เกินหน่วยความจำตอนบูต: กำลังแก้ |  |
 | Canon EOS 5D Mark III (firmware 1.1.3) | 1.1.3 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-5D3.113.zip` |
 | Canon EOS 5D Mark III (firmware 1.2.3) | 1.2.3 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-5D3.123.zip` |
-| Canon EOS 550D / Rebel T2i / Kiss X4 | 1.0.9 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-550D.109.zip` |
-| Canon EOS 600D / Rebel T3i / Kiss X5 | 1.0.2 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-600D.102.zip` |
+| Canon EOS 550D / Rebel T2i / Kiss X4 | 1.0.9 | 🔧 ใหญ่เกินหน่วยความจำตอนบูต: กำลังแก้ |  |
+| Canon EOS 600D / Rebel T3i / Kiss X5 | 1.0.2 | 🔧 ใหญ่เกินหน่วยความจำตอนบูต: กำลังแก้ |  |
 | Canon EOS 60D | 1.1.1 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-60D.111.zip` |
-| Canon EOS 1100D / Rebel T3 / Kiss X50 | 1.0.5 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-1100D.105.zip` |
+| Canon EOS 1100D / Rebel T3 / Kiss X50 | 1.0.5 | 🔧 ใหญ่เกินหน่วยความจำตอนบูต: กำลังแก้ |  |
 | Canon EOS 500D / Rebel T1i / Kiss X3 | 1.1.1 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-500D.111.zip` |
 | Canon EOS 50D | 1.0.9 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-50D.109.zip` |
 | Canon EOS 5D Mark II | 2.1.2 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-5D2.212.zip` |
@@ -124,7 +124,7 @@ M-Film ทำบน EOS M และใช้ได้จริงบนรุ่
 **ยังไม่รองรับ:** 7D (source ปัจจุบันของ Magic Lantern build รุ่นนี้ไม่ได้) · 200D, 750D, 77D, 80D, 7D Mark II, 5D Mark IV, 5DS R, 6D Mark II, 850D, M50, R, RP, R5, R6, SX70 HS, SX740 HS (Magic Lantern เองยังเป็นรุ่นทดลองบนกล้องเหล่านี้)
 <!-- cameras:end -->
 
-✅ ลองบนกล้องแล้ว ใช้ได้ · 🧪 build ได้แล้ว รอคนลอง ไฟล์ลงการ์ดอยู่ใน [release](../../releases/latest) แต่ละเวอร์ชัน
+✅ ลองบนกล้องแล้ว ใช้ได้ · 🧪 build ได้แล้ว รอคนลอง · 🔧 ใหญ่เกินหน่วยความจำที่ ML ได้ตอนบูตบนรุ่นนั้น ([เหตุผล](ml-dev/MEMORY.md)) ไฟล์ลงการ์ดอยู่ใน [release](../../releases/latest) แต่ละเวอร์ชัน
 รายชื่อกล้องอยู่ที่ [`ml-dev/cameras.txt`](ml-dev/cameras.txt) วิธีทำให้กล้องรุ่นอื่นอยู่ใน [PORTING.md](PORTING.md)
 
 ### ลงในกล้อง
@@ -173,6 +173,9 @@ M-Film ทำบน EOS M และใช้ได้จริงบนรุ่
 แล้ว key จะส่งมาทางอีเมล ใช้ได้ทีละ 1 เครื่อง (จะย้ายเครื่อง ให้กด Release ใน Darkrooms ที่เครื่องเดิมก่อน)
 
 ### ดาวน์โหลด
+
+> **ยังไม่ได้ปล่อย** Darkrooms จะออกพร้อม Darkrooms Full ระหว่างนี้ยังไม่มีไฟล์ด้านล่างใน release
+> ล้างม้วนด้วยห้องมืดในกล้องไปก่อนได้
 
 | คอมของคุณ | ไฟล์ | เปิดยังไง |
 |---|---|---|
