@@ -172,12 +172,12 @@ roll you shot with its film, and develops them at full resolution.
 | Price | free | **US$5.99 once** (checkout shows your currency), updates included |
 
 The camera's own darkroom stays free and unlimited. Buy Darkrooms Full in the program
-(gear icon → *Get Full*); the licence key arrives by e-mail and works on one computer at a time
-(release it in Darkrooms to move it to another).
+(*Free · … left today* at the top → *Get Darkrooms Full*); after you pay, the page shows your licence key.
+It works on one computer at a time (release it in Darkrooms to move it to another).
 
 ### Download
 
-> **Not released yet.** Darkrooms comes out together with Darkrooms Full; until then the files below
+> **Coming soon.** Darkrooms comes out together with Darkrooms Full very soon; until then the files below
 > aren't in the releases. The camera's own darkroom develops your rolls in the meantime.
 
 | Your computer | Get | Open it |
