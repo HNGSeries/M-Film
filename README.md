@@ -167,6 +167,19 @@ notes in [PORTING.md](PORTING.md).
 3. Full steps, and how to go back: [TESTING.md](TESTING.md). Building it yourself:
    `ml-dev/build_fork.sh <camera>`.
 
+### Updating to a new version
+
+Don't unzip a new version over the old one: files left from before can make the camera misbehave.
+Start from a clean card instead:
+
+1. **Finish the roll** and develop it, in the camera or with Darkrooms. A new install starts with no roll loaded.
+2. **Copy your photos off the card** (the `DCIM` folder), including the developed JPEG folders.
+3. **Format the card in the camera** and choose to remove Magic Lantern.
+4. **Unzip the new version** onto the card, as on the first install.
+5. Put the card in the camera and run *Firmware ver.* → update again, then switch the camera on.
+
+Your settings (film, screen colour, Film mode) go back to their defaults: set them again.
+
 ---
 
 ## Develop on your computer: Darkrooms
