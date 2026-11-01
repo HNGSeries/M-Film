@@ -62,6 +62,20 @@ the roll, then develop it and see what you got.
 
 Every RAW is kept, so nothing is lost: you can develop the same roll again with another film later.
 
+### How big the prints are
+
+The camera's darkroom makes small prints, sized for the camera's screen, so it can develop a frame in the
+camera's little memory. For full-size photos, develop the same roll on your computer with
+**[Darkrooms](#develop-on-your-computer-darkrooms)** (coming soon). Your RAWs stay on the card, so you can
+develop the rolls you've already shot again once it's out.
+
+| | Horizontal frame | Vertical frame |
+|---|---|---|
+| **In the camera** | 720 × 480 (0.35 MP) | 320 × 480 (0.15 MP) |
+| **Darkrooms on a computer** | the full RAW, e.g. 5472 × 3648 (20 MP) on a 6D | the same, turned upright |
+
+Full size in Darkrooms by camera, about: EOS M, 650D, 700D, 100D 5184 × 3456 · 6D 5472 × 3648 · 5D Mark III 5760 × 3840 · 5D Mark II 5616 × 3744.
+
 ### Basic or Realistic
 
 <table>
