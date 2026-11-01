@@ -1,7 +1,8 @@
 /* hudtest: the viewfinder HUD over a made-up LiveView picture, with a
  * stand-in for Canon's palette (white 1, black 2, red 8, dark red 12,
  * greys 38..79)
- *   hudtest [1|0|e] [liveview.ppm]   the picture: a 720 x 480 binary PPM */
+ *   hudtest [1|0|e|p] [liveview.ppm]   the picture: a 720 x 480 binary PPM;
+ *   p: the top plate a DSLR shows instead when you shoot through the viewfinder */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,9 +23,11 @@ int main(int argc, char **argv)
     struct fos_hud h = { 1, 1, 1, 13, 6, 15, "125", 12, 36, 0, 1, 1, "PORTRA 400" };
     if (argc > 1 && argv[1][0] == '0') { h.lit = 0; h.need_wind = 1; }
     if (argc > 1 && argv[1][0] == 'e') { h.finished = 1; strcpy(h.shutter, "0.5\""); h.want = 30; }
+    h.iso = 400;
     fos_gfx_init();
     sim_fonts();
-    fos_hud_draw(ov, 960, &h, &p);
+    if (argc > 1 && argv[1][0] == 'p') { h.want = h.fstop - 2; fos_hud_plate(ov, 960, &h, &p); }
+    else fos_hud_draw(ov, 960, &h, &p);
 
     static uint8_t lv[480 * 720 * 3];
     int have_lv = 0;

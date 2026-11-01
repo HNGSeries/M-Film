@@ -28,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [EOSM.202, 100D.101, 650D.104, 700D.115, 6D.116, 70D.112, 5D3.113, 5D3.123, 550D.109, 600D.102, 60D.111, 1100D.105, 500D.111, 50D.109, 5D2.212]  # from ml-dev/cameras.txt
+        platform: [EOSM.202, 650D.104, 700D.115, 6D.116, 5D3.113, 5D3.123, 60D.111, 500D.111, 50D.109, 5D2.212]  # from ml-dev/cameras.txt
     runs-on: ubuntu-24.04
     name: camera ${{ matrix.platform }}
     steps:

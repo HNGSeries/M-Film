@@ -14,7 +14,7 @@ The camera side is free and open, for everyone.
 [![Buy the developer a coffee](https://img.shields.io/badge/Buy%20the%20developer%20a%20coffee-ffdd00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buy.stripe.com/7sY14p8d93QE5Ny5M58so02)
 
 [![License GPL-2.0](https://img.shields.io/badge/license-GPL--2.0-3b352f)](LICENSE)
-[![Cameras](https://img.shields.io/badge/cameras-1%20works%20%C2%B7%2014%20in%20testing-3b352f)](#cameras)
+[![Cameras](https://img.shields.io/badge/cameras-1%20works%20%C2%B7%209%20in%20testing-3b352f)](#cameras)
 [![Films](https://img.shields.io/badge/films-72-3b352f)](FILMS.md)
 
 **English** · [ภาษาไทย](README.th.md) · [Films](#72-films) · [Cameras](#cameras) · [Darkrooms](#develop-on-your-computer-darkrooms) · [Take it further](PORTING.md)
@@ -40,14 +40,14 @@ the roll, then develop it and see what you got.
 </tr>
 <tr>
 <td><b>Load a roll.</b> A shelf of canisters that turn to face you. Pick one and the leader comes out of it.</td>
-<td><b>Count your frames.</b> A film camera's frame counter, from S to the last frame of the roll, and a rewind.</td>
+<td><b>Count your frames.</b> A film camera's frame counter, from S to the last frame of the roll.</td>
 </tr>
 <tr>
 <td><img src="ml-dev/filmos/preview/hud.png" alt="Viewfinder HUD"></td>
 <td><img src="ml-dev/filmos/preview/developing.png" alt="Developing in the camera"></td>
 </tr>
 <tr>
-<td><b>Shoot.</b> An SLR viewfinder: aperture scale, light meter needle, red seven-segment frame count.</td>
+<td><b>Shoot.</b> An SLR viewfinder over LiveView: aperture scale, light meter needle, red seven-segment frame count.</td>
 <td><b>Develop in the camera.</b> The darkroom develops the finished roll frame by frame, into JPEG folders on the card.</td>
 </tr>
 <tr>
@@ -61,6 +61,38 @@ the roll, then develop it and see what you got.
 </table>
 
 Every RAW is kept, so nothing is lost: you can develop the same roll again with another film later.
+
+### Basic or Realistic
+
+<table>
+<tr>
+<td width="50%"><img src="ml-dev/filmos/preview/system.png" alt="Film mode in Settings"></td>
+<td width="50%"><img src="ml-dev/filmos/preview/end-of-roll.png" alt="A finished roll in Basic mode"></td>
+</tr>
+<tr>
+<td><b>Choose how real.</b> <i>Settings → System → Film mode</i>.</td>
+<td><b>Basic</b> (the default): the last frame finishes the roll, and it goes straight to the darkroom. No rewinding.</td>
+</tr>
+</table>
+
+- **Basic:** shoot, then develop. Stop early with *Finish roll* on the Roll page.
+- **Realistic:** like a real film camera. Rewind the roll before it can be developed.
+- Either way the roll is the same on the card, so Darkrooms reads both.
+
+### On a DSLR: a top plate
+
+<p align="center"><img src="ml-dev/filmos/preview/plate.png" alt="The top plate on a DSLR's back screen" width="720"></p>
+
+A DSLR shoots through its optical viewfinder, so there is no LiveView to draw on. With a roll loaded and
+LiveView off, the back screen becomes a film camera's top plate:
+
+- shutter, aperture and frame in big seven-segment digits
+- the film and its ISO
+- a light meter from −2 to +2 stops, and a bar of the frames left
+- WIND ON when the next frame needs winding
+
+It goes off when you put your eye to the viewfinder, and LiveView brings the viewfinder HUD back.
+*New in 0.1.1, still waiting for a DSLR tester: see [Cameras](#cameras).*
 
 ---
 
@@ -105,17 +137,17 @@ one of them, you can help: [TESTING.md](TESTING.md) says how (about 20 minutes, 
 | Camera | Canon firmware | Status | Card files |
 |---|---|---|---|
 | Canon EOS M | 2.0.2 | ✅ **Works** | `M-Film-camera-EOSM.202.zip` |
-| Canon EOS 100D / Rebel SL1 / Kiss X7 | 1.0.1 | 🧪 Builds, needs a tester | `M-Film-camera-100D.101.zip` |
+| Canon EOS 100D / Rebel SL1 / Kiss X7 | 1.0.1 | 🔧 Too big for its boot memory: being fixed |  |
 | Canon EOS 650D / Rebel T4i / Kiss X6i | 1.0.4 | 🧪 Builds, needs a tester | `M-Film-camera-650D.104.zip` |
 | Canon EOS 700D / Rebel T5i / Kiss X7i | 1.1.5 | 🧪 Builds, needs a tester | `M-Film-camera-700D.115.zip` |
 | Canon EOS 6D | 1.1.6 | 🧪 Builds, needs a tester | `M-Film-camera-6D.116.zip` |
-| Canon EOS 70D | 1.1.2 | 🧪 Builds, needs a tester | `M-Film-camera-70D.112.zip` |
+| Canon EOS 70D | 1.1.2 | 🔧 Too big for its boot memory: being fixed |  |
 | Canon EOS 5D Mark III (firmware 1.1.3) | 1.1.3 | 🧪 Builds, needs a tester | `M-Film-camera-5D3.113.zip` |
 | Canon EOS 5D Mark III (firmware 1.2.3) | 1.2.3 | 🧪 Builds, needs a tester | `M-Film-camera-5D3.123.zip` |
-| Canon EOS 550D / Rebel T2i / Kiss X4 | 1.0.9 | 🧪 Builds, needs a tester | `M-Film-camera-550D.109.zip` |
-| Canon EOS 600D / Rebel T3i / Kiss X5 | 1.0.2 | 🧪 Builds, needs a tester | `M-Film-camera-600D.102.zip` |
+| Canon EOS 550D / Rebel T2i / Kiss X4 | 1.0.9 | 🔧 Too big for its boot memory: being fixed |  |
+| Canon EOS 600D / Rebel T3i / Kiss X5 | 1.0.2 | 🔧 Too big for its boot memory: being fixed |  |
 | Canon EOS 60D | 1.1.1 | 🧪 Builds, needs a tester | `M-Film-camera-60D.111.zip` |
-| Canon EOS 1100D / Rebel T3 / Kiss X50 | 1.0.5 | 🧪 Builds, needs a tester | `M-Film-camera-1100D.105.zip` |
+| Canon EOS 1100D / Rebel T3 / Kiss X50 | 1.0.5 | 🔧 Too big for its boot memory: being fixed |  |
 | Canon EOS 500D / Rebel T1i / Kiss X3 | 1.1.1 | 🧪 Builds, needs a tester | `M-Film-camera-500D.111.zip` |
 | Canon EOS 50D | 1.0.9 | 🧪 Builds, needs a tester | `M-Film-camera-50D.109.zip` |
 | Canon EOS 5D Mark II | 2.1.2 | 🧪 Builds, needs a tester | `M-Film-camera-5D2.212.zip` |
@@ -123,7 +155,7 @@ one of them, you can help: [TESTING.md](TESTING.md) says how (about 20 minutes, 
 **Not yet:** 7D (Magic Lantern's current source doesn't build it) · 200D, 750D, 77D, 80D, 7D Mark II, 5D Mark IV, 5DS R, 6D Mark II, 850D, M50, R, RP, R5, R6, SX70 HS, SX740 HS (Magic Lantern itself is still experimental on these).
 <!-- cameras:end -->
 
-✅ tried on the camera and works · 🧪 builds; waiting for someone to try it. The card files are in each
+✅ tried on the camera and works · 🧪 builds; waiting for someone to try it · 🔧 bigger than the memory Magic Lantern gets at boot there ([why](ml-dev/MEMORY.md)). The card files are in each
 [release](../../releases/latest). The list lives in [`ml-dev/cameras.txt`](ml-dev/cameras.txt); porting
 notes in [PORTING.md](PORTING.md).
 
@@ -134,6 +166,19 @@ notes in [PORTING.md](PORTING.md).
    update once. From then on M-Film starts with the camera from that card.
 3. Full steps, and how to go back: [TESTING.md](TESTING.md). Building it yourself:
    `ml-dev/build_fork.sh <camera>`.
+
+### Updating to a new version
+
+Don't unzip a new version over the old one: files left from before can make the camera misbehave.
+Start from a clean card instead:
+
+1. **Finish the roll** and develop it, in the camera or with Darkrooms. A new install starts with no roll loaded.
+2. **Copy your photos off the card** (the `DCIM` folder), including the developed JPEG folders.
+3. **Format the card in the camera** and choose to remove Magic Lantern.
+4. **Unzip the new version** onto the card, as on the first install.
+5. Put the card in the camera and run *Firmware ver.* → update again, then switch the camera on.
+
+Your settings (film, screen colour, Film mode) go back to their defaults: set them again.
 
 ---
 
@@ -172,10 +217,13 @@ roll you shot with its film, and develops them at full resolution.
 | Price | free | **US$5.99 once** (checkout shows your currency), updates included |
 
 The camera's own darkroom stays free and unlimited. Buy Darkrooms Full in the program
-(gear icon → *Get Full*); the licence key arrives by e-mail and works on one computer at a time
-(release it in Darkrooms to move it to another).
+(*Free · … left today* at the top → *Get Darkrooms Full*); after you pay, the page shows your licence key.
+It works on one computer at a time (release it in Darkrooms to move it to another).
 
 ### Download
+
+> **Coming soon.** Darkrooms comes out together with Darkrooms Full very soon; until then the files below
+> aren't in the releases. The camera's own darkroom develops your rolls in the meantime.
 
 | Your computer | Get | Open it |
 |---|---|---|

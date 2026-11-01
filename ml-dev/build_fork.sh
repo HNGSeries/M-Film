@@ -76,30 +76,31 @@ python3 "$F/tools/genfilms.py" "$OUT/ML/data/FOSFILMS.BIN"
 python3 -c "import segno" 2>/dev/null || pip install -q segno
 python3 "$F/tools/genqr.py" "$HERE/donate.txt" "$OUT/ML/data/FOSQR.BIN"
 
-# with no darkroom, nothing below is used: the card is done
-if [ -n "$NODARK" ]; then
-    echo "== card files in $OUT (no darkroom) =="
-    (cd "$OUT" && find . -maxdepth 3 | sort | head -60)
-    exit 0
-fi
-
 # every film's colour table, so the darkroom never spends its first
 # develop of a film mixing one (the camera checks they match its looks):
 # mixed from the look, then baked from the film's LUT where it has one
 # (films/getluts.py fetches the Film-Luts ones; your own go in films/luts/)
 [ -d "$HERE/films/luts/filmluts" ] || python3 "$HERE/films/getluts.py"
 gcc -O2 -std=gnu99 -DFOS_DEV_TEST -I"$F" -o "$HOME/ml/devtest" "$F"/sim/devtest.c "$F"/sim/port_files.c \
-    "$F"/sim/films.c "$F"/fos_dev.c "$F"/fos_looks.c "$F"/fos_film.c "$F"/fos_gfx.c "$F"/fos_jpeg.c -lm
+    "$F"/sim/films.c "$F"/fos_dev.c "$F"/fos_print.c "$F"/fos_looks.c "$F"/fos_film.c "$F"/fos_gfx.c "$F"/fos_jpeg.c -lm
 mkdir -p "$OUT/ML/DARKROOM"
 FOS_FILMS="$OUT/ML/data/FOSFILMS.BIN" "$HOME/ml/devtest" -T "$OUT/ML/DARKROOM"
 python3 "$F/tools/genfilms.py" "$OUT/ML/data/FOSFILMS.BIN" --tables "$OUT/ML/DARKROOM"
 
 # the shelf's samples (PLAY on the shelf): one photo developed with every
-# film, with the tables above, as the camera's darkroom would. EOS M only for now.
-if [ "$PLAT" = "EOSM.202" ]; then
-    mkdir -p "$OUT/ML/SAMPLES"
-    FOS_FILMS="$OUT/ML/data/FOSFILMS.BIN" FOS_LUT_DIR="$OUT/ML/DARKROOM" \
-        "$HOME/ml/devtest" -S "$HERE/films/sample/SAMPLE.CR2" "$OUT/ML/SAMPLES"
+# film, with the tables above, as the camera's darkroom would. The prints
+# don't depend on the camera, so every camera gets the same ones.
+mkdir -p "$OUT/ML/SAMPLES"
+FOS_FILMS="$OUT/ML/data/FOSFILMS.BIN" FOS_LUT_DIR="$OUT/ML/DARKROOM" \
+    "$HOME/ml/devtest" -S "$HERE/films/sample/SAMPLE.CR2" "$OUT/ML/SAMPLES"
+
+# with no darkroom, the colour tables were only for the samples: the card is done
+if [ -n "$NODARK" ]; then
+    rm -rf "$OUT/ML/DARKROOM"
+    python3 "$F/tools/genfilms.py" "$OUT/ML/data/FOSFILMS.BIN"
+    echo "== card files in $OUT (no darkroom) =="
+    (cd "$OUT" && find . -maxdepth 3 | sort | head -60)
+    exit 0
 fi
 echo "== card files in $OUT =="
 (cd "$OUT" && find . -maxdepth 3 | sort | head -60)
