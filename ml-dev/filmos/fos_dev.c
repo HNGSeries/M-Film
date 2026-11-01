@@ -1165,8 +1165,13 @@ static void decode(struct fos_dev *d, long n)
 
 /* ---- finishing */
 
-/* 65536 / n for the samples a print pixel's channel got */
-static uint32_t recip[64];
+/* 65536 / n for the samples a print pixel's channel got. A portrait print
+ * pixel takes about 12 x 12 raw samples on a full-frame sensor (5D Mark III,
+ * 6D, 5D Mark II), so green gets up to 98 of them: with room for only 63
+ * here green came out black and the print purple. (sums <= 16383 n, and
+ * 65536 / n of them still fits 32 bits for any n.) */
+#define NMAX 256
+static uint32_t recip[NMAX];
 
 /* scene-linear sRGB of print pixel i (4096 = 1.0), clipped as the lab's
  * RAW converter does, times d->mul; 0 where the picture isn't */
@@ -1182,7 +1187,7 @@ FOS_INLINE void pixel_linear(const struct fos_dev *d, int x, int y, int lin[3])
     for (int c = 0; c < 3; c++)
     {
         /* the mean (sums <= 16383 n, so this fits), less black, balanced */
-        int m = n[c] < 64 ? (int) (d->sums[3 * i + c] * recip[n[c]] >> 12) - d->black16 : 0;
+        int m = n[c] < NMAX ? (int) (d->sums[3 * i + c] * recip[n[c]] >> 12) - d->black16 : 0;
         int v = m > 0 ? (int) (((int64_t) m * d->pre[c]) >> 14) : 0;
         cam[c] = v < 0 ? 0 : v > 4096 ? 4096 : v;
     }
@@ -1237,7 +1242,7 @@ static void setup_colour(struct fos_dev *d)
         d->mul[c] = 4096;
         for (int j = 0; j < 3; j++) d->mat[c][j] = (int) (inv[c][j] * 4096 + (inv[c][j] < 0 ? -0.5f : 0.5f));
     }
-    for (int k = 1; k < 64; k++) recip[k] = 65536 / k;
+    for (int k = 1; k < NMAX; k++) recip[k] = 65536 / k;
 }
 
 /* small, fast noise */
@@ -1719,9 +1724,9 @@ static __attribute__((noinline)) void expose_cam(const struct fos_dev *d, const 
         int n0 = a * *ra, n1 = a * *rb + b * *ra, n2 = b * *rb;
         int c0 = 0, c1 = 0, c2 = 0;
         /* (sums <= 16383 n, so this fits) */
-        if (n0 < 64) { int m = (int) (sm[0] * recip[n0] >> 12) - black; if (m > 0) { c0 = (m * p0) >> 14; if (c0 > 4096) c0 = 4096; } }
-        if (n1 < 64) { int m = (int) (sm[1] * recip[n1] >> 12) - black; if (m > 0) { c1 = (m * p1) >> 14; if (c1 > 4096) c1 = 4096; } }
-        if (n2 < 64) { int m = (int) (sm[2] * recip[n2] >> 12) - black; if (m > 0) { c2 = (m * p2) >> 14; if (c2 > 4096) c2 = 4096; } }
+        if (n0 < NMAX) { int m = (int) (sm[0] * recip[n0] >> 12) - black; if (m > 0) { c0 = (m * p0) >> 14; if (c0 > 4096) c0 = 4096; } }
+        if (n1 < NMAX) { int m = (int) (sm[1] * recip[n1] >> 12) - black; if (m > 0) { c1 = (m * p1) >> 14; if (c1 > 4096) c1 = 4096; } }
+        if (n2 < NMAX) { int m = (int) (sm[2] * recip[n2] >> 12) - black; if (m > 0) { c2 = (m * p2) >> 14; if (c2 > 4096) c2 = 4096; } }
         cam[0] = (uint16_t) c0; cam[1] = (uint16_t) c1; cam[2] = (uint16_t) c2;
     }
 }
