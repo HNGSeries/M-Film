@@ -1,12 +1,12 @@
 diff --git a/platform/100D.101/Makefile b/platform/100D.101/Makefile
-index 05832de0d..4ca45d79b 100644
+index 05832de0d..9e706a32e 100644
 --- a/platform/100D.101/Makefile
 +++ b/platform/100D.101/Makefile
 @@ -15,6 +15,7 @@ PLATFORM_ARCH = armv5te
  RESTARTSTART = 0x44C100
  ML_BOOT_OBJ = boot-d45-am.o
  ML_SRC_EXTRA_OBJS = $(BUILD_DIR)/reloc.o
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
@@ -34,14 +34,14 @@ index 8428d3c4b..a3be71e80 100644
  mlv_play
  mlv_snd
 diff --git a/platform/1100D.105/Makefile b/platform/1100D.105/Makefile
-index 474a5bd7b..08d281014 100644
+index 474a5bd7b..b28492c1b 100644
 --- a/platform/1100D.105/Makefile
 +++ b/platform/1100D.105/Makefile
 @@ -21,6 +21,7 @@ RESTARTSTART = 0xC80100
  ML_BOOT_OBJ = boot-d45-am.o
  
  FIRMWARE_ID_1100D = 0x80000288
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
@@ -69,14 +69,14 @@ index 70260051d..eb4ce352c 100644
  mlv_snd
  pic_view
 diff --git a/platform/500D.111/Makefile b/platform/500D.111/Makefile
-index cfd4478d6..2a74c6055 100644
+index cfd4478d6..37d877707 100644
 --- a/platform/500D.111/Makefile
 +++ b/platform/500D.111/Makefile
 @@ -17,6 +17,7 @@ PLATFORM_ARCH = armv5te
  RESTARTSTART = 0x4D000
  
  ML_PICSTYLE_AUTO = n
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
@@ -104,14 +104,14 @@ index edc1dfbba..b8ec816ba 100644
  mlv_play
  mlv_snd
 diff --git a/platform/50D.109/Makefile b/platform/50D.109/Makefile
-index d94cf18cd..ef4b2a9a4 100644
+index d94cf18cd..3f8af89a9 100644
 --- a/platform/50D.109/Makefile
 +++ b/platform/50D.109/Makefile
 @@ -24,6 +24,7 @@ ML_SRC_EXTRA_OBJS = $(BUILD_DIR)/misc.o $(BUILD_DIR)/afma.o
  #	video_hacks.o
  #	reloc.o \
  #	af_patterns.o
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
@@ -138,14 +138,14 @@ index 9412f9301..6c9da4f53 100644
  mlv_play
  pic_view
 diff --git a/platform/550D.109/Makefile b/platform/550D.109/Makefile
-index d7b8d6f03..6658f9d0e 100644
+index d7b8d6f03..47d22dfd0 100644
 --- a/platform/550D.109/Makefile
 +++ b/platform/550D.109/Makefile
 @@ -22,6 +22,7 @@ ML_BOOT_OBJ = boot-d45-am.o
  ML_PICSTYLE_AUTO = n
  
  CONFIG_LVAPP_HACK_RELOC = y
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
@@ -173,14 +173,14 @@ index edc1dfbba..b8ec816ba 100644
  mlv_play
  mlv_snd
 diff --git a/platform/5D2.212/Makefile b/platform/5D2.212/Makefile
-index c70b6b12b..07da09631 100644
+index c70b6b12b..2eb976d7c 100644
 --- a/platform/5D2.212/Makefile
 +++ b/platform/5D2.212/Makefile
 @@ -20,6 +20,7 @@ RESTARTSTART = 0x4E000
  ML_PICSTYLE_AUTO = n
  
  ML_SRC_EXTRA_OBJS = $(BUILD_DIR)/afma.o $(BUILD_DIR)/asm.o
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
@@ -208,14 +208,14 @@ index eddc7617e..6bfdee970 100644
  mlv_play
  mlv_snd
 diff --git a/platform/5D3.113/Makefile b/platform/5D3.113/Makefile
-index ee6ae21d4..35dea4aea 100644
+index ee6ae21d4..3285f3ed1 100644
 --- a/platform/5D3.113/Makefile
 +++ b/platform/5D3.113/Makefile
 @@ -19,6 +19,7 @@ ML_BITRATE_OBJ = bitrate-5d3.o
  ML_AF_PATTERNS_OBJ = n
  
  ML_SRC_EXTRA_OBJS = $(BUILD_DIR)/video_hacks.o $(BUILD_DIR)/afma.o $(BUILD_DIR)/asm.o
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
@@ -243,14 +243,14 @@ index eddc7617e..6bfdee970 100644
  mlv_play
  mlv_snd
 diff --git a/platform/5D3.123/Makefile b/platform/5D3.123/Makefile
-index dd4efea17..9d092fb21 100644
+index dd4efea17..f4ebfdd17 100644
 --- a/platform/5D3.123/Makefile
 +++ b/platform/5D3.123/Makefile
 @@ -21,6 +21,7 @@ ML_BITRATE_OBJ = bitrate-5d3.o
  ML_AF_PATTERNS_OBJ = n
  
  ML_SRC_EXTRA_OBJS = $(BUILD_DIR)/video_hacks.o $(BUILD_DIR)/afma.o $(BUILD_DIR)/asm.o
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
@@ -278,14 +278,14 @@ index eddc7617e..6bfdee970 100644
  mlv_play
  mlv_snd
 diff --git a/platform/600D.102/Makefile b/platform/600D.102/Makefile
-index 1cd54b6a0..21596556b 100644
+index 1cd54b6a0..e1b6731bc 100644
 --- a/platform/600D.102/Makefile
 +++ b/platform/600D.102/Makefile
 @@ -19,6 +19,7 @@ ML_BOOT_OBJ = boot-d45-ch.o
  ML_AUDIO_OBJ = audio-lapis.o
  
  CONFIG_LVAPP_HACK_RELOC = y
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
@@ -313,14 +313,14 @@ index edc1dfbba..b8ec816ba 100644
  mlv_play
  mlv_snd
 diff --git a/platform/60D.111/Makefile b/platform/60D.111/Makefile
-index aea8e0b83..29408bd01 100644
+index aea8e0b83..523e03ca7 100644
 --- a/platform/60D.111/Makefile
 +++ b/platform/60D.111/Makefile
 @@ -24,6 +24,7 @@ ML_BOOT_OBJ = boot-d45-ch.o
  ML_PICSTYLE_AUTO = n
  
  CONFIG_LVAPP_HACK_RELOC = y
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
@@ -348,14 +348,14 @@ index edc1dfbba..b8ec816ba 100644
  mlv_play
  mlv_snd
 diff --git a/platform/650D.104/Makefile b/platform/650D.104/Makefile
-index 9e9650596..4d3b26d96 100644
+index 9e9650596..6ef6f2852 100644
 --- a/platform/650D.104/Makefile
 +++ b/platform/650D.104/Makefile
 @@ -14,6 +14,7 @@ PLATFORM_ARCH = armv5te
  # RESTARTSTART is selected to be just above the end of the bss
  #
  RESTARTSTART = 0x7E100
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
  
  include  ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
@@ -383,14 +383,14 @@ index 8428d3c4b..a3be71e80 100644
  mlv_play
  mlv_snd
 diff --git a/platform/6D.116/Makefile b/platform/6D.116/Makefile
-index 8ba969fae..c8569b9ba 100644
+index 8ba969fae..dbe466cd3 100644
 --- a/platform/6D.116/Makefile
 +++ b/platform/6D.116/Makefile
 @@ -19,6 +19,7 @@ ML_BITRATE_OBJ = bitrate-5d3.o
  ML_SOUND_CODEC_OBJ = ak4646.o
  
  ML_SRC_EXTRA_OBJS = $(BUILD_DIR)/afma.o $(BUILD_DIR)/reloc.o $(BUILD_DIR)/gps.o
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
@@ -418,14 +418,14 @@ index eddc7617e..6bfdee970 100644
  mlv_play
  mlv_snd
 diff --git a/platform/700D.115/Makefile b/platform/700D.115/Makefile
-index af9eb604f..e48f7bddd 100644
+index af9eb604f..373803523 100644
 --- a/platform/700D.115/Makefile
 +++ b/platform/700D.115/Makefile
 @@ -15,6 +15,7 @@ PLATFORM_ARCH = armv5te
  #
  MAIN_FIRMWARE_ADDR = 0xFF0C0000
  RESTARTSTART = 0x7EC00
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
@@ -453,14 +453,14 @@ index 8428d3c4b..a3be71e80 100644
  mlv_play
  mlv_snd
 diff --git a/platform/70D.112/Makefile b/platform/70D.112/Makefile
-index 508e2c952..b0de6158c 100644
+index 508e2c952..46950f467 100644
 --- a/platform/70D.112/Makefile
 +++ b/platform/70D.112/Makefile
 @@ -20,6 +20,7 @@ ML_BITRATE_OBJ = bitrate-5d3.o
  # default 0x44C000 - 0xD3C000, patched to 0x4E0000 - 0xD3C000 (592K for us).
  RESTARTSTART = 0x44C100
  ML_BOOT_OBJ = boot-d45-am.o
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
@@ -523,14 +523,14 @@ index eddc7617e..6bfdee970 100644
  mlv_play
  mlv_snd
 diff --git a/platform/EOSM.202/Makefile b/platform/EOSM.202/Makefile
-index 7e11d12a2..f463352ee 100644
+index 7e11d12a2..cc4932423 100644
 --- a/platform/EOSM.202/Makefile
 +++ b/platform/EOSM.202/Makefile
 @@ -19,5 +19,7 @@ RESTARTSTART = 0x9E1E0
  
  ML_AF_PATTERNS_OBJ = n
  
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
 +
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
@@ -557,12 +557,29 @@ index 8428d3c4b..a3be71e80 100644
  mlv_lite
  mlv_play
  mlv_snd
+diff --git a/src/boot-d45-am.c b/src/boot-d45-am.c
+index 2201e76c7..01865665a 100755
+--- a/src/boot-d45-am.c
++++ b/src/boot-d45-am.c
+@@ -124,7 +124,11 @@ init_task_func init_task_patched(void)
+         while(1);                                       /* refuse to boot */
+     }
+ 
+-    #if defined(CONFIG_6D) || defined(CONFIG_100D) || defined(CONFIG_70D)
++    #if defined(CONFIG_6D)
++    /* film-mode fork: R0 0x44C000 -> 0x520000 => reserve 848K for ML (MOV R0, #0x520000) */
++    addr_AllocMem_end[1] = 0xE3A00852;
++    ml_reserved_mem = 0x520000 - RESTARTSTART;
++    #elif defined(CONFIG_100D) || defined(CONFIG_70D)
+     /* R0: 0x44C000 (start address, easier to patch, change to 0x4E0000 => reserve 592K for ML) */
+     /* R1: 0xD3C000 [6D, 70D] / 0xC3C000 [100D] (end address, unchanged) */
+     addr_AllocMem_end[1] = MOV_R0_0x4E0000_INSTR;
 diff --git a/src/filmroll.c b/src/filmroll.c
 new file mode 100644
-index 000000000..50b8ffb83
+index 000000000..c0415b929
 --- /dev/null
 +++ b/src/filmroll.c
-@@ -0,0 +1,1387 @@
+@@ -0,0 +1,1454 @@
 +/* filmroll: a Canon camera as a film camera (built into this ML fork).
 + * Made on the EOS M; 100D, 650D, 700D and others build from the same code.
 + *
@@ -629,6 +646,7 @@ index 000000000..50b8ffb83
 +static CONFIG_INT("filmroll.startup",   startup_picker,   2);   /* 0 off, 1 when no film, 2 always */
 +static CONFIG_INT("filmroll.bootanim",  boot_anim,        1);
 +static CONFIG_INT("filmroll.debug",     debug_log,        1);
++static CONFIG_INT("filmroll.mode",      film_mode,        0);   /* 0 Basic, 1 Realistic (FS_MODE) */
 +static CONFIG_INT("filmroll.lens_wide", lens_widest,      6);   /* index into fos_fstops: f/1.8 */
 +static CONFIG_INT("filmroll.fstop",     manual_fstop,     6);
 +static CONFIG_INT("filmroll.ap_keys",   aperture_keys,    0);   /* 0 wheel in Av, 1 up/down, 2 menu only */
@@ -1285,20 +1303,33 @@ index 000000000..50b8ffb83
 +}
 +
 +/* Canon reads files by DMA: into memory the CPU caches, it goes through
-+ * an uncached buffer */
++ * an uncached buffer. Taken at start (card_buffer), while there is memory
++ * for it: on a 5D Mark II, asked for only when the darkroom first read a
++ * roll's log, it wasn't there, and every read came back empty (#10). */
 +#define BOUNCE (64 * 1024)
++static uint8_t *bounce = 0;
++static int bounce_size = 0;
++
++static int card_buffer()
++{
++    for (int size = BOUNCE; !bounce && size >= 4096; size /= 4)
++    {
++        bounce = fio_malloc(size);
++        if (bounce) bounce_size = size;
++        else dbg("read: no %d-byte buffer for card reads", size);
++    }
++    return bounce != 0;
++}
 +
 +int fos_port_read(void *f, void *buf, int size)
 +{
 +    if (buf != CACHEABLE(buf))
 +        return FIO_ReadFile(f, buf, size);
-+    static uint8_t *bounce = 0;
-+    if (!bounce) bounce = fio_malloc(BOUNCE);
-+    if (!bounce) return -1;
++    if (!card_buffer()) return -1;
 +    int done = 0;
 +    while (done < size)
 +    {
-+        int n = MIN(size - done, BOUNCE);
++        int n = MIN(size - done, bounce_size);
 +        int got = FIO_ReadFile(f, UNCACHEABLE(bounce), n);
 +        if (got <= 0) break;
 +        memcpy((uint8_t *) buf + done, UNCACHEABLE(bounce), got);
@@ -1401,6 +1432,7 @@ index 000000000..50b8ffb83
 +        case FS_PLAYLOCK:   return &play_lock;
 +        case FS_BOOTANIM:   return &boot_anim;
 +        case FS_DEBUG:      return &debug_log;
++        case FS_MODE:       return &film_mode;
 +        case FS_FILM:       return &film_sel;
 +        case FS_EXP:        return &exp_sel;
 +        case FS_SCR_STD:    return &scr_std;
@@ -1526,6 +1558,14 @@ index 000000000..50b8ffb83
 +    return hud_enabled && roll_loaded && lv && display_idle() && !is_movie_mode() && !ui_running;
 +}
 +
++/* a DSLR shooting through the viewfinder: the back screen shows Canon's
++ * settings display, and the top plate (fos_hud_plate) goes over it */
++static int plate_visible()
++{
++    return !FOS_LV_ONLY && hud_enabled && roll_loaded && !lv && display_is_on() && display_idle()
++        && !is_movie_mode() && !ui_running;
++}
++
 +/* Magic Lantern's own LiveView overlays never draw: the film OS (or
 + * Canon's clean screen) is all you see */
 +int filmroll_overlays_active()
@@ -1563,7 +1603,7 @@ index 000000000..50b8ffb83
 +    buf[n] = 0;
 +}
 +
-+static void hud_draw(int lit, int blink)
++static void hud_draw(int lit, int blink, int plate)
 +{
 +    struct fos_hud h;
 +    memset(&h, 0, sizeof(h));
@@ -1584,9 +1624,13 @@ index 000000000..50b8ffb83
 +    h.need_wind = need_wind;
 +    h.focus_screen = focus_screen;
 +    h.film = fos_films[COERCE(roll_film, 0, fos_nfilms - 1)].name;
++    h.iso = fos_films[COERCE(roll_film, 0, fos_nfilms - 1)].box_iso;
 +    uint8_t *vram = bmp_vram();
-+    if (vram)
-+        fos_hud_draw(vram, BMPPITCH, &h, &hud_pal);
++#if !FOS_LV_ONLY
++    if (vram && plate) fos_hud_plate(vram, BMPPITCH, &h, &hud_pal);
++    else
++#endif
++    if (vram) fos_hud_draw(vram, BMPPITCH, &h, &hud_pal);
 +}
 +
 +static void hud_clear()
@@ -1603,15 +1647,53 @@ index 000000000..50b8ffb83
 +    static int last_draw = 0;
 +    static int drawn = 0;
 +    static int was_visible = -1;
++    static int plate_drawn = 0;
 +
-+    int visible = hud_visible();
-+    if (visible != was_visible)
++    int plate = plate_visible();
++    int visible = hud_visible() || plate;
++    if (visible * 2 + plate != was_visible)
 +    {
-+        dbg("hud: visible %d (enabled %d roll %d lv %d movie %d ui %d)",
-+            visible, hud_enabled, roll_loaded, lv, is_movie_mode(), ui_running);
-+        was_visible = visible;
++        dbg("hud: visible %d plate %d (enabled %d roll %d lv %d movie %d ui %d)",
++            visible, plate, hud_enabled, roll_loaded, lv, is_movie_mode(), ui_running);
++        was_visible = visible * 2 + plate;
 +    }
 +    hud_showing = visible;
++
++#if !FOS_LV_ONLY
++    /* On a DSLR Canon keeps drawing its own screen (the settings display, or
++     * its LiveView overlays) and flipping it over ours: the two flicker in
++     * turn, and a change of aperture or shutter brings Canon's back. While the
++     * HUD or the plate is up, stop Canon flipping its buffer, as the ML menu
++     * does, and wipe what it left. Canon gets the screen back as soon as ours
++     * goes (a Canon menu, playback, the display off). The film OS's own pages
++     * take the buffer themselves (film_ui_open). */
++    static int canon_held = 0;
++    if (visible && !canon_held)
++    {
++        canon_gui_disable_front_buffer();
++        clrscr();
++        canon_held = 1;
++        hud_dirty = 1;
++        dbg("hud: Canon's screen held");
++    }
++    else if (!visible && canon_held)
++    {
++        canon_held = 0;
++        if (!ui_running) canon_gui_enable_front_buffer(1);
++        dbg("hud: Canon's screen given back%s", ui_running ? " (to the film OS)" : "");
++    }
++#endif
++
++    /* the plate off (LiveView on, or a Canon menu over it): hand the screen back */
++    if (plate_drawn && !plate)
++    {
++#if !FOS_LV_ONLY
++        uint8_t *vram = bmp_vram();
++        if (vram && display_idle() && !ui_running) fos_hud_plate_clear(vram, BMPPITCH, &hud_pal);
++#endif
++        plate_drawn = 0;
++        last_sig = -1;
++    }
 +
 +    if (!visible)
 +    {
@@ -1640,7 +1722,8 @@ index 000000000..50b8ffb83
 +        hud_dirty = 0;
 +        last_sig = sig;
 +        last_draw = now;
-+        hud_draw(lit, blink);
++        hud_draw(lit, blink, plate);
++        plate_drawn = plate;
 +    }
 +}
 +
@@ -1914,6 +1997,7 @@ index 000000000..50b8ffb83
 +
 +    load_fonts();
 +    load_films();
++    dbg("read: %s", card_buffer() ? "card buffer ready" : "no card buffer: the darkroom can't read the card");
 +    startup_task();
 +    film_capture_check();
 +
@@ -1974,10 +2058,10 @@ index 000000000..f43cb73ad
 +#endif
 diff --git a/src/fos.h b/src/fos.h
 new file mode 100644
-index 000000000..f11c0a056
+index 000000000..89552b20a
 --- /dev/null
 +++ b/src/fos.h
-@@ -0,0 +1,235 @@
+@@ -0,0 +1,240 @@
 +/* fos: the film OS - the EOS M's own user interface on top of Magic Lantern.
 + *
 + * Everything the user sees (film shelf, home, settings, roll status,
@@ -2084,6 +2168,7 @@ index 000000000..f11c0a056
 +    FS_HUD, FS_LEDS, FS_FOCUS, FS_WIND,
 +    FS_APKEYS, FS_LENS_WIDE, FS_FSTOP,
 +    FS_STARTUP, FS_PLAYLOCK, FS_BOOTANIM, FS_DEBUG,
++    FS_MODE,            /* film mode: 0 Basic (a finished roll goes straight to the darkroom), 1 Realistic (rewind it first) */
 +    FS_FILM, FS_EXP,
 +    FS_SCR_STD,         /* screen colour: 0 Canon's conversion, 1 Rec.709 */
 +    FS_SCR_SAT, FS_SCR_WARM, FS_SCR_BRIGHT,     /* -FOS_SCR_STEPS..FOS_SCR_STEPS */
@@ -2178,6 +2263,7 @@ index 000000000..f11c0a056
 +    int frame, exposures, finished, need_wind;
 +    int focus_screen;
 +    const char *film;
++    int iso;                    /* the film's speed (the top plate shows it) */
 +};
 +
 +struct fos_hud_palette
@@ -2188,6 +2274,9 @@ index 000000000..f11c0a056
 +
 +void fos_hud_draw(uint8_t *vram, int pitch, const struct fos_hud *h, const struct fos_hud_palette *p);
 +void fos_hud_clear(uint8_t *vram, int pitch, const struct fos_hud_palette *p);
++/* the top plate: a DSLR's back screen while you shoot through the viewfinder */
++void fos_hud_plate(uint8_t *vram, int pitch, const struct fos_hud *h, const struct fos_hud_palette *p);
++void fos_hud_plate_clear(uint8_t *vram, int pitch, const struct fos_hud_palette *p);
 +
 +/* ---------------------------------------------------------------- the UI */
 +
@@ -2215,10 +2304,10 @@ index 000000000..f11c0a056
 +#endif
 diff --git a/src/fos_dark.c b/src/fos_dark.c
 new file mode 100644
-index 000000000..639b3d968
+index 000000000..6d753e3da
 --- /dev/null
 +++ b/src/fos_dark.c
-@@ -0,0 +1,1327 @@
+@@ -0,0 +1,1332 @@
 +/* fos_dark: the darkroom.
 + *
 + * Rolls that have been shot and rewound wait here to be developed. The
@@ -2285,7 +2374,12 @@ index 000000000..639b3d968
 + * (developing again skips the prints already made) */
 +/* developed: every frame printed, and every print in DCIM as a JPEG */
 +static int is_developed(const struct fos_lab_roll *r) { return r->sheet && r->developed >= r->shot && r->jpegs >= r->developed; }
-+static int is_waiting(const struct fos_lab_roll *r) { return !is_developed(r) && !r->in_camera && r->shot > 0; }
++/* Basic mode: a finished roll still in the camera waits too; developing it finishes it (fos_port_action) */
++static int finished_in_camera(const struct fos_lab_roll *r) { return r->in_camera && !ui_realistic() && r->shot >= r->exposures; }
++static int is_waiting(const struct fos_lab_roll *r)
++{
++    return !is_developed(r) && (!r->in_camera || finished_in_camera(r)) && r->shot > 0;
++}
 +static int has_prints(const struct fos_lab_roll *r) { return r->sheet || r->developed > 0; }
 +
 +/* about how long a frame takes, measured while developing */
@@ -2348,7 +2442,8 @@ index 000000000..639b3d968
 +    char b[96], eta[32];
 +    int frames, waiting = count_waiting(&frames);
 +    if (!nrolls)
-+        snprintf(b, sizeof(b), "No rolls yet " T_MDASH " finish one, rewind it, and it waits here.");
++        snprintf(b, sizeof(b), ui_realistic() ? "No rolls yet " T_MDASH " finish one, rewind it, and it waits here."
++                                              : "No rolls yet " T_MDASH " finish one, and it waits here.");
 +    else if (waiting)
 +    {
 +        format_eta(eta, sizeof(eta), frames, 0);
@@ -2413,7 +2508,11 @@ index 000000000..639b3d968
 +    int nm = count_marked();
 +    dark_queue_clear();
 +    for (int i = nrolls - 1; i >= 0; i--)
-+        if (is_waiting(&rolls[i]) && (!nm || marked[i])) dark_queue_add(rolls[i].number);
++        if (is_waiting(&rolls[i]) && (!nm || marked[i]))
++        {
++            if (finished_in_camera(&rolls[i])) fos_port_action(FA_REWIND, 0, 0);    /* out of the camera first */
++            dark_queue_add(rolls[i].number);
++        }
 +    ui_go(SCR_DEVELOP, 0, GO_FADE);
 +}
 +
@@ -2435,7 +2534,9 @@ index 000000000..639b3d968
 +            break;
 +        case FK_SET: case FK_RIGHT:
 +            if (!r) break;
-+            if (r->in_camera) ui_toast("Still in the camera " T_MDASH " rewind it first");
++            if (r->in_camera && !finished_in_camera(r))
++                ui_toast(ui_realistic() ? "Still in the camera " T_MDASH " rewind it first"
++                                        : "Still in the camera " T_MDASH " finish it on the Roll page first");
 +            else if (is_waiting(r) && k == FK_SET) marked[dk_sel] ^= 1;
 +            else if (has_prints(r)) ui_go(SCR_PRINTS, r->number, GO_FADE);
 +            break;
@@ -2491,7 +2592,7 @@ index 000000000..639b3d968
 +    snprintf(b, sizeof(b), "Roll %03d " T_DOT " %d frame%s " T_DOT " %s", r->number, r->shot, r->shot == 1 ? "" : "s", short_date(when));
 +    fos_text(cv, &fos_font_sm, x + 42, y + 48, b, C_TEXT3, OPAQUE, 0);
 +    fcol c;
-+    if (r->in_camera) { snprintf(b, sizeof(b), "IN CAMERA"); c = C_TEXT3; }
++    if (r->in_camera && !finished_in_camera(r)) { snprintf(b, sizeof(b), "IN CAMERA"); c = C_TEXT3; }
 +    else if (is_developed(r)) { snprintf(b, sizeof(b), "DEVELOPED"); c = C_TEXT3; }
 +    else if (r->developed) { snprintf(b, sizeof(b), "%d OF %d DEVELOPED", r->developed, r->shot); c = C_ACCENT; }
 +    else { snprintf(b, sizeof(b), "TO DEVELOP"); c = C_ACCENT; }
@@ -2520,7 +2621,7 @@ index 000000000..639b3d968
 +    fos_clip(cv, 0, DK_Y, FOS_W, DK_Y + DK_ROWS * DK_ROW);
 +    if (!nrolls)
 +    {
-+        fos_text_c(cv, &fos_font_md, 360, DK_Y + 120, "Shot rolls appear here once they are rewound.", C_TEXT3, OPAQUE, 0);
++        fos_text_c(cv, &fos_font_md, 360, DK_Y + 120, ui_realistic() ? "Shot rolls appear here once they are rewound." : "Shot rolls appear here once they are finished.", C_TEXT3, OPAQUE, 0);
 +        *cv = save;
 +        return;
 +    }
@@ -2732,7 +2833,14 @@ index 000000000..639b3d968
 +                char msg[120];
 +                snprintf(msg, sizeof(msg), "darkroom: roll %03d frame %d: no RAW file %s", cur_roll, f->no, f->cr2);
 +                fos_port_log(msg);
-+                snprintf(last_error, sizeof(last_error), "No RAW file " T_MDASH " shoot with Image quality RAW");
++                {
++                    const char *base = strrchr(f->cr2, '/');
++                    if (f->cr2[0])
++                        snprintf(last_error, sizeof(last_error), "%s isn't on the card " T_MDASH " was it shot in RAW?",
++                                 base ? base + 1 : f->cr2);
++                    else
++                        snprintf(last_error, sizeof(last_error), "No RAW file " T_MDASH " shoot with Image quality RAW");
++                }
 +                failed_frames++;
 +                done_frames++;
 +                continue;
@@ -3456,20 +3564,6 @@ index 000000000..639b3d968
 +    return 0;
 +}
 +
-+/* overlay text: coverage onto the panel greys, or the accent */
-+static int pv_text(const struct fos_font *f, int x, int y, const char *s, int accent, int align)
-+{
-+    static const uint8_t grey[16] = { 0, PX_G1, PX_G1, PX_G2, PX_G2, PX_G3, PX_G3, PX_G3, PX_G4, PX_G4,
-+                                      PX_G5, PX_G5, PX_G5, PX_WHITE, PX_WHITE, PX_WHITE };
-+    static const uint8_t amber[16] = { 0, PX_G1, PX_G1, PX_G2, PX_AMBER2, PX_AMBER2, PX_AMBER2, PX_AMBER2,
-+                                       PX_AMBER, PX_AMBER, PX_AMBER, PX_AMBER, PX_AMBER, PX_AMBER, PX_AMBER, PX_AMBER };
-+    int w = fos_text_w(f, s, accent ? 40 : 0);
-+    if (align == 1) x -= w / 2;
-+    else if (align == 2) x -= w;
-+    fos_text_map(cv->px, cv->pitch, FOS_W, FOS_H, f, x, y, s, accent ? amber : grey, accent ? 40 : 0);
-+    return w;
-+}
-+
 +static void sheet_cell(int i, int *x, int *y)
 +{
 +    int rows = (pv_frames + 5) / 6;
@@ -3517,7 +3611,7 @@ index 000000000..639b3d968
 +        memset(cv->px, PX_BLACK, FOS_W * FOS_H);
 +        char b[64];
 +        snprintf(b, sizeof(b), pv_mode ? "Frame %d was not developed" : "No contact sheet", pv_cur);
-+        pv_text(&fos_font_md, 360, 244, b, 0, 1);
++        ui_photo_text(&fos_font_md, 360, 244, b, 0, 1);
 +    }
 +    const struct fos_lab_roll *r = &rolls[pv_roll];
 +    if (!pv_mode)
@@ -3534,24 +3628,24 @@ index 000000000..639b3d968
 +        memset(&cv->px[y * cv->pitch], PX_LINE, FOS_W);
 +        const struct fos_lab_frame *m = pv_cur >= 1 && pv_cur <= FOS_MAX_FRAMES ? &pv_meta[pv_cur - 1] : 0;
 +        snprintf(b, sizeof(b), "ROLL %03d", r->number);
-+        int x = 20 + pv_text(&fos_font_xs, 20, y + 28, b, 1, 0);
++        int x = 20 + ui_photo_text(&fos_font_xs, 20, y + 28, b, 1, 0);
 +        snprintf(b, sizeof(b), "%s " T_DOT " frame %d of %d", fos_films[r->film].name, pv_cur, pv_frames);
-+        x += 14 + pv_text(&fos_font_sm, x + 14, y + 28, b, 0, 0);
++        x += 14 + ui_photo_text(&fos_font_sm, x + 14, y + 28, b, 0, 0);
 +        if (m && m->when[0])
 +        {
 +            snprintf(c, sizeof(c), "%s%s%s", m->when, m->fstop[0] ? "  f/" : "", m->fstop);
-+            pv_text(&fos_font_sm, x + 14, y + 28, c, 0, 0);
++            ui_photo_text(&fos_font_sm, x + 14, y + 28, c, 0, 0);
 +        }
-+        pv_text(&fos_font_xs, FOS_W - 20, y + 28, pv_mode ? "SET SHEET   INFO HIDE" : "SET OPEN   WHEEL ROLLS", 0, 2);
++        ui_photo_text(&fos_font_xs, FOS_W - 20, y + 28, pv_mode ? "SET SHEET   INFO HIDE" : "SET OPEN   WHEEL ROLLS", 0, 2);
 +    }
 +    ui_damage_all();
 +}
 diff --git a/src/fos_dev.c b/src/fos_dev.c
 new file mode 100644
-index 000000000..83672d714
+index 000000000..3d034217c
 --- /dev/null
 +++ b/src/fos_dev.c
-@@ -0,0 +1,2156 @@
+@@ -0,0 +1,2097 @@
 +/* fos_dev: developing film in the camera, a frame at a time.
 + *
 + * The frame's CR2 is read a chunk at a time and its lossless JPEG decoded;
@@ -4373,6 +4467,20 @@ index 000000000..83672d714
 +}
 +
 +typedef uint32_t __attribute__((may_alias)) word;
++#ifdef FOS_ARM_UNALIGNED
++/* devtest -DFOS_ARM_UNALIGNED: a word load the way ARMv5 does one off its
++ * boundary (the aligned word, rotated), to find reads the PC gets right by luck */
++static uint32_t arm_load(const word *p)
++{
++    uintptr_t a = (uintptr_t) p;
++    uint32_t v = *(const word *) (a & ~(uintptr_t) 3);
++    int r = (int) (a & 3) * 8;
++    return r ? v >> r | v << (32 - r) : v;
++}
++#define LOADW(q, i) arm_load((q) + (i))
++#else
++#define LOADW(q, i) ((q)[i])
++#endif
 +
 +/* a byte of w is 0xFF: a zero byte of ~w, (~w - 0x01010101) & w & 0x80808080,
 + * and ~w - k is ~(w + k) */
@@ -4615,10 +4723,10 @@ index 000000000..83672d714
 +        uint32_t w = 0;
 +        switch (k & 7)
 +        {
-+            case 4: w += q[3];  /* fall through */
-+            case 3: w += q[2];  /* fall through */
-+            case 2: w += q[1];  /* fall through */
-+            case 1: w += q[0];  /* fall through */
++            case 4: w += LOADW(q, 3);   /* fall through */
++            case 3: w += LOADW(q, 2);   /* fall through */
++            case 2: w += LOADW(q, 1);   /* fall through */
++            case 1: w += LOADW(q, 0);   /* fall through */
 +            default: break;
 +        }
 +        v += 2 * (k & 7);
@@ -4962,35 +5070,15 @@ index 000000000..83672d714
 +
 +/* ---------------------------------------------------------------- files */
 +
-+/* the overlay's colours over a photograph: black, a panel, greys up to
-+ * white for text on it, the accent, red, a line, and a dim grey */
-+const uint8_t fos_fixed_rgb[FOS_FIXED_N][3] =
-+{
-+    { 0, 0, 0 }, { 22, 21, 20 }, { 52, 50, 48 }, { 88, 85, 82 }, { 128, 124, 120 }, { 170, 166, 160 },
-+    { 210, 206, 200 }, { 244, 241, 236 }, { 236, 168, 52 }, { 150, 104, 34 }, { 214, 64, 52 }, { 60, 58, 56 },
-+    { 112, 108, 104 }, { 0, 0, 0 },
-+};
-+
-+/* A print is an 8-bit BMP, so it also opens on a PC: the file and info
-+ * headers, 256 palette entries (1..240 the print's), our own header with
-+ * the frame's details, the pixels top row first, then the thumbnail. */
-+#define BMP_PAL     (14 + 40)
-+#define BMP_META    (BMP_PAL + 256 * 4)
-+#define META_SIZE   64
-+#define BMP_PIXELS  (BMP_META + META_SIZE)
-+#define BMP_THUMB   (BMP_PIXELS + FOS_PRINT_W * FOS_PRINT_H)
-+#define THUMB_SIZE  (FOS_THUMB_W * FOS_THUMB_H * 3)
-+#define BMP_SIZE    (BMP_THUMB + THUMB_SIZE)
-+
 +
 +static int write_print(const char *path, int film, int frame, const char *when, const char *fstop,
 +                       const uint8_t pal[][3], int npal, const uint8_t *px, const uint8_t *thumb, int x0, int w)
 +{
-+    static uint8_t h[BMP_PIXELS];
++    static uint8_t h[FOS_BMP_PIXELS];
 +    memset(h, 0, sizeof(h));
 +    h[0] = 'B'; h[1] = 'M';
-+    put32(h + 2, BMP_SIZE);
-+    put32(h + 10, BMP_PIXELS);
++    put32(h + 2, FOS_BMP_SIZE);
++    put32(h + 10, FOS_BMP_PIXELS);
 +    put32(h + 14, 40);
 +    put32(h + 18, FOS_PRINT_W);
 +    put32(h + 22, (uint32_t) -FOS_PRINT_H);         /* top-down */
@@ -5000,10 +5088,10 @@ index 000000000..83672d714
 +    put32(h + 46, 256);
 +    for (int i = 0; i < npal && i < FOS_PRINT_COLOURS; i++)
 +    {
-+        uint8_t *q = h + BMP_PAL + 4 * (i + 1);
++        uint8_t *q = h + FOS_BMP_PAL + 4 * (i + 1);
 +        q[0] = pal[i][2]; q[1] = pal[i][1]; q[2] = pal[i][0];
 +    }
-+    uint8_t *m = h + BMP_META;
++    uint8_t *m = h + FOS_BMP_META;
 +    memcpy(m, "FOP2", 4);
 +    m[4] = (uint8_t) film;
 +    m[6] = (uint8_t) frame; m[7] = (uint8_t) (frame >> 8);
@@ -5014,64 +5102,11 @@ index 000000000..83672d714
 +
 +    void *f = fos_port_open(path, 1);
 +    if (!f) return 0;
-+    int ok = fos_port_write(f, h, BMP_PIXELS) == BMP_PIXELS
++    int ok = fos_port_write(f, h, FOS_BMP_PIXELS) == FOS_BMP_PIXELS
 +          && fos_port_write(f, px, FOS_PRINT_W * FOS_PRINT_H) == FOS_PRINT_W * FOS_PRINT_H
-+          && fos_port_write(f, thumb, THUMB_SIZE) == THUMB_SIZE;
++          && fos_port_write(f, thumb, FOS_THUMB_SIZE) == FOS_THUMB_SIZE;
 +    fos_port_close(f);
 +    return ok;
-+}
-+
-+static int is_print(const uint8_t *h)
-+{
-+    return h[0] == 'B' && h[1] == 'M' && u32le(h + 10) == BMP_PIXELS && u32le(h + 18) == FOS_PRINT_W
-+        && !memcmp(h + BMP_META, "FOP2", 4);
-+}
-+
-+int fos_print_thumb(const char *path, uint8_t *thumb)
-+{
-+    void *f = fos_port_open(path, 0);
-+    if (!f) return 0;
-+    static uint8_t h[BMP_PIXELS];
-+    int ok = fos_port_read(f, h, BMP_PIXELS) == BMP_PIXELS && is_print(h)
-+          && fos_port_seek(f, BMP_THUMB) >= 0 && fos_port_read(f, thumb, THUMB_SIZE) == THUMB_SIZE;
-+    fos_port_close(f);
-+    return ok;
-+}
-+
-+int fos_print_load(const char *path, struct fos_print *p)
-+{
-+    memset(p, 0, sizeof(*p));
-+    void *f = fos_port_open(path, 0);
-+    if (!f) return 0;
-+    static uint8_t h[BMP_PIXELS];
-+    int ok = fos_port_read(f, h, BMP_PIXELS) == BMP_PIXELS && is_print(h);
-+    if (ok)
-+    {
-+        const uint8_t *m = h + BMP_META;
-+        p->film = m[4];
-+        p->frame = u16le(m + 6);
-+        memcpy(p->when, m + 8, 19);
-+        memcpy(p->fstop, m + 28, 7);
-+        p->x0 = u16le(m + 36);
-+        p->w = u16le(m + 38);
-+        if (!p->w || p->x0 + p->w > FOS_PRINT_W) p->x0 = 0, p->w = FOS_PRINT_W;
-+        for (int i = 0; i < FOS_PRINT_COLOURS; i++)
-+        {
-+            const uint8_t *q = h + BMP_PAL + 4 * (i + 1);
-+            p->pal[i][0] = q[2]; p->pal[i][1] = q[1]; p->pal[i][2] = q[0];
-+        }
-+        p->px = fos_port_alloc(FOS_PRINT_W * FOS_PRINT_H);
-+        ok = p->px && fos_port_read(f, p->px, FOS_PRINT_W * FOS_PRINT_H) == FOS_PRINT_W * FOS_PRINT_H;
-+    }
-+    fos_port_close(f);
-+    if (!ok) fos_print_free(p);
-+    return ok;
-+}
-+
-+void fos_print_free(struct fos_print *p)
-+{
-+    fos_port_free(p->px);
-+    p->px = 0;
 +}
 +
 +/* ---------------------------------------------------------------- quantize an RGB print */
@@ -5710,10 +5745,10 @@ index 000000000..83672d714
 +}
 diff --git a/src/fos_dev.h b/src/fos_dev.h
 new file mode 100644
-index 000000000..63938354c
+index 000000000..9403bf967
 --- /dev/null
 +++ b/src/fos_dev.h
-@@ -0,0 +1,153 @@
+@@ -0,0 +1,165 @@
 +/* fos_dev: developing film in the camera.
 + *
 + * A frame's CR2 RAW becomes a print for the screen: 720 x 480 in its own
@@ -5782,6 +5817,18 @@ index 000000000..63938354c
 +       PX_AMBER, PX_AMBER2, PX_RED, PX_LINE, PX_DIM, PX_SPARE };
 +extern const uint8_t fos_fixed_rgb[FOS_FIXED_N][3];
 +
++/* A print is an 8-bit BMP, so it also opens on a PC: the file and info
++ * headers, 256 palette entries (1..240 the print's), our own header with
++ * the frame's details, the pixels top row first, then the thumbnail. */
++#define FOS_BMP_PAL     (14 + 40)
++#define FOS_BMP_META    (FOS_BMP_PAL + 256 * 4)
++#define FOS_META_SIZE   64
++#define FOS_BMP_PIXELS  (FOS_BMP_META + FOS_META_SIZE)
++#define FOS_BMP_THUMB   (FOS_BMP_PIXELS + FOS_PRINT_W * FOS_PRINT_H)
++#define FOS_THUMB_SIZE  (FOS_THUMB_W * FOS_THUMB_H * 3)
++#define FOS_BMP_SIZE    (FOS_BMP_THUMB + FOS_THUMB_SIZE)
++
++/* in fos_print.c, which every build has (the shelf's samples are prints too) */
 +int  fos_print_load(const char *path, struct fos_print *p);     /* allocates p->px; 0 on failure */
 +void fos_print_free(struct fos_print *p);
 +int  fos_print_thumb(const char *path, uint8_t *thumb);         /* FOS_THUMB_W x FOS_THUMB_H RGB */
@@ -11267,15 +11314,16 @@ index 000000000..ba76a9ed0
 +const struct fos_font fos_font_lsm_data = { lsm_bits, lsm_glyphs, lsm_lut, lsm_kern, 87, 13, 3 };
 diff --git a/src/fos_gfx.c b/src/fos_gfx.c
 new file mode 100644
-index 000000000..a4e0f3add
+index 000000000..4c4bbbc16
 --- /dev/null
 +++ b/src/fos_gfx.c
-@@ -0,0 +1,959 @@
+@@ -0,0 +1,970 @@
 +/* fos_gfx: palette ramps, dithering, anti-aliased shapes and text.
 + * See fos_gfx.h for the idea. Everything here is integer maths except the
 + * one-time palette build. */
 +
 +#include "fos_gfx.h"
++#include "fos_dev.h"
 +#include <string.h>
 +
 +/* ---------------------------------------------------------------- ramps */
@@ -12230,6 +12278,16 @@ index 000000000..a4e0f3add
 +    }
 +    return ((pen + 8) >> 4) - x;
 +}
++
++/* the overlay's colours over a photograph (a print, or the camera's own
++ * picture): black, a panel, greys up to white for text on it, the accent,
++ * red, a line, and a dim grey */
++const uint8_t fos_fixed_rgb[FOS_FIXED_N][3] =
++{
++    { 0, 0, 0 }, { 22, 21, 20 }, { 52, 50, 48 }, { 88, 85, 82 }, { 128, 124, 120 }, { 170, 166, 160 },
++    { 210, 206, 200 }, { 244, 241, 236 }, { 236, 168, 52 }, { 150, 104, 34 }, { 214, 64, 52 }, { 60, 58, 56 },
++    { 112, 108, 104 }, { 0, 0, 0 },
++};
 diff --git a/src/fos_gfx.h b/src/fos_gfx.h
 new file mode 100644
 index 000000000..22d1f64ea
@@ -12454,10 +12512,10 @@ index 000000000..22d1f64ea
 +#endif
 diff --git a/src/fos_hud.c b/src/fos_hud.c
 new file mode 100644
-index 000000000..536534838
+index 000000000..315a92e2c
 --- /dev/null
 +++ b/src/fos_hud.c
-@@ -0,0 +1,262 @@
+@@ -0,0 +1,371 @@
 +/* fos_hud: the SLR viewfinder over LiveView - an aperture scale with the
 + * meter needle on the right, a strip of red seven-segment LEDs below.
 + *
@@ -12537,10 +12595,13 @@ index 000000000..536534838
 +    return 0;
 +}
 +
-+#define DIG_W   15
-+#define DIG_H   26
-+#define SEG_T   3
-+#define DIG_GAP 6
++/* the digits' size: the HUD's, or the top plate's bigger ones (seg_size) */
++static int DIG_W = 15, DIG_H = 26, SEG_T = 3, DIG_GAP = 6;
++
++static void seg_size(int w, int h, int t, int gap)
++{
++    DIG_W = w; DIG_H = h; SEG_T = t; DIG_GAP = gap;
++}
 +
 +/* one slanted digit; off segments are drawn faintly, like the unlit LEDs
 + * you can just see behind a real viewfinder mask */
@@ -12549,7 +12610,7 @@ index 000000000..536534838
 +    int half = DIG_H / 2;
 +    for (int r = 0; r < DIG_H; r++)
 +    {
-+        int slant = (DIG_H - 1 - r) * 3 / DIG_H;    /* leans right like the real ones */
++        int slant = (DIG_H - 1 - r) * (DIG_H * 3 / 26) / DIG_H;    /* leans right like the real ones */
 +        int yy = y + r;
 +        /* horizontals: a at the top, g in the middle, d at the bottom */
 +        int hseg = -1;
@@ -12559,7 +12620,7 @@ index 000000000..536534838
 +        if (hseg >= 0)
 +        {
 +            /* chamfered ends: shorter where the segment meets the verticals */
-+            int inset = hseg == 6 ? 2 : (r == 0 || r == DIG_H - 1) ? 2 : 1;
++            int inset = (hseg == 6 ? 2 : (r == 0 || r == DIG_H - 1) ? 2 : 1) * SEG_T / 3;
 +            fill(x + slant + inset + 1, yy, DIG_W - 2 * inset - 2, 1, (bits >> hseg) & 1 ? on : off);
 +        }
 +        /* verticals: f and b above the middle, e and c below */
@@ -12589,9 +12650,9 @@ index 000000000..536534838
 +        }
 +        if (*s == '"')
 +        {
-+            fill(x - 2, y, 2, 6, on);
-+            fill(x + 2, y, 2, 6, on);
-+            x += 8;
++            fill(x - 2, y, SEG_T * 2 / 3, DIG_H / 4, on);
++            fill(x + SEG_T * 2 / 3, y, SEG_T * 2 / 3, DIG_H / 4, on);
++            x += DIG_H / 3;
 +            continue;
 +        }
 +        seg_digit(x, y, seg_bits(*s), on, off);
@@ -12720,12 +12781,118 @@ index 000000000..536534838
 +    fill(0, VIEW_H, W, BAR_H, p->clear);
 +    fill(VIEW_W / 2 - 64, VIEW_H / 2 - 64, 129, 129, p->clear);
 +}
++
++/* ---------------------------------------------------------------- the top plate */
++
++/* not on the EOS M: it has no viewfinder to shoot through, and its boot
++ * memory is short (MEMORY.md) */
++#ifndef CONFIG_EOSM
++
++/* What a DSLR shows when you shoot through the viewfinder and the screen
++ * on the back is Canon's settings display: a film camera's top plate in
++ * its place, lit like the HUD's LEDs. Shutter, aperture and the frame
++ * counter in big red digits, the meter's needle on a scale of stops, the
++ * film and its speed. */
++void fos_hud_plate(uint8_t *vram, int pitch, const struct fos_hud *h, const struct fos_hud_palette *p)
++{
++    vr = vram; vp = pitch; pal = p;
++    char b[24];
++    fill(0, 0, W, H, p->black);
++
++    /* the maker's plate: name, and the film loaded */
++    text_gray(&fos_font_sm, 28, 40, "M" "\x80" "FILM", 46, 40);
++    if (h->film)
++    {
++        int w = fos_text_w(&fos_font_lg, h->film, 0);
++        text_gray(&fos_font_lg, W - 28 - w, 46, h->film, 100, 0);
++    }
++    if (h->iso)
++    {
++        snprintf(b, sizeof(b), "ISO %d", h->iso);
++        int w = fos_text_w(&fos_font_sm, b, 24);
++        text_gray(&fos_font_sm, W - 28 - w, 74, b, 55, 24);
++    }
++    fill(28, 92, W - 56, 1, p->gray[18]);
++
++    /* three windows: shutter, aperture, frames */
++    static const char *const names[3] = { "SHUTTER", "APERTURE", "FRAME" };
++    const int col[3] = { 28, 268, 488 };
++    for (int i = 0; i < 3; i++)
++        text_gray(&fos_font_xs, col[i], 132, names[i], 40, 48);
++    seg_size(36, 64, 7, 12);
++    int ty = 150;
++    seg_text(col[0], ty, h->shutter, h->lit);
++    fos_format_fstop(b, sizeof(b), h->fstop);
++    int w = seg_text(col[1] + 22, ty, b, h->lit);
++    text_gray(&fos_font_md, col[1], ty + 62, "f", h->lit ? 70 : 30, 0);
++    (void) w;
++    if (h->finished)
++        seg_text(col[2], ty, h->blink ? "End" : "   ", 1);
++    else
++    {
++        snprintf(b, sizeof(b), "%d", h->frame);
++        int fw = seg_text(col[2], ty, b, 1);
++        snprintf(b, sizeof(b), "/%d", h->exposures);
++        text_gray(&fos_font_md, col[2] + fw + 4, ty + 62, b, 55, 0);
++    }
++    seg_size(15, 26, 3, 6);
++
++    /* the meter: -2 .. +2 stops in thirds, the needle where the light is */
++    int my = 286, mx0 = 120, mx1 = W - 120, mc = (mx0 + mx1) / 2, step = (mx1 - mx0) / 12;
++    fill(mx0, my, mx1 - mx0, 1, p->gray[30]);
++    for (int t = -6; t <= 6; t++)
++    {
++        int x = mc + t * step, big = t % 3 == 0;
++        fill(x, my - (big ? 10 : 5), t == 0 ? 3 : 1, big ? 20 : 10, p->gray[t == 0 ? 70 : big ? 45 : 25]);
++        if (big && t)
++        {
++            snprintf(b, sizeof(b), "%+d", t / 3);
++            int tw = fos_text_w(&fos_font_xs, b, 0);
++            text_gray(&fos_font_xs, x - tw / 2, my + 30, b, 40, 0);
++        }
++    }
++    text_gray(&fos_font_xs, mx0 - 70, my + 5, "UNDER", 30, 24);
++    text_gray(&fos_font_xs, mx1 + 16, my + 5, "OVER", 30, 24);
++    if (h->lit && h->meter)
++    {
++        int thirds = h->fstop - h->want;            /* + : more light than the aperture set wants */
++        int out = thirds > 6 || thirds < -6;
++        thirds = thirds > 6 ? 6 : thirds < -6 ? -6 : thirds;
++        if (!out || h->blink)
++        {
++            int x = mc + thirds * step;
++            for (int r = 0; r < 14; r++)
++                fill(x - (14 - r) / 2, my - 26 + r, 14 - r + 1, 1, p->red);
++        }
++    }
++
++    /* the frames left, like the marks on a film counter */
++    int n = h->exposures > 0 ? h->exposures : 36, done = h->finished ? n : h->frame - 1;
++    int fx = 28, fw = (W - 56) / n;
++    for (int i = 0; i < n; i++)
++        fill(fx + i * fw, 364, fw - 3 > 1 ? fw - 3 : 1, 10, i < done ? p->gray[60] : i == done ? p->red : p->gray[14]);
++    if (h->need_wind)
++        text_led(&fos_font_mdb, 28, 420, "WIND ON", h->blink, 24);
++
++    /* the way back to the film OS */
++    const char *hint = "TRASH  Home     PLAY  Prints";
++    int hw = fos_text_w(&fos_font_xs, hint, 24);
++    text_gray(&fos_font_xs, W - 28 - hw, H - 22, hint, 36, 24);
++}
++
++/* the plate off: Canon's screen shows again */
++void fos_hud_plate_clear(uint8_t *vram, int pitch, const struct fos_hud_palette *p)
++{
++    vr = vram; vp = pitch; pal = p;
++    fill(0, 0, W, H, p->clear);
++}
++#endif
 diff --git a/src/fos_jpeg.c b/src/fos_jpeg.c
 new file mode 100644
-index 000000000..a46bf4e98
+index 000000000..a2ec300ff
 --- /dev/null
 +++ b/src/fos_jpeg.c
-@@ -0,0 +1,358 @@
+@@ -0,0 +1,397 @@
 +/* fos_jpeg: a small baseline JPEG writer for the developed frames - 4:2:0,
 + * the standard Huffman tables, integer DCT (the camera has no FPU), and
 + * EXIF with the date, the film and the f-stop.
@@ -12920,6 +13087,33 @@ index 000000000..a46bf4e98
 +
 +/* a tiny TIFF: IFD0 (description, make, model, software, date) and the
 + * EXIF IFD (date taken, f-number) */
++/* text for XML: the few characters that can't stand as they are */
++static int xml_text(char *out, int size, const char *s)
++{
++    int n = 0;
++    for (; *s && n < size - 6; s++)
++    {
++        const char *e = *s == '&' ? "&amp;" : *s == '<' ? "&lt;" : *s == '>' ? "&gt;" : 0;
++        if (e) { int l = (int) strlen(e); memcpy(out + n, e, l); n += l; }
++        else out[n++] = *s;
++    }
++    out[n] = 0;
++    return n;
++}
++
++static int xmp(char *out, int size, const char *film)
++{
++    char f[160];
++    xml_text(f, sizeof(f), film);
++    int n = snprintf(out, size,
++        "<x:xmpmeta xmlns:x=\"adobe:ns:meta/\"><rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"
++        "<rdf:Description rdf:about=\"\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\">"
++        "<dc:description><rdf:Alt><rdf:li xml:lang=\"x-default\">%s</rdf:li></rdf:Alt></dc:description>"
++        "<dc:subject><rdf:Bag><rdf:li>%s</rdf:li><rdf:li>M-Film</rdf:li><rdf:li>film simulation</rdf:li></rdf:Bag></dc:subject>"
++        "</rdf:Description></rdf:RDF></x:xmpmeta>", f, f);
++    return n < size ? n : size - 1;
++}
++
 +static int exif(uint8_t *out, const struct fos_jpeg_meta *m)
 +{
 +    char date[20] = "";
@@ -13018,6 +13212,18 @@ index 000000000..a46bf4e98
 +        static const uint8_t tag[6] = { 'E', 'x', 'i', 'f', 0, 0 };
 +        for (int i = 0; i < 6; i++) put8(w, tag[i]);
 +        for (int i = 0; i < n; i++) put8(w, ex[i]);
++        /* XMP: the film as the caption and as keywords, where photo apps
++         * (Lightroom, Photos, Bridge) look for them; EXIF's ImageDescription
++         * above is the same caption for the ones that read only EXIF */
++        if (meta->desc && *meta->desc)
++        {
++            static char x[1024];
++            int k = xmp(x, sizeof(x), meta->desc);
++            static const char ns[] = "http://ns.adobe.com/xap/1.0/";
++            put16(w, 0xFFE1); put16(w, 2 + (int) sizeof(ns) + k);
++            for (int i = 0; i < (int) sizeof(ns); i++) put8(w, (uint8_t) ns[i]);    /* with its 0 */
++            for (int i = 0; i < k; i++) put8(w, (uint8_t) x[i]);
++        }
 +    }
 +    /* quantisation, frame, Huffman tables */
 +    for (int t = 0; t < 2; t++)
@@ -13111,10 +13317,10 @@ index 000000000..ae60ddb83
 +#endif
 diff --git a/src/fos_lab.c b/src/fos_lab.c
 new file mode 100644
-index 000000000..b6a5312bf
+index 000000000..bee53acdc
 --- /dev/null
 +++ b/src/fos_lab.c
-@@ -0,0 +1,358 @@
+@@ -0,0 +1,379 @@
 +/* fos_lab: the rolls on the card and their prints, for the darkroom.
 + *
 + * A roll is what its logs say: DCIM/xxxCANON/ROLL_nnn.TXT, written by the
@@ -13236,6 +13442,12 @@ index 000000000..b6a5312bf
 +    void *f = fos_port_open(path, 0);
 +    int n = f ? fos_port_read(f, buf, LOG_MAX) : 0;
 +    if (f) fos_port_close(f);
++    if (n <= 0)
++    {
++        char msg[96];
++        snprintf(msg, sizeof(msg), "lab: can't read %s (%s)", path, f ? "read failed" : "can't open");
++        fos_port_log(msg);
++    }
 +    buf[n > 0 ? n : 0] = 0;
 +    for (char *line = buf; *line; )
 +    {
@@ -13468,6 +13680,21 @@ index 000000000..b6a5312bf
 +    {
 +        if (!frames[i].cr2[0]) { frames[i].missing = 1; continue; }
 +        void *f = fos_port_open(frames[i].cr2, 0);
++        if (!f)
++        {
++            /* in Adobe RGB, Canon names the file _MG_0012.CR2, while the log
++             * (Magic Lantern's file prefix) says IMG_0012.CR2: the name's first
++             * letter becomes '_' */
++            char *base = strrchr(frames[i].cr2, '/');
++            base = base ? base + 1 : frames[i].cr2;
++            if (*base && *base != '_')
++            {
++                char was = *base;
++                *base = '_';
++                f = fos_port_open(frames[i].cr2, 0);
++                if (!f) *base = was;
++            }
++        }
 +        if (f) fos_port_close(f);
 +        else frames[i].missing = 1;
 +    }
@@ -13528,12 +13755,79 @@ index 000000000..c041267ef
 +      1, { 0.42f, 0.48f, 0.1f } },
 +};
 +const int fos_nlooks = sizeof(fos_looks) / sizeof(fos_looks[0]);
+diff --git a/src/fos_nodark.c b/src/fos_nodark.c
+new file mode 100644
+index 000000000..595b475b0
+--- /dev/null
++++ b/src/fos_nodark.c
+@@ -0,0 +1,61 @@
++/* fos_nodark: the darkroom's place in a build that leaves it out.
++ *
++ * Some cameras can't spare the memory the in-camera darkroom takes at boot
++ * (fos_dark.c, fos_dev.c, fos_lab.c, fos_looks.c, fos_jpeg.c: about 60 KB).
++ * Built with build_fork.sh --no-darkroom, those are replaced by this: the
++ * Darkroom and Prints screens say where the rolls are developed instead
++ * (Darkrooms, on a computer). The shelf's samples still show (fos_print.c).
++ */
++
++#include "fos_ui.h"
++#include "fos_dev.h"
++
++#define ND_X    24
++
++static void nd_bake()
++{
++    ui_bg_plain();
++    ui_to_bg(1);
++    ui_status_bar("DARKROOM");
++    fos_text(cv, &fos_font_lg, ND_X, 82, "Darkroom", C_TEXT, OPAQUE, 0);
++    fos_text(cv, &fos_font_sm, ND_X, 120, "This camera's M" T_DOT "FILM has no darkroom of its own,", C_TEXT2, OPAQUE, 0);
++    fos_text(cv, &fos_font_sm, ND_X, 144, "to leave the camera the memory it needs.", C_TEXT2, OPAQUE, 0);
++    fos_text(cv, &fos_font_sm, ND_X, 184, "Your rolls are on the card, every frame in RAW:", C_TEXT3, OPAQUE, 0);
++    fos_text(cv, &fos_font_sm, ND_X, 208, "develop them with Darkrooms on a computer.", C_ACCENT2, OPAQUE, 0);
++    ui_to_bg(0);
++}
++
++static void nd_draw()
++{
++    if (!ui_clobbered) return;
++    ui_clobbered = 0;
++    ui_bg_restore(0, 0, FOS_W, FOS_H);
++    ui_damage_all();
++    static const struct hint h[] = { { "MENU", "Back" } };
++    ui_hints(h, 1);
++}
++
++static void nd_key(int k)
++{
++    if (k == FK_MENU || k == FK_SET || k == FK_PLAY) ui_go(SCR_HOME, 2, GO_POP);
++}
++
++void dark_enter(int arg) { nd_bake(); }
++void dark_free() {}
++void dark_key(int k) { nd_key(k); }
++int  dark_update(int dt) { return 0; }
++void dark_draw() { nd_draw(); }
++
++void dark_queue_clear() {}
++void dark_queue_add(int roll) {}
++void develop_enter(int arg) { nd_bake(); }
++void develop_leave() {}
++void develop_key(int k) { nd_key(k); }
++int  develop_update(int dt) { return 0; }
++void develop_draw() { nd_draw(); }
++
++void prints_enter(int arg) { nd_bake(); }
++void prints_leave() {}
++void prints_key(int k) { nd_key(k); }
++int  prints_update(int dt) { return 0; }
++void prints_draw() { nd_draw(); }
 diff --git a/src/fos_pages.c b/src/fos_pages.c
 new file mode 100644
-index 000000000..597cc06c9
+index 000000000..e5b45de23
 --- /dev/null
 +++ b/src/fos_pages.c
-@@ -0,0 +1,1100 @@
+@@ -0,0 +1,1103 @@
 +/* fos_pages: home, the settings pages and the roll in the camera.
 + *
 + * Home is the film OS's main menu: the roll you are shooting on the left
@@ -13626,7 +13920,7 @@ index 000000000..597cc06c9
 +    if (left > 0)
 +        snprintf(b, sizeof(b), "%d shot " T_DOT " %d left", shot, left);
 +    else
-+        snprintf(b, sizeof(b), "End of roll " T_DOT " rewind to load");
++        snprintf(b, sizeof(b), ui_realistic() ? "End of roll " T_DOT " rewind to load" : "End of roll " T_DOT " ready to develop");
 +    fos_text_c(cv, &fos_font_sm, cx, sy + 36, b, left > 0 ? C_TEXT2 : C_RED, OPAQUE, 0);
 +}
 +
@@ -13738,7 +14032,7 @@ index 000000000..597cc06c9
 +    switch (i)
 +    {
 +        case H_FILM:
-+            snprintf(sub, sizeof(sub), "%s", roll_active() ? "Change film (rewinds this roll)" : "Choose a stock and load a roll");
++            snprintf(sub, sizeof(sub), "%s", roll_active() ? (ui_realistic() ? "Change film (rewinds this roll)" : "Change film (finishes this roll)") : "Choose a stock and load a roll");
 +            break;
 +        case H_ROLL:
 +            if (ui_roll.loaded)
@@ -13761,7 +14055,7 @@ index 000000000..597cc06c9
 +                snprintf(sub, sizeof(sub), "%s", fos_port_lens_name());
 +            break;
 +        case H_SYSTEM:
-+            snprintf(sub, sizeof(sub), "Screen colour, start screen, Canon menu");
++            snprintf(sub, sizeof(sub), "%s mode " T_DOT " screen colour " T_DOT " Canon menu", ui_realistic() ? "Realistic" : "Basic");
 +            break;
 +    }
 +    int x = LIST_X + 20;
@@ -13838,10 +14132,11 @@ index 000000000..597cc06c9
 +static const char *const wind_choices[] = { "Off", "Reminder", "Locks shutter" };
 +static const char *const apkey_choices[] = { "Dial in Av", "Up / Down", "Menu only" };
 +static const char *const start_choices[] = { "Off", "When no film", "Always" };
++static const char *const mode_choices[] = { "Basic", "Realistic" };
 +
 +static const struct item finder_items[] =
 +{
-+    { "Viewfinder HUD", IT_TOGGLE, FS_HUD, 0, 0, "SLR-style meter needle and LED readout over LiveView." },
++    { "Viewfinder HUD", IT_TOGGLE, FS_HUD, 0, 0, "Meter and LEDs over LiveView; on a DSLR, a top plate on the back screen too." },
 +    { "LEDs on half-press", IT_TOGGLE, FS_LEDS, 0, 0, "Like a real SLR: the readout lights only while metering." },
 +    { "Focusing screen", IT_TOGGLE, FS_FOCUS, 0, 0, "A split-image circle and microprism collar (decoration only)." },
 +    { "Wind lever", IT_CHOICE, FS_WIND, wind_choices, 3, "After each frame press SET to wind on. Locking is experimental." },
@@ -13857,6 +14152,7 @@ index 000000000..597cc06c9
 +
 +static const struct item system_items[] =
 +{
++    { "Film mode", IT_CHOICE, FS_MODE, mode_choices, 2, "Basic: a finished roll goes straight to the darkroom. Realistic: rewind it first." },
 +    { "Start screen", IT_CHOICE, FS_STARTUP, start_choices, 3, "The film shelf when the camera turns on." },
 +    { "Boot animation", IT_TOGGLE, FS_BOOTANIM, 0, 0, "The aperture opening on the name at power on." },
 +    { "Screen colour", IT_PAGE, PAGE_SCREEN, 0, 0, "Match these colours to what you see around you." },
@@ -13883,7 +14179,7 @@ index 000000000..597cc06c9
 +{
 +    { "Viewfinder", "What you see in LiveView while you shoot", finder_items, 4 },
 +    { "Lens", "Aperture for manual lenses", lens_items, 4 },
-+    { "System", "Screen colour, start up and the Canon menu", system_items, 9 },
++    { "System", "Film mode, screen colour, start up and the Canon menu", system_items, 10 },
 +    { "Screen colour", "Live: the whole film OS changes as you go", screen_items, 5 },
 +};
 +
@@ -14432,7 +14728,7 @@ index 000000000..597cc06c9
 +    ui_bg_plain();
 +    ui_to_bg(1);
 +    ui_status_bar("ROLL");
-+    struct hint h1[] = { { "SET", "Rewind roll" }, { "MENU", "Back" } };
++    struct hint h1[] = { { "SET", ui_realistic() ? "Rewind roll" : "Finish roll" }, { "MENU", "Back" } };
 +    struct hint h2[] = { { "SET", "Load film" }, { "MENU", "Back" } };
 +    if (ui_roll.loaded) ui_hints(h1, 2); else ui_hints(h2, 2);
 +    ui_to_bg(0);
@@ -14458,7 +14754,7 @@ index 000000000..597cc06c9
 +        {
 +            asking_rewind = 0;
 +            rewinding = 1;
-+            rewind_t = 0;
++            rewind_t = ui_realistic() ? 0 : 1500;       /* Basic: no rewinding to watch */
 +            rewind_then = k == FK_SET;
 +            rewind_number = ui_roll.number;
 +            fos_port_action(FA_REWIND, 0, 0);
@@ -14615,7 +14911,7 @@ index 000000000..597cc06c9
 +        fos_text(cv, &fos_font_md, x + 140, y, b, C_TEXT3, OPAQUE, 0);
 +    }
 +
-+    if (rewinding)
++    if (rewinding && ui_realistic())
 +    {
 +        float t = clampf(rewind_t / 900.0f, 0, 1);
 +        fos_text_c(cv, &fos_font_lg, 360, 420, "Rewinding" T_ELLIPSIS, FC(RAMP_GRAY, (int) (240 * ease_out(t))), OPAQUE, 0);
@@ -14624,22 +14920,94 @@ index 000000000..597cc06c9
 +    int left = ui_roll.exposures - ui_roll.shot;
 +    if (left > 0)
 +    {
-+        snprintf(b, sizeof(b), "Rewind roll %03d?", ui_roll.number);
++        snprintf(b, sizeof(b), ui_realistic() ? "Rewind roll %03d?" : "Finish roll %03d?", ui_roll.number);
 +        snprintf(body, sizeof(body), "%d frames stay unexposed. Develop it now, or load a new roll first.", left);
 +    }
 +    else
 +    {
 +        snprintf(b, sizeof(b), "Roll %03d is finished", ui_roll.number);
-+        snprintf(body, sizeof(body), "Rewind it, then develop it now or load a new roll first.");
++        snprintf(body, sizeof(body), ui_realistic() ? "Rewind it, then develop it now or load a new roll first."
++                                                    : "Develop it now, or load a new roll first.");
 +    }
 +    ui_sheet3(sheet.x, b, body, "Develop now", "New roll", left > 0 ? "Cancel" : "Not now");
 +}
+diff --git a/src/fos_print.c b/src/fos_print.c
+new file mode 100644
+index 000000000..38c5d504a
+--- /dev/null
++++ b/src/fos_print.c
+@@ -0,0 +1,65 @@
++/* fos_print: reading a print (the BMP the darkroom writes, fos_dev.c).
++ *
++ * Kept apart from the darkroom so every build can show prints: the shelf's
++ * sample of each film is one, also in builds made --no-darkroom.
++ */
++
++#include "fos.h"
++#include "fos_dev.h"
++#include <string.h>
++
++static int u16le(const uint8_t *p) { return p[0] | p[1] << 8; }
++static unsigned u32le(const uint8_t *p) { return p[0] | p[1] << 8 | p[2] << 16 | (unsigned) p[3] << 24; }
++
++static int is_print(const uint8_t *h)
++{
++    return h[0] == 'B' && h[1] == 'M' && u32le(h + 10) == FOS_BMP_PIXELS && u32le(h + 18) == FOS_PRINT_W
++        && !memcmp(h + FOS_BMP_META, "FOP2", 4);
++}
++
++int fos_print_thumb(const char *path, uint8_t *thumb)
++{
++    void *f = fos_port_open(path, 0);
++    if (!f) return 0;
++    static uint8_t h[FOS_BMP_PIXELS];
++    int ok = fos_port_read(f, h, FOS_BMP_PIXELS) == FOS_BMP_PIXELS && is_print(h)
++          && fos_port_seek(f, FOS_BMP_THUMB) >= 0 && fos_port_read(f, thumb, FOS_THUMB_SIZE) == FOS_THUMB_SIZE;
++    fos_port_close(f);
++    return ok;
++}
++
++int fos_print_load(const char *path, struct fos_print *p)
++{
++    memset(p, 0, sizeof(*p));
++    void *f = fos_port_open(path, 0);
++    if (!f) return 0;
++    static uint8_t h[FOS_BMP_PIXELS];
++    int ok = fos_port_read(f, h, FOS_BMP_PIXELS) == FOS_BMP_PIXELS && is_print(h);
++    if (ok)
++    {
++        const uint8_t *m = h + FOS_BMP_META;
++        p->film = m[4];
++        p->frame = u16le(m + 6);
++        memcpy(p->when, m + 8, 19);
++        memcpy(p->fstop, m + 28, 7);
++        p->x0 = u16le(m + 36);
++        p->w = u16le(m + 38);
++        if (!p->w || p->x0 + p->w > FOS_PRINT_W) p->x0 = 0, p->w = FOS_PRINT_W;
++        for (int i = 0; i < FOS_PRINT_COLOURS; i++)
++        {
++            const uint8_t *q = h + FOS_BMP_PAL + 4 * (i + 1);
++            p->pal[i][0] = q[2]; p->pal[i][1] = q[1]; p->pal[i][2] = q[0];
++        }
++        p->px = fos_port_alloc(FOS_PRINT_W * FOS_PRINT_H);
++        ok = p->px && fos_port_read(f, p->px, FOS_PRINT_W * FOS_PRINT_H) == FOS_PRINT_W * FOS_PRINT_H;
++    }
++    fos_port_close(f);
++    if (!ok) fos_print_free(p);
++    return ok;
++}
++
++void fos_print_free(struct fos_print *p)
++{
++    fos_port_free(p->px);
++    p->px = 0;
++}
 diff --git a/src/fos_shelf.c b/src/fos_shelf.c
 new file mode 100644
-index 000000000..1d9d34341
+index 000000000..f6292051c
 --- /dev/null
 +++ b/src/fos_shelf.c
-@@ -0,0 +1,707 @@
+@@ -0,0 +1,914 @@
 +/* fos_shelf: the film shelf - the canisters on a dark stage, turning
 + * towards you as they glide past - and loading a roll.
 + *
@@ -14651,9 +15019,13 @@ index 000000000..1d9d34341
 + *
 + * The films stand on shelves by kind (colour, slide, B&W, cine): up and
 + * down change shelf, and the canisters of the next one drop in.
++ *
++ * PLAY shows the film's sample: one photo developed with every film when
++ * the card was made (ML/SAMPLES), full screen on its own palette.
 + */
 +
 +#include "fos_ui.h"
++#include "fos_dev.h"
 +#include <string.h>
 +
 +#define FLOOR_Y     262
@@ -14700,6 +15072,25 @@ index 000000000..1d9d34341
 +
 +static char baked_clock[16];
 +static void bake();
++
++/* the sample, full screen; changing what is shown goes through black, as
++ * the prints do (fos_dark.c) */
++enum { SM_OFF, SM_WAIT, SM_IN, SM_SHOW, SM_OUT };
++enum { SM_NEXT_LOAD, SM_NEXT_BACK, SM_NEXT_ROLL };
++static int sm_state, sm_t, sm_next;
++static int sm_black;                /* the black before the picture is on screen */
++static int has_samples;             /* the card has them (made for this camera) */
++static struct fos_print sm_print;
++static int sm_have;                 /* sm_print holds the film's sample */
++static int sm_info = 1;             /* the film's details along the bottom */
++static int sm_dirty;
++#define SM_FADE_MS  180
++#define SM_INFO_H   44
++
++static void sample_path(char *buf, int size, int film)
++{
++    snprintf(buf, size, "%sML/SAMPLES/F%03d.BMP", fos_port_card(), film);
++}
 +
 +/* ---------------------------------------------------------------- canisters */
 +
@@ -14900,6 +15291,13 @@ index 000000000..1d9d34341
 +    sheet.x = 0; sheet.v = 0;
 +    loading = 0;
 +    sheet_drawn = 0;
++    sm_state = SM_OFF;
++    sm_have = 0;
++    char path[64];
++    sample_path(path, sizeof(path), 0);
++    void *f = fos_port_open(path, 0);
++    has_samples = f != 0;
++    if (f) fos_port_close(f);
 +    paint_around(target);
 +    ui_cans_exposures(fos_exposure_choices[exp_sel]);
 +    bake();
@@ -14907,6 +15305,10 @@ index 000000000..1d9d34341
 +
 +void shelf_leave()
 +{
++    if (sm_have) fos_print_free(&sm_print);
++    sm_have = 0;
++    if (sm_state != SM_OFF) fos_port_palette();
++    sm_state = SM_OFF;
 +}
 +
 +static int roll_in_progress()
@@ -14930,13 +15332,167 @@ index 000000000..1d9d34341
 + * loading animation is up, else the band between status bar and hints */
 +static void shelf_damage()
 +{
-+    if (loading || asking || sheet.x > 0 || sheet_drawn) ui_damage_all();
++    if (loading || asking || sheet.x > 0 || sheet_drawn || sm_state != SM_OFF) ui_damage_all();
 +    else ui_damage(MOVING_Y0, MOVING_Y1);
 +}
++
++/* ---------------------------------------------------------------- the sample */
++
++static void sm_load()
++{
++    char path[64];
++    if (sm_have) fos_print_free(&sm_print);
++    sm_have = 0;
++    sample_path(path, sizeof(path), list[target]);
++    sm_have = fos_print_load(path, &sm_print);
++    /* made with another set of films: not this one's */
++    if (sm_have && sm_print.film != list[target]) { fos_print_free(&sm_print); sm_have = 0; }
++    if (!sm_have)
++    {
++        char msg[96];
++        snprintf(msg, sizeof(msg), "shelf: no sample in %s", path);
++        fos_port_log(msg);
++    }
++    sm_dirty = 1;
++}
++
++static void sm_palette(int k)
++{
++    static const uint8_t black[1][3] = { { 0, 0, 0 } };
++    if (sm_have) fos_port_photo((const uint8_t (*)[3]) sm_print.pal, FOS_PRINT_COLOURS, k);
++    else fos_port_photo(black, 1, k);
++}
++
++static void sm_go(int next)
++{
++    if (sm_state == SM_OUT) return;
++    sm_next = next;
++    sm_state = SM_OUT;
++    sm_t = 0;
++}
++
++static void sample_key(int k)
++{
++    if (sm_state != SM_SHOW) return;
++    switch (k)
++    {
++        case FK_LEFT: case FK_WHEEL_L: case FK_RIGHT: case FK_WHEEL_R:
++        {
++            /* the next film on this shelf; the shelf follows */
++            int to = target + (k == FK_LEFT || k == FK_WHEEL_L ? -1 : 1);
++            if (to < 0 || to >= nlist) break;
++            target = to;
++            group_at[group] = target;
++            sm_go(SM_NEXT_LOAD);
++            break;
++        }
++        case FK_INFO:
++            sm_info = !sm_info;
++            sm_dirty = 1;
++            break;
++        case FK_SET:
++            sm_go(SM_NEXT_ROLL);
++            break;
++        case FK_MENU: case FK_PLAY: case FK_HOME:
++            sm_go(SM_NEXT_BACK);
++            break;
++    }
++}
++
++static int sample_update(int dt)
++{
++    sm_t += dt;
++    switch (sm_state)
++    {
++        case SM_WAIT:
++            /* once the screen is black in the film OS's colours, the picture */
++            if (!sm_black) return 1;
++            sm_load();
++            sm_palette(0);
++            sm_state = SM_IN;
++            sm_t = 0;
++            return 1;
++        case SM_IN:
++            sm_palette(fos_clamp(sm_t * 256 / SM_FADE_MS, 0, 256));
++            if (sm_t >= SM_FADE_MS) sm_state = SM_SHOW;
++            return 1;
++        case SM_OUT:
++            sm_palette(fos_clamp(256 - sm_t * 256 / SM_FADE_MS, 0, 256));
++            if (sm_t < SM_FADE_MS) return 1;
++            if (sm_next == SM_NEXT_LOAD)
++            {
++                sm_load();
++                sm_state = SM_IN;
++                sm_t = 0;
++                return 1;
++            }
++            /* back to the shelf's colours, on black, at the film shown last */
++            sm_state = SM_OFF;
++            if (sm_have) fos_print_free(&sm_print);
++            sm_have = 0;
++            memset(cv->px, fos_ix(FC(RAMP_GRAY, 0)), FOS_W * FOS_H);
++            fos_port_present(cv->px, FOS_W, 0, FOS_H);
++            fos_port_palette();
++            pos.x = target; pos.v = 0;
++            paint_around(target);
++            ui_clobbered = 1;
++            if (sm_next == SM_NEXT_ROLL)
++            {
++                if (roll_in_progress()) asking = 1;
++                else start_loading();
++            }
++            shelf_damage();
++            return 1;
++    }
++    return 0;
++}
++
++static void sample_draw()
++{
++    if (sm_state == SM_WAIT)
++    {
++        memset(cv->px, fos_ix(FC(RAMP_GRAY, 0)), FOS_W * FOS_H);
++        ui_clobbered = 0;
++        ui_damage_all();
++        sm_black = 1;
++        return;
++    }
++    if (sm_state == SM_OUT) return;         /* what is fading out stays as it was */
++    if (!sm_dirty && !ui_clobbered) return;
++    sm_dirty = 0;
++    ui_clobbered = 0;
++    const struct fos_film *f = &fos_films[list[target]];
++    if (sm_have) memcpy(cv->px, sm_print.px, FOS_W * FOS_H);
++    else
++    {
++        memset(cv->px, PX_BLACK, FOS_W * FOS_H);
++        ui_photo_text(&fos_font_md, 360, 244, "No sample for this film", 0, 1);
++    }
++    if (sm_info)
++    {
++        char b[96];
++        int y = FOS_H - SM_INFO_H;
++        memset(&cv->px[y * cv->pitch], PX_PANEL, FOS_W * SM_INFO_H);
++        memset(&cv->px[y * cv->pitch], PX_LINE, FOS_W);
++        int x = 20 + ui_photo_text(&fos_font_xs, 20, y + 28, "SAMPLE", 1, 0);
++        snprintf(b, sizeof(b), "%s %s " T_DOT " ISO %d " T_DOT " %s", f->brand, f->name, f->box_iso, f->process);
++        ui_photo_text(&fos_font_sm, x + 14, y + 28, b, 0, 0);
++        ui_photo_text(&fos_font_xs, FOS_W - 20, y + 28, "SET LOAD   PLAY BACK", 0, 2);
++    }
++    ui_damage_all();
++}
++
++/* ---------------------------------------------------------------- keys */
 +
 +void shelf_key(int k)
 +{
 +    if (loading) return;
++    if (sm_state != SM_OFF)
++    {
++        sample_key(k);
++        shelf_damage();
++        return;
++    }
 +    if (asking)
 +    {
 +        if (k == FK_SET) start_loading();
@@ -14987,7 +15543,19 @@ index 000000000..1d9d34341
 +            if (ui_from() == SCR_HOME) ui_go(SCR_HOME, 0, GO_POP);
 +            else ui_leave();
 +            break;
-+        case FK_HOME: case FK_PLAY:
++        case FK_PLAY:
++            if (has_samples)
++            {
++                /* the canisters settle where they are going first */
++                pos.x = target; pos.v = 0;
++                sm_state = SM_WAIT;
++                sm_t = 0;
++                sm_black = 0;
++                break;
++            }
++            ui_go(SCR_HOME, 0, GO_POP);
++            break;
++        case FK_HOME:
 +            ui_go(SCR_HOME, 0, GO_POP);
 +            break;
 +    }
@@ -14996,6 +15564,7 @@ index 000000000..1d9d34341
 +
 +int shelf_update(int dt)
 +{
++    if (sm_state != SM_OFF) return sample_update(dt);
 +    int moving = 0;
 +    char clock[16];
 +    fos_port_clock(clock, sizeof(clock));
@@ -15116,8 +15685,9 @@ index 000000000..1d9d34341
 +static void draw_static(int alpha)
 +{
 +    struct hint h[] = { { "<>", "Film" }, { "^v", "Shelf" }, { "INFO", "Exposures" },
-+                        { "SET", roll_in_progress() ? "Rewind & load" : "Load" }, { "MENU", "Back" } };
-+    if (alpha >= OPAQUE) ui_hints(h, 5);
++                        { "SET", roll_in_progress() ? (ui_realistic() ? "Rewind & load" : "Finish & load") : "Load" }, { "MENU", "Back" },
++                        { "PLAY", "Sample" } };
++    if (alpha >= OPAQUE) ui_hints(h, has_samples ? 6 : 5);
 +    /* the shelves, this one lit */
 +    int tw = 0;
 +    for (int g = 0; g < FOS_NGROUPS; g++) tw += fos_text_w(&fos_font_xs, fos_group_names[g], 64) + (g ? 30 : 0);
@@ -15289,10 +15859,10 @@ index 000000000..1d9d34341
 +static void draw_sheet()
 +{
 +    char t[48], b[96];
-+    snprintf(t, sizeof(t), "Rewind roll %03d?", ui_roll.number);
++    snprintf(t, sizeof(t), ui_realistic() ? "Rewind roll %03d?" : "Finish roll %03d?", ui_roll.number);
 +    snprintf(b, sizeof(b), "%d of %d frames on %s are still unexposed. They will be lost.",
 +             ui_roll.exposures - ui_roll.shot, ui_roll.exposures, fos_films[ui_roll.film].name);
-+    ui_sheet(sheet.x, t, b, "Rewind and load", "Keep shooting");
++    ui_sheet(sheet.x, t, b, ui_realistic() ? "Rewind and load" : "Finish and load", "Keep shooting");
 +}
 +
 +/* SET: the leader is drawn out of the canister across the stage, the
@@ -15324,6 +15894,11 @@ index 000000000..1d9d34341
 +
 +void shelf_draw()
 +{
++    if (sm_state != SM_OFF)
++    {
++        sample_draw();
++        return;
++    }
 +    if (loading)
 +    {
 +        draw_loading();
@@ -15349,10 +15924,10 @@ index 000000000..1d9d34341
 +}
 diff --git a/src/fos_ui.c b/src/fos_ui.c
 new file mode 100644
-index 000000000..443e2e75d
+index 000000000..2f85cf742
 --- /dev/null
 +++ b/src/fos_ui.c
-@@ -0,0 +1,907 @@
+@@ -0,0 +1,923 @@
 +/* fos_ui: the loop, navigation, transitions and shared widgets of the
 + * film OS. The screens themselves are in fos_shelf.c and fos_pages.c.
 + *
@@ -15363,6 +15938,7 @@ index 000000000..443e2e75d
 + */
 +
 +#include "fos_ui.h"
++#include "fos_dev.h"
 +#include <string.h>
 +
 +struct fos_canvas *cv;
@@ -15589,6 +16165,20 @@ index 000000000..443e2e75d
 +        x += ui_keycap(x, base, h[i].key) + 8;
 +        x += fos_text(cv, &fos_font_sm, x, base - 1, h[i].label, C_TEXT3, OPAQUE, 0) + 22;
 +    }
++}
++
++/* overlay text: coverage onto the panel greys, or the accent */
++int ui_photo_text(const struct fos_font *f, int x, int y, const char *s, int accent, int align)
++{
++    static const uint8_t grey[16] = { 0, PX_G1, PX_G1, PX_G2, PX_G2, PX_G3, PX_G3, PX_G3, PX_G4, PX_G4,
++                                      PX_G5, PX_G5, PX_G5, PX_WHITE, PX_WHITE, PX_WHITE };
++    static const uint8_t amber[16] = { 0, PX_G1, PX_G1, PX_G2, PX_AMBER2, PX_AMBER2, PX_AMBER2, PX_AMBER2,
++                                       PX_AMBER, PX_AMBER, PX_AMBER, PX_AMBER, PX_AMBER, PX_AMBER, PX_AMBER, PX_AMBER };
++    int w = fos_text_w(f, s, accent ? 40 : 0);
++    if (align == 1) x -= w / 2;
++    else if (align == 2) x -= w;
++    fos_text_map(cv->px, cv->pitch, FOS_W, FOS_H, f, x, y, s, accent ? amber : grey, accent ? 40 : 0);
++    return w;
 +}
 +
 +void ui_dots(int x, int y, int n, int filled, fcol on)
@@ -16255,6 +16845,7 @@ index 000000000..443e2e75d
 +        fos_port_sleep(moving || in_tr ? frame_rest(now) : 40);
 +    }
 +    if (stat.frames || stat.open_ms) fos_port_stat(&stat);     /* the last part second */
++    if (screen == SCR_SHELF) shelf_leave();
 +    if (screen == SCR_DEVELOP) develop_leave();
 +    if (screen == SCR_PRINTS) prints_leave();
 +    dark_free();
@@ -16262,10 +16853,10 @@ index 000000000..443e2e75d
 +}
 diff --git a/src/fos_ui.h b/src/fos_ui.h
 new file mode 100644
-index 000000000..cc38d6e71
+index 000000000..0b55b62e8
 --- /dev/null
 +++ b/src/fos_ui.h
-@@ -0,0 +1,146 @@
+@@ -0,0 +1,155 @@
 +/* fos_ui.h: shared between the film OS screens (fos_ui.c, fos_shelf.c,
 + * fos_pages.c). Not used by the camera glue. */
 +
@@ -16296,6 +16887,10 @@ index 000000000..cc38d6e71
 +extern uint8_t *ui_bg;              /* background of the current screen, same layout */
 +extern int ui_now;                  /* ms */
 +extern struct fos_roll ui_roll;
++
++/* film mode (System > Film mode): Realistic rewinds a roll before it can be developed, like a film
++ * camera; Basic just finishes it (the same in the roll's log), with no rewind to explain */
++#define ui_realistic() (fos_port_get(FS_MODE) == 1)
 +
 +/* set when something else drew over the canvas (the shutter, a screen
 + * change): screens that redraw only what moved must redraw it all */
@@ -16337,6 +16932,11 @@ index 000000000..cc38d6e71
 +int  ui_keycap(int x, int base, const char *key);   /* returns width */
 +
 +void ui_dots(int x, int y, int n, int filled, fcol on);   /* 1..5 rating */
++
++/* text over a photograph (its palette up, fos_port_photo): coverage onto
++ * the fixed greys, or the amber; align 0 left, 1 centred, 2 right of x.
++ * Returns the width. */
++int  ui_photo_text(const struct fos_font *f, int x, int y, const char *s, int accent, int align);
 +
 +/* a short message in a pill above the hints, fading after a moment */
 +void ui_toast(const char *msg);

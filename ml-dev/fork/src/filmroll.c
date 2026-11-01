@@ -1077,6 +1077,31 @@ static void hud_step()
     }
     hud_showing = visible;
 
+#if !FOS_LV_ONLY
+    /* On a DSLR Canon keeps drawing its own screen (the settings display, or
+     * its LiveView overlays) and flipping it over ours: the two flicker in
+     * turn, and a change of aperture or shutter brings Canon's back. While the
+     * HUD or the plate is up, stop Canon flipping its buffer, as the ML menu
+     * does, and wipe what it left. Canon gets the screen back as soon as ours
+     * goes (a Canon menu, playback, the display off). The film OS's own pages
+     * take the buffer themselves (film_ui_open). */
+    static int canon_held = 0;
+    if (visible && !canon_held)
+    {
+        canon_gui_disable_front_buffer();
+        clrscr();
+        canon_held = 1;
+        hud_dirty = 1;
+        dbg("hud: Canon's screen held");
+    }
+    else if (!visible && canon_held)
+    {
+        canon_held = 0;
+        if (!ui_running) canon_gui_enable_front_buffer(1);
+        dbg("hud: Canon's screen given back%s", ui_running ? " (to the film OS)" : "");
+    }
+#endif
+
     /* the plate off (LiveView on, or a Canon menu over it): hand the screen back */
     if (plate_drawn && !plate)
     {
