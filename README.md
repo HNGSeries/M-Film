@@ -14,7 +14,7 @@ The camera side is free and open, for everyone.
 [![Buy the developer a coffee](https://img.shields.io/badge/Buy%20the%20developer%20a%20coffee-ffdd00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buy.stripe.com/7sY14p8d93QE5Ny5M58so02)
 
 [![License GPL-2.0](https://img.shields.io/badge/license-GPL--2.0-3b352f)](LICENSE)
-[![Cameras](https://img.shields.io/badge/cameras-1%20works%20%C2%B7%209%20in%20testing-3b352f)](#cameras)
+[![Cameras](https://img.shields.io/badge/cameras-1%20works%20%C2%B7%2010%20in%20testing-3b352f)](#cameras)
 [![Films](https://img.shields.io/badge/films-72-3b352f)](FILMS.md)
 
 **English** · [ภาษาไทย](README.th.md) · [Films](#72-films) · [Cameras](#cameras) · [Darkrooms](#develop-on-your-computer-darkrooms) · [Take it further](PORTING.md)
@@ -155,7 +155,7 @@ one of them, you can help: [TESTING.md](TESTING.md) says how (about 20 minutes, 
 | Canon EOS 650D / Rebel T4i / Kiss X6i | 1.0.4 | 🧪 Builds, needs a tester | `M-Film-camera-650D.104.zip` |
 | Canon EOS 700D / Rebel T5i / Kiss X7i | 1.1.5 | 🧪 Builds, needs a tester | `M-Film-camera-700D.115.zip` |
 | Canon EOS 6D | 1.1.6 | 🧪 Builds, needs a tester | `M-Film-camera-6D.116.zip` |
-| Canon EOS 70D | 1.1.2 | 🔧 Too big for its boot memory: being fixed |  |
+| Canon EOS 70D | 1.1.2 | 🧪 Builds, needs a tester | `M-Film-camera-70D.112.zip` |
 | Canon EOS 5D Mark III (firmware 1.1.3) | 1.1.3 | 🧪 Builds, needs a tester | `M-Film-camera-5D3.113.zip` |
 | Canon EOS 5D Mark III (firmware 1.2.3) | 1.2.3 | 🧪 Builds, needs a tester | `M-Film-camera-5D3.123.zip` |
 | Canon EOS 550D / Rebel T2i / Kiss X4 | 1.0.9 | 🔧 Too big for its boot memory: being fixed |  |

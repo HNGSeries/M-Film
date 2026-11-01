@@ -1,9 +1,9 @@
 # Testing M-Film on your camera
 
-M-Film runs on the **Canon EOS M**. The same code now **builds** for 8 more cameras (650D, 700D, 6D,
-5D Mark III on two firmwares, 60D, 500D, 50D, 5D Mark II), but few have been tried yet. The 100D, 70D,
+M-Film runs on the **Canon EOS M**. The same code now **builds** for 9 more cameras (650D, 700D, 6D,
+5D Mark III on two firmwares, 60D, 500D, 50D, 5D Mark II, 70D), but few have been tried yet. The 100D,
 550D, 600D and 1100D wait until Magic Lantern's boot memory is raised for them
-([MEMORY.md](ml-dev/MEMORY.md)). If you have one of the 8, you can be the first: it takes about
+([MEMORY.md](ml-dev/MEMORY.md)). If you have one of the 9, you can be the first: it takes about
 20 minutes, and you can always go back.
 
 > **Is it safe?** Magic Lantern runs from the card and changes nothing permanent in the camera.
@@ -23,6 +23,7 @@ From the [latest release](../../releases/latest) (or the newest run under *Actio
 | Canon EOS 650D / Rebel T4i / Kiss X6i | 1.0.4 | `M-Film-camera-650D.104.zip` |
 | Canon EOS 700D / Rebel T5i / Kiss X7i | 1.1.5 | `M-Film-camera-700D.115.zip` |
 | Canon EOS 6D | 1.1.6 | `M-Film-camera-6D.116.zip` |
+| Canon EOS 70D | 1.1.2 | `M-Film-camera-70D.112.zip` |
 | Canon EOS 5D Mark III (firmware 1.1.3) | 1.1.3 | `M-Film-camera-5D3.113.zip` |
 | Canon EOS 5D Mark III (firmware 1.2.3) | 1.2.3 | `M-Film-camera-5D3.123.zip` |
 | Canon EOS 60D | 1.1.1 | `M-Film-camera-60D.111.zip` |
@@ -62,8 +63,9 @@ and the file **`ML/FILMROLL.LOG`** from the card attached.
 
 Battery out, card out. Then please tell us, because it most likely means the program is too big for
 that camera's memory (on the EOS M the limit is about 727 KB at boot; the other builds are 670–750 KB, and
-nobody knows their limits yet). Say
-which camera and firmware, and whether the card light stayed on.
+nobody knows their limits yet). On the **70D** the fork raises Magic Lantern's slice from 592K to 848K
+(the 6D's value) and that is unverified, so check *Debug → Free Memory* on stock Magic Lantern first if
+you can. Say which camera and firmware, and whether the card light stayed on.
 
 ## 4. Remove it
 

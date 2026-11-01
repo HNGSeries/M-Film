@@ -1,0 +1,208 @@
+diff --git a/.github/workflows/camera.yml b/.github/workflows/camera.yml
+--- a/.github/workflows/camera.yml
++++ b/.github/workflows/camera.yml
+@@ -28,7 +28,7 @@
+     strategy:
+       fail-fast: false
+       matrix:
+-        platform: [EOSM.202, 650D.104, 700D.115, 6D.116, 5D3.113, 5D3.123, 60D.111, 500D.111, 50D.109, 5D2.212]  # from ml-dev/cameras.txt
++        platform: [EOSM.202, 650D.104, 700D.115, 6D.116, 70D.112, 5D3.113, 5D3.123, 60D.111, 500D.111, 50D.109, 5D2.212]  # from ml-dev/cameras.txt
+     runs-on: ubuntu-24.04
+     name: camera ${{ matrix.platform }}
+     steps:
+@@ -69,7 +69,7 @@
+     strategy:
+       fail-fast: false
+       matrix:
+-        platform: [6D.116]    # built --no-darkroom
++        platform: [6D.116, 70D.112]    # built --no-darkroom
+     runs-on: ubuntu-24.04
+     name: camera ${{ matrix.platform }} (no darkroom, for testing)
+     steps:
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@ -14,7 +14,7 @@
+ [![Buy the developer a coffee](https://img.shields.io/badge/Buy%20the%20developer%20a%20coffee-ffdd00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buy.stripe.com/7sY14p8d93QE5Ny5M58so02)
+ 
+ [![License GPL-2.0](https://img.shields.io/badge/license-GPL--2.0-3b352f)](LICENSE)
+-[![Cameras](https://img.shields.io/badge/cameras-1%20works%20%C2%B7%209%20in%20testing-3b352f)](#cameras)
++[![Cameras](https://img.shields.io/badge/cameras-1%20works%20%C2%B7%2010%20in%20testing-3b352f)](#cameras)
+ [![Films](https://img.shields.io/badge/films-72-3b352f)](FILMS.md)
+ 
+ **English** · [ภาษาไทย](README.th.md) · [Films](#72-films) · [Cameras](#cameras) · [Darkrooms](#develop-on-your-computer-darkrooms) · [Take it further](PORTING.md)
+@@ -155,7 +155,7 @@
+ | Canon EOS 650D / Rebel T4i / Kiss X6i | 1.0.4 | 🧪 Builds, needs a tester | `M-Film-camera-650D.104.zip` |
+ | Canon EOS 700D / Rebel T5i / Kiss X7i | 1.1.5 | 🧪 Builds, needs a tester | `M-Film-camera-700D.115.zip` |
+ | Canon EOS 6D | 1.1.6 | 🧪 Builds, needs a tester | `M-Film-camera-6D.116.zip` |
+-| Canon EOS 70D | 1.1.2 | 🔧 Too big for its boot memory: being fixed |  |
++| Canon EOS 70D | 1.1.2 | 🧪 Builds, needs a tester | `M-Film-camera-70D.112.zip` |
+ | Canon EOS 5D Mark III (firmware 1.1.3) | 1.1.3 | 🧪 Builds, needs a tester | `M-Film-camera-5D3.113.zip` |
+ | Canon EOS 5D Mark III (firmware 1.2.3) | 1.2.3 | 🧪 Builds, needs a tester | `M-Film-camera-5D3.123.zip` |
+ | Canon EOS 550D / Rebel T2i / Kiss X4 | 1.0.9 | 🔧 Too big for its boot memory: being fixed |  |
+diff --git a/README.th.md b/README.th.md
+--- a/README.th.md
++++ b/README.th.md
+@@ -14,7 +14,7 @@
+ [![เลี้ยงกาแฟผู้พัฒนา](https://img.shields.io/badge/%E0%B9%80%E0%B8%A5%E0%B8%B5%E0%B9%89%E0%B8%A2%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B9%81%E0%B8%9F%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%9E%E0%B8%B1%E0%B8%92%E0%B8%99%E0%B8%B2-ffdd00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buy.stripe.com/7sY14p8d93QE5Ny5M58so02)
+ 
+ [![License GPL-2.0](https://img.shields.io/badge/license-GPL--2.0-3b352f)](LICENSE)
+-[![Cameras](https://img.shields.io/badge/cameras-1%20works%20%C2%B7%209%20in%20testing-3b352f)](#กล้องที่รองรับ)
++[![Cameras](https://img.shields.io/badge/cameras-1%20works%20%C2%B7%2010%20in%20testing-3b352f)](#กล้องที่รองรับ)
+ [![Films](https://img.shields.io/badge/films-72-3b352f)](FILMS.md)
+ 
+ [English](README.md) · **ภาษาไทย** · [ฟิล์ม](#ฟิล์ม-72-แบบ) · [กล้องที่รองรับ](#กล้องที่รองรับ) · [Darkrooms](#ล้างบนคอม-darkrooms) · [คู่มือในกล้อง](docs/MANUAL.th.md) · [ทำต่อยอด](PORTING.md)
+@@ -155,7 +155,7 @@
+ | Canon EOS 650D / Rebel T4i / Kiss X6i | 1.0.4 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-650D.104.zip` |
+ | Canon EOS 700D / Rebel T5i / Kiss X7i | 1.1.5 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-700D.115.zip` |
+ | Canon EOS 6D | 1.1.6 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-6D.116.zip` |
+-| Canon EOS 70D | 1.1.2 | 🔧 ใหญ่เกินหน่วยความจำตอนบูต: กำลังแก้ |  |
++| Canon EOS 70D | 1.1.2 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-70D.112.zip` |
+ | Canon EOS 5D Mark III (firmware 1.1.3) | 1.1.3 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-5D3.113.zip` |
+ | Canon EOS 5D Mark III (firmware 1.2.3) | 1.2.3 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-5D3.123.zip` |
+ | Canon EOS 550D / Rebel T2i / Kiss X4 | 1.0.9 | 🔧 ใหญ่เกินหน่วยความจำตอนบูต: กำลังแก้ |  |
+diff --git a/TESTING.md b/TESTING.md
+--- a/TESTING.md
++++ b/TESTING.md
+@@ -1,9 +1,9 @@
+ # Testing M-Film on your camera
+ 
+-M-Film runs on the **Canon EOS M**. The same code now **builds** for 8 more cameras (650D, 700D, 6D,
+-5D Mark III on two firmwares, 60D, 500D, 50D, 5D Mark II), but few have been tried yet. The 100D, 70D,
++M-Film runs on the **Canon EOS M**. The same code now **builds** for 9 more cameras (650D, 700D, 6D,
++5D Mark III on two firmwares, 60D, 500D, 50D, 5D Mark II, 70D), but few have been tried yet. The 100D,
+ 550D, 600D and 1100D wait until Magic Lantern's boot memory is raised for them
+-([MEMORY.md](ml-dev/MEMORY.md)). If you have one of the 8, you can be the first: it takes about
++([MEMORY.md](ml-dev/MEMORY.md)). If you have one of the 9, you can be the first: it takes about
+ 20 minutes, and you can always go back.
+ 
+ > **Is it safe?** Magic Lantern runs from the card and changes nothing permanent in the camera.
+@@ -23,6 +23,7 @@
+ | Canon EOS 650D / Rebel T4i / Kiss X6i | 1.0.4 | `M-Film-camera-650D.104.zip` |
+ | Canon EOS 700D / Rebel T5i / Kiss X7i | 1.1.5 | `M-Film-camera-700D.115.zip` |
+ | Canon EOS 6D | 1.1.6 | `M-Film-camera-6D.116.zip` |
++| Canon EOS 70D | 1.1.2 | `M-Film-camera-70D.112.zip` |
+ | Canon EOS 5D Mark III (firmware 1.1.3) | 1.1.3 | `M-Film-camera-5D3.113.zip` |
+ | Canon EOS 5D Mark III (firmware 1.2.3) | 1.2.3 | `M-Film-camera-5D3.123.zip` |
+ | Canon EOS 60D | 1.1.1 | `M-Film-camera-60D.111.zip` |
+@@ -62,8 +63,9 @@
+ 
+ Battery out, card out. Then please tell us, because it most likely means the program is too big for
+ that camera's memory (on the EOS M the limit is about 727 KB at boot; the other builds are 670–750 KB, and
+-nobody knows their limits yet). Say
+-which camera and firmware, and whether the card light stayed on.
++nobody knows their limits yet). On the **70D** the fork raises Magic Lantern's slice from 592K to 848K
++(the 6D's value) and that is unverified, so check *Debug → Free Memory* on stock Magic Lantern first if
++you can. Say which camera and firmware, and whether the card light stayed on.
+ 
+ ## 4. Remove it
+ 
+diff --git a/ml-dev/MEMORY.md b/ml-dev/MEMORY.md
+--- a/ml-dev/MEMORY.md
++++ b/ml-dev/MEMORY.md
+@@ -18,7 +18,7 @@
+ **Fixed reservation** (`boot-d45-am.c`, `boot-d45-ch.c`): Magic Lantern takes a fixed slice of
+ Canon's AllocateMemory pool, the same size whatever the build. If the build is bigger, `src/boot.h`
+ stops at power on and blinks the card light **3 long, 3 short, a pause**, forever. That is what the
+-6D did (#3) until the fork raised its slice to 848K (#8).
++6D did (#3) until the fork raised its slice to 848K (#8); the 70D gets the same raise, untested.
+ 
+ ## The cameras
+ 
+@@ -35,7 +35,7 @@
+ | 5D Mark II | sized to fit | unknown | 749,824 | | try it |
+ | 6D | fixed, raised by the fork | 868,096 (848K) | 740,864 | | ✅ starts (#3, #8) |
+ | 100D | fixed | 605,952 (592K) | 741,888 | 684,288 | 🔧 too big, even without the darkroom |
+-| 70D | fixed | 605,952 (592K) | 690,432 | 632,832 | 🔧 too big, even without the darkroom |
++| 70D | fixed, raised by the fork | 868,096 (848K, unverified) | 690,432 | 632,832 | ⚠️ raise added (the 6D's): try it |
+ | 550D | fixed | 589,568 (576K) | 751,616 | 694,016 | 🔧 too big, even without the darkroom |
+ | 600D | fixed | 589,824 (576K, see below) | 716,800 | 659,200 | 🔧 too big, even without the darkroom |
+ | 1100D | fixed | 524,032 (512K) | 672,000 | 614,400 | 🔧 too big, even without the darkroom |
+@@ -55,8 +55,8 @@
+ ## What would fix the fixed ones
+ 
+ The same as the 6D: give Magic Lantern a bigger slice of the pool at boot, and check that Canon keeps enough.
+-- **70D:** its pool starts and ends where the 6D's does (`0x44C000`–`0xD3C000`), so the 6D's `0x520000` (848K)
+-  is the obvious first try.
++- **70D:** its pool starts and ends where the 6D's does (`0x44C000`–`0xD3C000`), so the fork gives it
++  the 6D's `0x520000` (848K). The raise is still unverified: measure Free Memory on stock ML first.
+ - **100D:** its pool is 1 MB smaller (it ends at `0xC3C000`). A smaller raise than the 6D's is safer.
+ - **550D, 600D, 1100D:** Magic Lantern takes the slice from the pool's end. Lowering that end more (for example to
+   `0xC50000`, 704K on the 550D) needs the pool's start and use, which the source doesn't give.
+diff --git a/ml-dev/cameras.txt b/ml-dev/cameras.txt
+--- a/ml-dev/cameras.txt
++++ b/ml-dev/cameras.txt
+@@ -5,17 +5,17 @@
+ #             planned  not started yet, but should be possible
+ #             memory   builds, but bigger than the memory Magic Lantern gets at boot on it: the camera
+ #                      would stop at power on (3 long, 3 short blinks), so it isn't built or released
+-#                      until that reservation is raised for it, as for the 6D (MEMORY.md)
++#                      until that reservation is raised for it, as for the 6D and 70D (MEMORY.md)
+ #             no       not for now: Magic Lantern itself is experimental there (DIGIC 6 and later)
+ #   boot-limit: the largest autoexec.bin (bytes at boot) known to start on it, - if not known yet
+-#             (6D: what the fork reserves for ML at boot, see the 6D edit in fork/apply_fork.py;
+-#              100D, 70D, 550D, 600D, 1100D: the fixed reservation of Magic Lantern's boot code, MEMORY.md)
++#             (6D, 70D: what the fork reserves for ML at boot, see the 6D/70D edit in fork/apply_fork.py;
++#              100D, 550D, 600D, 1100D: the fixed reservation of Magic Lantern's boot code, MEMORY.md)
+ EOSM.202      working   727072      Canon EOS M
+ 100D.101      memory    605952      Canon EOS 100D / Rebel SL1 / Kiss X7
+ 650D.104      testing   -           Canon EOS 650D / Rebel T4i / Kiss X6i
+ 700D.115      testing   -           Canon EOS 700D / Rebel T5i / Kiss X7i
+ 6D.116        testing   868096      Canon EOS 6D
+-70D.112       memory    605952      Canon EOS 70D
++70D.112       testing   868096      Canon EOS 70D
+ 5D3.113       testing   -           Canon EOS 5D Mark III (firmware 1.1.3)
+ 5D3.123       testing   -           Canon EOS 5D Mark III (firmware 1.2.3)
+ 550D.109      memory    589568      Canon EOS 550D / Rebel T2i / Kiss X4
+diff --git a/ml-dev/fork/apply_fork.py b/ml-dev/fork/apply_fork.py
+--- a/ml-dev/fork/apply_fork.py
++++ b/ml-dev/fork/apply_fork.py
+@@ -83,22 +83,41 @@
+     p.write_text(p.read_text().replace(
+         "ML_MODULES = \\\n", "# lua dropped by film-mode fork (newlib header clash with gcc 14)\nML_MODULES = \\\n", 1))
+ 
+-# 6D only: a bigger share of Canon's AllocateMemory pool for autoexec.bin.
++# 6D and 70D: a bigger share of Canon's AllocateMemory pool for autoexec.bin.
+ # ML takes 0x44C000-0x4E0000 (592K) of the pool's 9152K (0x44C000-0xD3C000,
+-# checked in the 1.1.6 ROM); the fork needs ~722K at boot, and with more
+-# boot.h refuses to start (card LED: 3 long, 3 short, forever).
++# checked in the 6D 1.1.6 ROM; the 70D's pool is the same size); the fork
++# needs ~675-723K at boot, and with more boot.h refuses to start (card LED:
++# 3 long, 3 short, forever).
+ # 0x520000 gives 848K. A 6D running ML with 592K had 2192K of the pool
+-# free (1503K while recording RAW), so ~1.9M stays free for Canon.
+-# 100D and 70D keep 0x4E0000.
++# free (1503K while recording RAW), so ~1.9M stays free for Canon. The 70D
++# gets the same raise, still unverified: check Free Memory on stock ML first.
++# 100D keeps 0x4E0000.
+ edit("src/boot-d45-am.c",
+      "    #if defined(CONFIG_6D) || defined(CONFIG_100D) || defined(CONFIG_70D)\n",
+-     "    #if defined(CONFIG_6D)\n"
++     "    #if defined(CONFIG_6D) || defined(CONFIG_70D)\n"
+      "    /* film-mode fork: R0 0x44C000 -> 0x520000 => reserve 848K for ML (MOV R0, #0x520000) */\n"
+      "    addr_AllocMem_end[1] = 0xE3A00852;\n"
+      "    ml_reserved_mem = 0x520000 - RESTARTSTART;\n"
+-     "    #elif defined(CONFIG_100D) || defined(CONFIG_70D)\n",
++     "    #elif defined(CONFIG_100D)\n",
+      "film-mode fork: R0 0x44C000 -> 0x520000")
+ 
++# A checkout patched by the older fork has the 6D raise but still leaves the
++# 70D at 0x4E0000. Lift it, so running this script again upgrades that tree.
++p = root / "src/boot-d45-am.c"
++old = ("    #if defined(CONFIG_6D)\n"
++       "    /* film-mode fork: R0 0x44C000 -> 0x520000 => reserve 848K for ML (MOV R0, #0x520000) */\n"
++       "    addr_AllocMem_end[1] = 0xE3A00852;\n"
++       "    ml_reserved_mem = 0x520000 - RESTARTSTART;\n"
++       "    #elif defined(CONFIG_100D) || defined(CONFIG_70D)\n")
++new = ("    #if defined(CONFIG_6D) || defined(CONFIG_70D)\n"
++       "    /* film-mode fork: R0 0x44C000 -> 0x520000 => reserve 848K for ML (MOV R0, #0x520000) */\n"
++       "    addr_AllocMem_end[1] = 0xE3A00852;\n"
++       "    ml_reserved_mem = 0x520000 - RESTARTSTART;\n"
++       "    #elif defined(CONFIG_100D)\n")
++if old in p.read_text():
++    p.write_text(p.read_text().replace(old, new, 1))
++    print("  src/boot-d45-am.c: 70D raised to 0x520000 (upgraded older fork)")
++
+ def platform(name):
+     """FEATURE_FILMROLL, our objects, and no lua, for one camera."""
+     # build it in

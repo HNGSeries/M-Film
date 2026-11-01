@@ -18,7 +18,7 @@ how much Canon can spare, and only trying on the camera finds it. On the EOS M i
 **Fixed reservation** (`boot-d45-am.c`, `boot-d45-ch.c`): Magic Lantern takes a fixed slice of
 Canon's AllocateMemory pool, the same size whatever the build. If the build is bigger, `src/boot.h`
 stops at power on and blinks the card light **3 long, 3 short, a pause**, forever. That is what the
-6D did (#3) until the fork raised its slice to 848K (#8).
+6D did (#3) until the fork raised its slice to 848K (#8); the 70D gets the same raise, untested.
 
 ## The cameras
 
@@ -35,7 +35,7 @@ stops at power on and blinks the card light **3 long, 3 short, a pause**, foreve
 | 5D Mark II | sized to fit | unknown | 749,824 | | try it |
 | 6D | fixed, raised by the fork | 868,096 (848K) | 740,864 | | ✅ starts (#3, #8) |
 | 100D | fixed | 605,952 (592K) | 741,888 | 684,288 | 🔧 too big, even without the darkroom |
-| 70D | fixed | 605,952 (592K) | 690,432 | 632,832 | 🔧 too big, even without the darkroom |
+| 70D | fixed, raised by the fork | 868,096 (848K, unverified) | 690,432 | 632,832 | ⚠️ raise added (the 6D's): try it |
 | 550D | fixed | 589,568 (576K) | 751,616 | 694,016 | 🔧 too big, even without the darkroom |
 | 600D | fixed | 589,824 (576K, see below) | 716,800 | 659,200 | 🔧 too big, even without the darkroom |
 | 1100D | fixed | 524,032 (512K) | 672,000 | 614,400 | 🔧 too big, even without the darkroom |
@@ -55,8 +55,8 @@ that stays on.
 ## What would fix the fixed ones
 
 The same as the 6D: give Magic Lantern a bigger slice of the pool at boot, and check that Canon keeps enough.
-- **70D:** its pool starts and ends where the 6D's does (`0x44C000`–`0xD3C000`), so the 6D's `0x520000` (848K)
-  is the obvious first try.
+- **70D:** its pool starts and ends where the 6D's does (`0x44C000`–`0xD3C000`), so the fork gives it
+  the 6D's `0x520000` (848K). The raise is still unverified: measure Free Memory on stock ML first.
 - **100D:** its pool is 1 MB smaller (it ends at `0xC3C000`). A smaller raise than the 6D's is safer.
 - **550D, 600D, 1100D:** Magic Lantern takes the slice from the pool's end. Lowering that end more (for example to
   `0xC50000`, 704K on the 550D) needs the pool's start and use, which the source doesn't give.

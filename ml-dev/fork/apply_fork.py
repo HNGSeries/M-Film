@@ -83,21 +83,40 @@ if "lua dropped by film-mode fork" not in p.read_text():
     p.write_text(p.read_text().replace(
         "ML_MODULES = \\\n", "# lua dropped by film-mode fork (newlib header clash with gcc 14)\nML_MODULES = \\\n", 1))
 
-# 6D only: a bigger share of Canon's AllocateMemory pool for autoexec.bin.
+# 6D and 70D: a bigger share of Canon's AllocateMemory pool for autoexec.bin.
 # ML takes 0x44C000-0x4E0000 (592K) of the pool's 9152K (0x44C000-0xD3C000,
-# checked in the 1.1.6 ROM); the fork needs ~722K at boot, and with more
-# boot.h refuses to start (card LED: 3 long, 3 short, forever).
+# checked in the 6D 1.1.6 ROM; the 70D's pool is the same size); the fork
+# needs ~675-723K at boot, and with more boot.h refuses to start (card LED:
+# 3 long, 3 short, forever).
 # 0x520000 gives 848K. A 6D running ML with 592K had 2192K of the pool
-# free (1503K while recording RAW), so ~1.9M stays free for Canon.
-# 100D and 70D keep 0x4E0000.
+# free (1503K while recording RAW), so ~1.9M stays free for Canon. The 70D
+# gets the same raise, still unverified: check Free Memory on stock ML first.
+# 100D keeps 0x4E0000.
 edit("src/boot-d45-am.c",
      "    #if defined(CONFIG_6D) || defined(CONFIG_100D) || defined(CONFIG_70D)\n",
-     "    #if defined(CONFIG_6D)\n"
+     "    #if defined(CONFIG_6D) || defined(CONFIG_70D)\n"
      "    /* film-mode fork: R0 0x44C000 -> 0x520000 => reserve 848K for ML (MOV R0, #0x520000) */\n"
      "    addr_AllocMem_end[1] = 0xE3A00852;\n"
      "    ml_reserved_mem = 0x520000 - RESTARTSTART;\n"
-     "    #elif defined(CONFIG_100D) || defined(CONFIG_70D)\n",
+     "    #elif defined(CONFIG_100D)\n",
      "film-mode fork: R0 0x44C000 -> 0x520000")
+
+# A checkout patched by the older fork has the 6D raise but still leaves the
+# 70D at 0x4E0000. Lift it, so running this script again upgrades that tree.
+p = root / "src/boot-d45-am.c"
+old = ("    #if defined(CONFIG_6D)\n"
+       "    /* film-mode fork: R0 0x44C000 -> 0x520000 => reserve 848K for ML (MOV R0, #0x520000) */\n"
+       "    addr_AllocMem_end[1] = 0xE3A00852;\n"
+       "    ml_reserved_mem = 0x520000 - RESTARTSTART;\n"
+       "    #elif defined(CONFIG_100D) || defined(CONFIG_70D)\n")
+new = ("    #if defined(CONFIG_6D) || defined(CONFIG_70D)\n"
+       "    /* film-mode fork: R0 0x44C000 -> 0x520000 => reserve 848K for ML (MOV R0, #0x520000) */\n"
+       "    addr_AllocMem_end[1] = 0xE3A00852;\n"
+       "    ml_reserved_mem = 0x520000 - RESTARTSTART;\n"
+       "    #elif defined(CONFIG_100D)\n")
+if old in p.read_text():
+    p.write_text(p.read_text().replace(old, new, 1))
+    print("  src/boot-d45-am.c: 70D raised to 0x520000 (upgraded older fork)")
 
 def platform(name):
     """FEATURE_FILMROLL, our objects, and no lua, for one camera."""
