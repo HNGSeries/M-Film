@@ -36,6 +36,8 @@ run prints; still prints 1300 prints-sheet; still prints 3500 prints-frame
 # the HUD over a made-up LiveView picture
 gcc -O2 -std=gnu99 -o out/hudtest hudtest.c fonts.c ../fos_gfx.c ../fos_film.c ../fos_hud.c -lm
 ./out/hudtest 1 ${LIVEVIEW:-} && python3 -c "from PIL import Image; Image.open('out/hud.ppm').save('$OUT/hud.png')"
+# and the top plate a DSLR shows instead, shooting through the viewfinder
+./out/hudtest p && python3 -c "from PIL import Image; Image.open('out/hud.ppm').save('$OUT/plate.png')"
 
 # browsing the shelf, half size
 run browse

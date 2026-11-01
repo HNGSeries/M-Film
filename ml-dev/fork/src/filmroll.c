@@ -976,6 +976,14 @@ static int hud_visible()
     return hud_enabled && roll_loaded && lv && display_idle() && !is_movie_mode() && !ui_running;
 }
 
+/* a DSLR shooting through the viewfinder: the back screen shows Canon's
+ * settings display, and the top plate (fos_hud_plate) goes over it */
+static int plate_visible()
+{
+    return !FOS_LV_ONLY && hud_enabled && roll_loaded && !lv && display_is_on() && display_idle()
+        && !is_movie_mode() && !ui_running;
+}
+
 /* Magic Lantern's own LiveView overlays never draw: the film OS (or
  * Canon's clean screen) is all you see */
 int filmroll_overlays_active()
@@ -1013,7 +1021,7 @@ static void shutter_led(char *buf, int size)
     buf[n] = 0;
 }
 
-static void hud_draw(int lit, int blink)
+static void hud_draw(int lit, int blink, int plate)
 {
     struct fos_hud h;
     memset(&h, 0, sizeof(h));
@@ -1034,9 +1042,13 @@ static void hud_draw(int lit, int blink)
     h.need_wind = need_wind;
     h.focus_screen = focus_screen;
     h.film = fos_films[COERCE(roll_film, 0, fos_nfilms - 1)].name;
+    h.iso = fos_films[COERCE(roll_film, 0, fos_nfilms - 1)].box_iso;
     uint8_t *vram = bmp_vram();
-    if (vram)
-        fos_hud_draw(vram, BMPPITCH, &h, &hud_pal);
+#if !FOS_LV_ONLY
+    if (vram && plate) fos_hud_plate(vram, BMPPITCH, &h, &hud_pal);
+    else
+#endif
+    if (vram) fos_hud_draw(vram, BMPPITCH, &h, &hud_pal);
 }
 
 static void hud_clear()
@@ -1053,15 +1065,28 @@ static void hud_step()
     static int last_draw = 0;
     static int drawn = 0;
     static int was_visible = -1;
+    static int plate_drawn = 0;
 
-    int visible = hud_visible();
-    if (visible != was_visible)
+    int plate = plate_visible();
+    int visible = hud_visible() || plate;
+    if (visible * 2 + plate != was_visible)
     {
-        dbg("hud: visible %d (enabled %d roll %d lv %d movie %d ui %d)",
-            visible, hud_enabled, roll_loaded, lv, is_movie_mode(), ui_running);
-        was_visible = visible;
+        dbg("hud: visible %d plate %d (enabled %d roll %d lv %d movie %d ui %d)",
+            visible, plate, hud_enabled, roll_loaded, lv, is_movie_mode(), ui_running);
+        was_visible = visible * 2 + plate;
     }
     hud_showing = visible;
+
+    /* the plate off (LiveView on, or a Canon menu over it): hand the screen back */
+    if (plate_drawn && !plate)
+    {
+#if !FOS_LV_ONLY
+        uint8_t *vram = bmp_vram();
+        if (vram && display_idle() && !ui_running) fos_hud_plate_clear(vram, BMPPITCH, &hud_pal);
+#endif
+        plate_drawn = 0;
+        last_sig = -1;
+    }
 
     if (!visible)
     {
@@ -1090,7 +1115,8 @@ static void hud_step()
         hud_dirty = 0;
         last_sig = sig;
         last_draw = now;
-        hud_draw(lit, blink);
+        hud_draw(lit, blink, plate);
+        plate_drawn = plate;
     }
 }
 

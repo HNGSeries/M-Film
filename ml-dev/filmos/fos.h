@@ -199,6 +199,7 @@ struct fos_hud
     int frame, exposures, finished, need_wind;
     int focus_screen;
     const char *film;
+    int iso;                    /* the film's speed (the top plate shows it) */
 };
 
 struct fos_hud_palette
@@ -209,6 +210,9 @@ struct fos_hud_palette
 
 void fos_hud_draw(uint8_t *vram, int pitch, const struct fos_hud *h, const struct fos_hud_palette *p);
 void fos_hud_clear(uint8_t *vram, int pitch, const struct fos_hud_palette *p);
+/* the top plate: a DSLR's back screen while you shoot through the viewfinder */
+void fos_hud_plate(uint8_t *vram, int pitch, const struct fos_hud *h, const struct fos_hud_palette *p);
+void fos_hud_plate_clear(uint8_t *vram, int pitch, const struct fos_hud_palette *p);
 
 /* ---------------------------------------------------------------- the UI */
 
