@@ -20,12 +20,17 @@ From the [latest release](../../releases/latest) (or the newest run under *Actio
 | Camera | Canon firmware it needs | File |
 |---|---|---|
 | Canon EOS M | 2.0.2 | `M-Film-camera-EOSM.202.zip` |
+| Canon EOS 100D / Rebel SL1 / Kiss X7 | 1.0.1 | `M-Film-camera-100D.101.zip` |
 | Canon EOS 650D / Rebel T4i / Kiss X6i | 1.0.4 | `M-Film-camera-650D.104.zip` |
 | Canon EOS 700D / Rebel T5i / Kiss X7i | 1.1.5 | `M-Film-camera-700D.115.zip` |
 | Canon EOS 6D | 1.1.6 | `M-Film-camera-6D.116.zip` |
+| Canon EOS 70D | 1.1.2 | `M-Film-camera-70D.112.zip` |
 | Canon EOS 5D Mark III (firmware 1.1.3) | 1.1.3 | `M-Film-camera-5D3.113.zip` |
 | Canon EOS 5D Mark III (firmware 1.2.3) | 1.2.3 | `M-Film-camera-5D3.123.zip` |
+| Canon EOS 550D / Rebel T2i / Kiss X4 | 1.0.9 | `M-Film-camera-550D.109.zip` |
+| Canon EOS 600D / Rebel T3i / Kiss X5 | 1.0.2 | `M-Film-camera-600D.102.zip` |
 | Canon EOS 60D | 1.1.1 | `M-Film-camera-60D.111.zip` |
+| Canon EOS 1100D / Rebel T3 / Kiss X50 | 1.0.5 | `M-Film-camera-1100D.105.zip` |
 | Canon EOS 500D / Rebel T1i / Kiss X3 | 1.1.1 | `M-Film-camera-500D.111.zip` |
 | Canon EOS 50D | 1.0.9 | `M-Film-camera-50D.109.zip` |
 | Canon EOS 5D Mark II | 2.1.2 | `M-Film-camera-5D2.212.zip` |

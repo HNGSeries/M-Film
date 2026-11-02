@@ -66,6 +66,10 @@ all in `ml-dev/fork/apply_fork.py` (applied to a `magiclantern_simplified` check
 4. `platform/EOSM.202/features.h`: `#define FEATURE_FILMROLL`.
 5. `platform/EOSM.202/Makefile`: our objects (`filmroll.o fos_*.o`).
 6. `modules/Makefile`: lua left out (didn't build with the toolchain used).
+7. `--module` only: autoexec.bin gets `filmhook.c` (the three hooks above, forwarded to the module by
+   `MODULE_FUNCTION`) instead of the film OS, which is built from the same sources as
+   `ML/modules/filmos.mo` (`fork/module/Makefile`, `fork/src/filmos_mod.h`). ~180 KB less at boot:
+   see "The film OS as a module" in `ml-dev/MEMORY.md`.
 
 4 to 6 are per camera: `apply_fork.py SRC <platform> ...` does them for any platform, and
 `build_fork.sh <platform>` builds one (`ml-dev/out/fork-<platform>/`). What is already done for the

@@ -14,7 +14,7 @@
 [![เลี้ยงกาแฟผู้พัฒนา](https://img.shields.io/badge/%E0%B9%80%E0%B8%A5%E0%B8%B5%E0%B9%89%E0%B8%A2%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B9%81%E0%B8%9F%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%9E%E0%B8%B1%E0%B8%92%E0%B8%99%E0%B8%B2-ffdd00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buy.stripe.com/7sY14p8d93QE5Ny5M58so02)
 
 [![License GPL-2.0](https://img.shields.io/badge/license-GPL--2.0-3b352f)](LICENSE)
-[![Cameras](https://img.shields.io/badge/cameras-2%20work%20%C2%B7%206%20with%20a%20problem%20%C2%B7%202%20in%20testing-3b352f)](#กล้องที่รองรับ)
+[![Cameras](https://img.shields.io/badge/cameras-2%20work%20%C2%B7%206%20with%20a%20problem%20%C2%B7%207%20in%20testing-3b352f)](#กล้องที่รองรับ)
 [![Films](https://img.shields.io/badge/films-72-3b352f)](FILMS.md)
 
 [English](README.md) · **ภาษาไทย** · [ฟิล์ม](#ฟิล์ม-72-แบบ) · [กล้องที่รองรับ](#กล้องที่รองรับ) · [Darkrooms](#ล้างบนคอม-darkrooms) · [คู่มือในกล้อง](docs/MANUAL.th.md) · [ทำต่อยอด](PORTING.md)
@@ -151,17 +151,17 @@ M-Film ทำบน EOS M และใช้ได้จริงบนรุ่
 | กล้อง | เฟิร์มแวร์ Canon | สถานะ | หมายเหตุ | ไฟล์ลงการ์ด |
 |---|---|---|---|---|
 | Canon EOS M | 2.0.2 | ✅ **ใช้ได้** |  | `M-Film-camera-EOSM.202.zip` |
-| Canon EOS 100D / Rebel SL1 / Kiss X7 | 1.0.1 | 🔧 ใหญ่เกินหน่วยความจำตอนบูต: กำลังแก้ |  |  |
+| Canon EOS 100D / Rebel SL1 / Kiss X7 | 1.0.1 | 🧪 build ได้แล้ว รอคนทดสอบ | ใหม่: film OS โหลดเป็นโมดูลหลังเปิดกล้อง build จึงพอดีหน่วยความจำตอนบูตแล้ว (562,944 จาก 605,952 ไบต์) รอคนลองเป็นคนแรก | `M-Film-camera-100D.101.zip` |
 | Canon EOS 650D / Rebel T4i / Kiss X6i | 1.0.4 | ⚠️ ไม่มีห้องมืดในกล้อง (ล้างด้วย Darkrooms) | build เต็มจอดำ ([#34](../../issues/34)) ผู้ทดสอบลองแบบไม่มีห้องมืดแล้วเปิดได้ ตั้งแต่ 0.1.3 ออกแบบนั้น ล้างบนคอม | `M-Film-camera-650D.104.zip` |
 | Canon EOS 700D / Rebel T5i / Kiss X7i | 1.1.5 | ⚠️ ไม่มีห้องมืดในกล้อง (ล้างด้วย Darkrooms) | build เต็มจอดำ ([#19](../../issues/19)) ตั้งแต่ 0.1.3 ออกแบบไม่มีห้องมืด เหมือน 650D รอคนลอง | `M-Film-camera-700D.115.zip` |
 | Canon EOS 6D | 1.1.6 | ✅ **ใช้ได้** | ใช้ได้ตั้งแต่ 0.1.2 ([#17](../../issues/17), [#22](../../issues/22)) | `M-Film-camera-6D.116.zip` |
-| Canon EOS 70D | 1.1.2 | 🔧 ใหญ่เกินหน่วยความจำตอนบูต: กำลังแก้ |  |  |
+| Canon EOS 70D | 1.1.2 | 🧪 build ได้แล้ว รอคนทดสอบ | ใหม่: film OS โหลดเป็นโมดูลหลังเปิดกล้อง build จึงพอดีหน่วยความจำตอนบูตแล้ว (511,744 จาก 605,952 ไบต์) รอคนลองเป็นคนแรก | `M-Film-camera-70D.112.zip` |
 | Canon EOS 5D Mark III (firmware 1.1.3) | 1.1.3 | ⚠️ ลองแล้ว ยังมีปัญหา | เปิดและถ่ายได้ ห้องมืดในกล้องหาไฟล์ RAW ไม่เจอ ([#31](../../issues/31)) แก้แล้วใน 0.1.3 | `M-Film-camera-5D3.113.zip` |
 | Canon EOS 5D Mark III (firmware 1.2.3) | 1.2.3 | ⚠️ ลองแล้ว ยังมีปัญหา | เปิดและถ่ายได้ ห้องมืดในกล้องหาไฟล์ RAW ไม่เจอ ([#16](../../issues/16), [#37](../../issues/37)) แก้แล้วใน 0.1.3 | `M-Film-camera-5D3.123.zip` |
-| Canon EOS 550D / Rebel T2i / Kiss X4 | 1.0.9 | 🔧 ใหญ่เกินหน่วยความจำตอนบูต: กำลังแก้ |  |  |
-| Canon EOS 600D / Rebel T3i / Kiss X5 | 1.0.2 | 🔧 ใหญ่เกินหน่วยความจำตอนบูต: กำลังแก้ |  |  |
+| Canon EOS 550D / Rebel T2i / Kiss X4 | 1.0.9 | 🧪 build ได้แล้ว รอคนทดสอบ | ใหม่: film OS โหลดเป็นโมดูลหลังเปิดกล้อง build จึงพอดีหน่วยความจำตอนบูตแล้ว (572,672 จาก 589,568 ไบต์) รอคนลองเป็นคนแรก | `M-Film-camera-550D.109.zip` |
+| Canon EOS 600D / Rebel T3i / Kiss X5 | 1.0.2 | 🧪 build ได้แล้ว รอคนทดสอบ | ใหม่: film OS โหลดเป็นโมดูลหลังเปิดกล้อง build จึงพอดีหน่วยความจำตอนบูตแล้ว (537,856 จาก 589,824 ไบต์) รอคนลองเป็นคนแรก | `M-Film-camera-600D.102.zip` |
 | Canon EOS 60D | 1.1.1 | ⚠️ ลองแล้ว ยังมีปัญหา | เปิด ถ่าย และล้างได้ รูปออกสีม่วงอมชมพู ([#25](../../issues/25)) แก้แล้วใน 0.1.3 | `M-Film-camera-60D.111.zip` |
-| Canon EOS 1100D / Rebel T3 / Kiss X50 | 1.0.5 | 🔧 ใหญ่เกินหน่วยความจำตอนบูต: กำลังแก้ |  |  |
+| Canon EOS 1100D / Rebel T3 / Kiss X50 | 1.0.5 | 🧪 build ได้แล้ว รอคนทดสอบ | ใหม่: film OS โหลดเป็นโมดูลหลังเปิดกล้อง build จึงพอดีหน่วยความจำตอนบูตแล้ว (493,056 จาก 524,032 ไบต์) รอคนลองเป็นคนแรก | `M-Film-camera-1100D.105.zip` |
 | Canon EOS 500D / Rebel T1i / Kiss X3 | 1.1.1 | 🧪 build ได้แล้ว รอคนทดสอบ |  | `M-Film-camera-500D.111.zip` |
 | Canon EOS 50D | 1.0.9 | 🧪 build ได้แล้ว รอคนทดสอบ |  | `M-Film-camera-50D.109.zip` |
 | Canon EOS 5D Mark II | 2.1.2 | ⚠️ ลองแล้ว ยังมีปัญหา | ส่วนใหญ่ค้างตอนเปิด เพราะ build ใหญ่เกินหน่วยความจำตอนบูต ([#18](../../issues/18)) 0.1.3 มี build ที่เล็กลง (ตัดบางฟีเจอร์ของ Magic Lantern ออก แต่ห้องมืดยังอยู่) และแก้รูปสีชมพู รอคนลอง | `M-Film-camera-5D2.212.zip` |

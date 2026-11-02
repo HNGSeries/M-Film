@@ -7,6 +7,10 @@
 #   build_fork.sh 6D.116 --no-darkroom
 #                                 without the in-camera darkroom (~60 KB less at boot, for cameras
 #                                 that can't spare it) -> ml-dev/out/fork-6D.116-nodark/
+#   build_fork.sh 1100D.105 --module
+#                                 the film OS as a module (ML/modules/filmos.mo, loaded after boot):
+#                                 autoexec.bin keeps only Magic Lantern and three hooks, ~190 KB less
+#                                 at boot -> ml-dev/out/fork-1100D.105-module/ (both flags can go together)
 #
 # The cameras are the folders under platform/ in magiclantern_simplified; the
 # ones M-Film knows are listed in CAMERAS (ml-dev/cameras.txt).
@@ -16,17 +20,25 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 SRC="${ML_SRC:-$HOME/ml/magiclantern_simplified}"
 PLAT="${1:-EOSM.202}"
 NODARK=""
-[ "${2:-}" = "--no-darkroom" ] && NODARK="--no-darkroom"
-if [ "$PLAT" = "EOSM.202" ] && [ -z "$NODARK" ]; then OUT="$HERE/out/fork"; else OUT="$HERE/out/fork-$PLAT${NODARK:+-nodark}"; fi
-LOG="${LOG:-$HOME/ml/build_fork_$PLAT${NODARK:+-nodark}.log}"
+MODULE=""
+for a in "${@:2}"; do
+    case "$a" in
+        --no-darkroom) NODARK="--no-darkroom" ;;
+        --module)      MODULE="--module" ;;
+        *) echo "unknown option $a"; exit 1 ;;
+    esac
+done
+TAG="${NODARK:+-nodark}${MODULE:+-module}"
+if [ "$PLAT" = "EOSM.202" ] && [ -z "$TAG" ]; then OUT="$HERE/out/fork"; else OUT="$HERE/out/fork-$PLAT$TAG"; fi
+LOG="${LOG:-$HOME/ml/build_fork_$PLAT$TAG.log}"
 
-cp "$HERE"/fork/src/filmroll.{c,h} "$HERE"/filmos/fos*.{c,h} "$SRC/src/"
-sed -i 's/\r$//' "$SRC"/src/filmroll.{c,h} "$SRC"/src/fos*.{c,h}
+cp "$HERE"/fork/src/filmroll.{c,h} "$HERE"/fork/src/filmhook.c "$HERE"/filmos/fos*.{c,h} "$SRC/src/"
+sed -i 's/\r$//' "$SRC"/src/filmroll.{c,h} "$SRC"/src/filmhook.c "$SRC"/src/fos*.{c,h}
 # M-Film's version, one for the camera and the program (VERSION at the top of the repository)
 VERSION=$(tr -d ' \r\n' < "$HERE/../VERSION")
 printf '#define MFILM_VERSION "%s"\n' "$VERSION" > "$SRC/src/fos_version.h"
 echo "M-Film $VERSION"
-python3 "$HERE/fork/apply_fork.py" "$SRC" "$PLAT" $NODARK
+python3 "$HERE/fork/apply_fork.py" "$SRC" "$PLAT" $NODARK $MODULE
 
 cd "$SRC/platform/$PLAT"
 make clean >/dev/null
@@ -58,10 +70,47 @@ if [ -n "$LIMIT" ] && [ "$LIMIT" != "-" ]; then
 else
     echo "ML takes $USED bytes at boot (no limit known for $PLAT yet: if the camera hangs at power on, it is too big)"
 fi
-mkdir -p "$HERE/out" && echo "$USED" > "$HERE/out/.size-$PLAT${NODARK:+-nodark}"
+mkdir -p "$HERE/out" && echo "$USED" > "$HERE/out/.size-$PLAT$TAG"
 
 rm -rf "$OUT" && mkdir -p "$OUT"
 (cd "$OUT" && unzip -q "$SRC/platform/$PLAT/$ZIP")
+
+if [ -n "$MODULE" ]; then
+    # the film OS as ML/modules/filmos.mo, built for this camera only (fork/module/Makefile)
+    MOD="$SRC/modules/filmos"
+    rm -rf "$MOD" && mkdir -p "$MOD"
+    cp "$HERE"/fork/module/{Makefile,README.rst} "$HERE"/fork/src/filmroll.{c,h} "$HERE"/fork/src/filmos_mod.h \
+       "$HERE"/filmos/fos*.{c,h} "$SRC"/src/fos_version.h "$MOD/"
+    sed -i 's/\r$//' "$MOD"/*.c "$MOD"/*.h
+    OBJS="filmroll.o fos_gfx.o fos_film.o fos_ui.o fos_shelf.o fos_pages.o fos_hud.o fos_print.o"
+    if [ -n "$NODARK" ]; then OBJS="$OBJS fos_nodark.o"; else OBJS="$OBJS fos_dark.o fos_dev.o fos_lab.o fos_looks.o fos_jpeg.o"; fi
+    make -C "$MOD" FILMOS_PLATFORM="$PLAT" FILMOS_OBJS="$OBJS" FATAL_WARNINGS=y >> "$LOG" 2>&1 || { tail -40 "$LOG"; echo "the film OS module didn't build, see $LOG"; exit 1; }
+    # Only the module's entry points stay global: the loader refuses a module that defines a name
+    # autoexec.bin already has (libgcc's helpers, pulled in with __powisf2).
+    arm-none-eabi-objcopy --wildcard --keep-global-symbol='__module_*' \
+        --keep-global-symbol=filmos_key_used --keep-global-symbol=filmos_menu_open \
+        --keep-global-symbol=filmos_overlays "$MOD/build/filmos.mo"
+    arm-none-eabi-readelf -sW "$MOD/build/filmos.mo" | awk '$5 == "GLOBAL" && $7 == "UND" {print $8}' | sort -u > "$MOD/build/filmos.dep"
+    # every symbol the module needs must be in this camera's autoexec.bin, or the loader refuses it
+    # the symbol file the camera's module loader reads (5D2_212.sym, t3_105.sym on the 1100D ...)
+    SYM="$OUT/ML/modules/$(cd "$SRC/platform/$PLAT/build" && ls *.sym | grep -v '^magiclantern.sym$' | head -1)"
+    [ -f "$SYM" ] || { echo "no symbol file for $PLAT in the card files"; exit 1; }
+    MISSING=$(comm -23 <(sort -u "$MOD/build/filmos.dep") <(awk '{print $2}' "$SYM" | sort -u))
+    if [ -n "$MISSING" ]; then
+        echo "the film OS module needs symbols this camera's Magic Lantern doesn't export:"; echo "$MISSING"
+        exit 1
+    fi
+    CLASH=$(comm -12 <(arm-none-eabi-readelf -sW "$MOD/build/filmos.mo" | awk '$5 == "GLOBAL" && $7 != "UND" {print $8}' | sort -u) <(awk '{print $2}' "$SYM" | sort -u))
+    if [ -n "$CLASH" ]; then
+        echo "the film OS module defines names autoexec.bin already has:"; echo "$CLASH"
+        exit 1
+    fi
+    # next to ML's own modules, in the zip's spelling (the card doesn't care, a computer unzipping it does)
+    mkdir -p "$OUT/ML/modules" "$OUT/ML/SETTINGS"
+    cp "$MOD/build/filmos.mo" "$OUT/ML/modules/filmos.mo"
+    : > "$OUT/ML/SETTINGS/filmos.en"        # enabled: ML's menu, where modules are switched on, is the film OS's
+    echo "film OS module: $(stat -c %s "$OUT/ML/modules/filmos.mo") bytes, loaded after boot"
+fi
 
 # the film OS fonts, loaded from the card after boot
 gcc -O2 -I"$HERE/filmos" -o "$HOME/ml/fontblob" "$HERE/filmos/tools/fontblob.c"
@@ -106,5 +155,5 @@ echo "== card files in $OUT =="
 (cd "$OUT" && find . -maxdepth 3 | sort | head -60)
 
 # keep the fork's source changes next to the project
-(cd "$SRC" && git add -A src/filmroll.c src/filmroll.h src/fos*.c $(ls src/fos*.h | grep -v fos_version.h) && git diff ed3e7c0df -- src platform > "$HERE/fork/film-mode.patch")
+(cd "$SRC" && git add -A src/filmroll.c src/filmroll.h src/filmhook.c src/fos*.c $(ls src/fos*.h | grep -v fos_version.h) && git diff ed3e7c0df -- src platform > "$HERE/fork/film-mode.patch")
 echo "patch: $HERE/fork/film-mode.patch"

@@ -1,26 +1,29 @@
 diff --git a/platform/100D.101/Makefile b/platform/100D.101/Makefile
-index 05832de0d..9e706a32e 100644
+index 05832de0d..6aeb6422b 100644
 --- a/platform/100D.101/Makefile
 +++ b/platform/100D.101/Makefile
 @@ -15,6 +15,7 @@ PLATFORM_ARCH = armv5te
  RESTARTSTART = 0x44C100
  ML_BOOT_OBJ = boot-d45-am.o
  ML_SRC_EXTRA_OBJS = $(BUILD_DIR)/reloc.o
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmhook.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/100D.101/features.h b/platform/100D.101/features.h
-index 18fa340fe..0a9fb2e00 100644
+index 18fa340fe..cb0f612f5 100644
 --- a/platform/100D.101/features.h
 +++ b/platform/100D.101/features.h
-@@ -12,3 +12,6 @@
+@@ -12,3 +12,9 @@
  /* Not working */
  #undef FEATURE_TRAP_FOCUS
  #undef FEATURE_MAGIC_ZOOM_FULL_SCREEN // https://bitbucket.org/hudson/magic-lantern/issues/2842
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
++
++/* film-mode fork: the film OS is a module (build_fork.sh --module) */
++#define FEATURE_FILMOS_MODULE
 diff --git a/platform/100D.101/modules.included b/platform/100D.101/modules.included
 index 8428d3c4b..a3be71e80 100644
 --- a/platform/100D.101/modules.included
@@ -34,28 +37,31 @@ index 8428d3c4b..a3be71e80 100644
  mlv_play
  mlv_snd
 diff --git a/platform/1100D.105/Makefile b/platform/1100D.105/Makefile
-index 474a5bd7b..b28492c1b 100644
+index 474a5bd7b..8063406cb 100644
 --- a/platform/1100D.105/Makefile
 +++ b/platform/1100D.105/Makefile
 @@ -21,6 +21,7 @@ RESTARTSTART = 0xC80100
  ML_BOOT_OBJ = boot-d45-am.o
  
  FIRMWARE_ID_1100D = 0x80000288
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmhook.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/1100D.105/features.h b/platform/1100D.105/features.h
-index 81cc3db68..21ccd11c0 100644
+index 81cc3db68..0c2e07e6b 100644
 --- a/platform/1100D.105/features.h
 +++ b/platform/1100D.105/features.h
-@@ -32,3 +32,6 @@
+@@ -32,3 +32,9 @@
  #undef FEATURE_FLEXINFO
  #undef FEATURE_SHOW_FREE_MEMORY
  #undef CONFIG_TSKMON
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
++
++/* film-mode fork: the film OS is a module (build_fork.sh --module) */
++#define FEATURE_FILMOS_MODULE
 diff --git a/platform/1100D.105/modules.included b/platform/1100D.105/modules.included
 index 70260051d..eb4ce352c 100644
 --- a/platform/1100D.105/modules.included
@@ -138,28 +144,31 @@ index 9412f9301..6c9da4f53 100644
  mlv_play
  pic_view
 diff --git a/platform/550D.109/Makefile b/platform/550D.109/Makefile
-index d7b8d6f03..47d22dfd0 100644
+index d7b8d6f03..b7479c3a7 100644
 --- a/platform/550D.109/Makefile
 +++ b/platform/550D.109/Makefile
 @@ -22,6 +22,7 @@ ML_BOOT_OBJ = boot-d45-am.o
  ML_PICSTYLE_AUTO = n
  
  CONFIG_LVAPP_HACK_RELOC = y
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmhook.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/550D.109/features.h b/platform/550D.109/features.h
-index fd2485377..104598425 100644
+index fd2485377..bfd9a86c8 100644
 --- a/platform/550D.109/features.h
 +++ b/platform/550D.109/features.h
-@@ -12,3 +12,6 @@
+@@ -12,3 +12,9 @@
  #undef FEATURE_LV_BUTTON_RATE_UPDOWN // Canon uses up/down in play mode
  
  #undef FEATURE_BULB_TIMER_SHOW_PREVIOUS_PIC // screen remains black
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
++
++/* film-mode fork: the film OS is a module (build_fork.sh --module) */
++#define FEATURE_FILMOS_MODULE
 diff --git a/platform/550D.109/modules.included b/platform/550D.109/modules.included
 index edc1dfbba..b8ec816ba 100644
 --- a/platform/550D.109/modules.included
@@ -299,28 +308,31 @@ index eddc7617e..6bfdee970 100644
  mlv_play
  mlv_snd
 diff --git a/platform/600D.102/Makefile b/platform/600D.102/Makefile
-index 1cd54b6a0..e1b6731bc 100644
+index 1cd54b6a0..6ef27076f 100644
 --- a/platform/600D.102/Makefile
 +++ b/platform/600D.102/Makefile
 @@ -19,6 +19,7 @@ ML_BOOT_OBJ = boot-d45-ch.o
  ML_AUDIO_OBJ = audio-lapis.o
  
  CONFIG_LVAPP_HACK_RELOC = y
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmhook.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/600D.102/features.h b/platform/600D.102/features.h
-index 7e3229a7b..ec518efec 100644
+index 7e3229a7b..16a0a2ca4 100644
 --- a/platform/600D.102/features.h
 +++ b/platform/600D.102/features.h
-@@ -17,3 +17,6 @@
+@@ -17,3 +17,9 @@
  #undef FEATURE_SHOW_EDMAC_INFO
  
  #undef CONFIG_TSKMON
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
++
++/* film-mode fork: the film OS is a module (build_fork.sh --module) */
++#define FEATURE_FILMOS_MODULE
 diff --git a/platform/600D.102/modules.included b/platform/600D.102/modules.included
 index edc1dfbba..b8ec816ba 100644
 --- a/platform/600D.102/modules.included
@@ -369,14 +381,14 @@ index edc1dfbba..b8ec816ba 100644
  mlv_play
  mlv_snd
 diff --git a/platform/650D.104/Makefile b/platform/650D.104/Makefile
-index 9e9650596..6ef6f2852 100644
+index 9e9650596..452e67a8d 100644
 --- a/platform/650D.104/Makefile
 +++ b/platform/650D.104/Makefile
 @@ -14,6 +14,7 @@ PLATFORM_ARCH = armv5te
  # RESTARTSTART is selected to be just above the end of the bss
  #
  RESTARTSTART = 0x7E100
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
  
  include  ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
@@ -439,14 +451,14 @@ index eddc7617e..6bfdee970 100644
  mlv_play
  mlv_snd
 diff --git a/platform/700D.115/Makefile b/platform/700D.115/Makefile
-index af9eb604f..373803523 100644
+index af9eb604f..0db8c8efa 100644
 --- a/platform/700D.115/Makefile
 +++ b/platform/700D.115/Makefile
 @@ -15,6 +15,7 @@ PLATFORM_ARCH = armv5te
  #
  MAIN_FIRMWARE_ADDR = 0xFF0C0000
  RESTARTSTART = 0x7EC00
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
@@ -474,28 +486,31 @@ index 8428d3c4b..a3be71e80 100644
  mlv_play
  mlv_snd
 diff --git a/platform/70D.112/Makefile b/platform/70D.112/Makefile
-index 508e2c952..46950f467 100644
+index 508e2c952..e2ec59b3e 100644
 --- a/platform/70D.112/Makefile
 +++ b/platform/70D.112/Makefile
 @@ -20,6 +20,7 @@ ML_BITRATE_OBJ = bitrate-5d3.o
  # default 0x44C000 - 0xD3C000, patched to 0x4E0000 - 0xD3C000 (592K for us).
  RESTARTSTART = 0x44C100
  ML_BOOT_OBJ = boot-d45-am.o
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmhook.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/70D.112/features.h b/platform/70D.112/features.h
-index 5095eea7d..7db47a65b 100644
+index 5095eea7d..e3daf04a3 100644
 --- a/platform/70D.112/features.h
 +++ b/platform/70D.112/features.h
-@@ -33,3 +33,6 @@
+@@ -33,3 +33,9 @@
  /* Audio Features */
  #define FEATURE_AUDIO_METERS
  #define FEATURE_AUDIO_REMOTE_SHOT
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
++
++/* film-mode fork: the film OS is a module (build_fork.sh --module) */
++#define FEATURE_FILMOS_MODULE
 diff --git a/platform/70D.112/modules.included b/platform/70D.112/modules.included
 index eddc7617e..6bfdee970 100644
 --- a/platform/70D.112/modules.included
@@ -508,51 +523,16 @@ index eddc7617e..6bfdee970 100644
  mlv_lite
  mlv_play
  mlv_snd
-diff --git a/platform/7D.203/Makefile b/platform/7D.203/Makefile
-index 01a525ba4..eb4f9e8e0 100644
---- a/platform/7D.203/Makefile
-+++ b/platform/7D.203/Makefile
-@@ -1,6 +1,7 @@
- #Makefile for 7D
- 
- MODEL=7D
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
- 
- include ../Makefile
- 
-diff --git a/platform/7D.203/features.h b/platform/7D.203/features.h
-index 2b37c0834..01b8ecc0b 100644
---- a/platform/7D.203/features.h
-+++ b/platform/7D.203/features.h
-@@ -19,3 +19,6 @@
- #define FEATURE_AUDIO_REMOTE_SHOT
- 
- #undef FEATURE_VIGNETTING_CORRECTION // requires master code
-+
-+/* film camera mode (src/filmroll.c) */
-+#define FEATURE_FILMROLL
-diff --git a/platform/7D.203/modules.included b/platform/7D.203/modules.included
-index eddc7617e..6bfdee970 100644
---- a/platform/7D.203/modules.included
-+++ b/platform/7D.203/modules.included
-@@ -11,7 +11,6 @@ edmac
- ettr
- file_man
- img_name
--lua
- mlv_lite
- mlv_play
- mlv_snd
 diff --git a/platform/EOSM.202/Makefile b/platform/EOSM.202/Makefile
-index 7e11d12a2..cc4932423 100644
+index 7e11d12a2..be468805c 100644
 --- a/platform/EOSM.202/Makefile
 +++ b/platform/EOSM.202/Makefile
-@@ -19,5 +19,7 @@ RESTARTSTART = 0x9E1E0
+@@ -18,6 +18,7 @@ PLATFORM_ARCH = armv5te
+ RESTARTSTART = 0x9E1E0
  
  ML_AF_PATTERNS_OBJ = n
- 
 +ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
-+
+ 
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/EOSM.202/features.h b/platform/EOSM.202/features.h
@@ -595,12 +575,51 @@ index 2201e76c7..01865665a 100755
      /* R0: 0x44C000 (start address, easier to patch, change to 0x4E0000 => reserve 592K for ML) */
      /* R1: 0xD3C000 [6D, 70D] / 0xC3C000 [100D] (end address, unchanged) */
      addr_AllocMem_end[1] = MOV_R0_0x4E0000_INSTR;
+diff --git a/src/filmhook.c b/src/filmhook.c
+new file mode 100644
+index 000000000..3c74011d1
+--- /dev/null
++++ b/src/filmhook.c
+@@ -0,0 +1,33 @@
++/* The film OS as a module (build_fork.sh --module): all that stays in
++ * autoexec.bin. The film OS itself (filmroll.c, fos_*.c) is ML/modules/filmos.mo,
++ * loaded after boot into Canon's memory, so it doesn't count against what the
++ * camera can spare at power on (MEMORY.md).
++ *
++ * These are the three calls ML's core makes into the film OS. Each goes to
++ * the module once it is loaded; without it (missing, failed to load, or ML
++ * skipped loading modules after a crash) they answer as if there were no
++ * film OS, so the camera still has Magic Lantern's own menu. */
++
++#include <dryos.h>
++#include <module.h>
++#include "filmroll.h"
++
++/* defined in the module (filmroll.c); 0 until it is loaded */
++static int (*filmos_key_used)(struct event *event) = MODULE_FUNCTION(filmos_key_used);
++static int (*filmos_menu_open)(void)               = MODULE_FUNCTION(filmos_menu_open);
++static int (*filmos_overlays)(void)                = MODULE_FUNCTION(filmos_overlays);
++
++int handle_filmroll_keys(struct event *event)
++{
++    return filmos_key_used(event) ? 0 : 1;
++}
++
++int filmroll_menu_requested()
++{
++    return filmos_menu_open();
++}
++
++int filmroll_overlays_active()
++{
++    return filmos_overlays();
++}
 diff --git a/src/filmroll.c b/src/filmroll.c
 new file mode 100644
-index 000000000..642db0176
+index 000000000..7812c702a
 --- /dev/null
 +++ b/src/filmroll.c
-@@ -0,0 +1,1469 @@
+@@ -0,0 +1,1498 @@
 +/* filmroll: a Canon camera as a film camera (built into this ML fork).
 + * Made on the EOS M; 100D, 650D, 700D and others build from the same code.
 + *
@@ -629,6 +648,15 @@ index 000000000..642db0176
 + * logged even in burst mode.
 + */
 +
++#ifdef MODULE
++/* ML/modules/filmos.mo is built for one camera (fork/module/Makefile), so it
++ * takes that camera's definitions, as autoexec.bin does */
++#include "internals.h"
++#include "internals-common.h"
++#include "features.h"
++#include "consts.h"
++#include "gui.h"        /* ahead of dryos.h's gui-common.h, as in autoexec.bin */
++#endif
 +#include <dryos.h>
 +#include <module.h>
 +#include <property.h>
@@ -647,6 +675,13 @@ index 000000000..642db0176
 +#include <tasks.h>
 +#include <mem.h>
 +#include <powersave.h>
++#ifdef MODULE
++/* built as ML/modules/filmos.mo (build_fork.sh --module): the core keeps
++ * these three names for its shim (filmhook.c), the module's own go by others */
++#define handle_filmroll_keys     fr_handle_keys
++#define filmroll_menu_requested  fr_menu_requested
++#define filmroll_overlays_active fr_overlays_active
++#endif
 +#include "filmroll.h"
 +#include "fos.h"
 +#include "fos_dev.h"
@@ -1928,11 +1963,20 @@ index 000000000..642db0176
 +
 +/* ---------------------------------------------------------------- the ML menu, replaced */
 +
++#ifdef MODULE
++int filmroll_menu_requested()
++{
++    if (shooting_screen())
++        open_ui(FOS_OPEN_HOME);
++    return 1;
++}
++#else
 +void filmroll_menu_requested()
 +{
 +    if (shooting_screen())
 +        open_ui(FOS_OPEN_HOME);
 +}
++#endif
 +
 +static void filmroll_init()
 +{
@@ -2068,14 +2112,18 @@ index 000000000..642db0176
 +    }
 +}
 +
++#ifndef MODULE
 +INIT_FUNC("filmroll", filmroll_init);
 +TASK_CREATE("film_main", filmroll_task, 0, 0x1e, 0x2000);
++#else
++#include "filmos_mod.h"
++#endif
 diff --git a/src/filmroll.h b/src/filmroll.h
 new file mode 100644
-index 000000000..f43cb73ad
+index 000000000..c465a6cd1
 --- /dev/null
 +++ b/src/filmroll.h
-@@ -0,0 +1,16 @@
+@@ -0,0 +1,22 @@
 +#ifndef _filmroll_h_
 +#define _filmroll_h_
 +
@@ -2084,8 +2132,14 @@ index 000000000..f43cb73ad
 +/* button hook, called from handle_common_events_by_feature; 0 = handled */
 +int handle_filmroll_keys(struct event *event);
 +
-+/* called instead of opening the Magic Lantern menu (menu.c) */
++/* called instead of opening the Magic Lantern menu (menu.c). With the film OS
++ * as a module (FEATURE_FILMOS_MODULE): 1 = it took it, 0 = open ML's menu as
++ * usual (the module isn't loaded) */
++#if defined(FEATURE_FILMOS_MODULE) || defined(MODULE)
++int filmroll_menu_requested();
++#else
 +void filmroll_menu_requested();
++#endif
 +
 +/* ML's own LiveView overlays stay out of the way of the film OS and the
 + * viewfinder HUD (always, in this fork) */
@@ -17110,7 +17164,7 @@ index 992e8f692..13f631291 100644
      if (handle_flexinfo_keys(event) == 0) return 0;
  
 diff --git a/src/menu.c b/src/menu.c
-index a83f43e1b..57405de9d 100755
+index a83f43e1b..a139f9128 100755
 --- a/src/menu.c
 +++ b/src/menu.c
 @@ -39,6 +39,7 @@
@@ -17121,13 +17175,18 @@ index a83f43e1b..57405de9d 100755
  
  #define CONFIG_MENU_ICONS
  //~ #define CONFIG_MENU_DIM_HACKS
-@@ -5648,6 +5649,10 @@ static void close_canon_menu()
+@@ -5648,6 +5649,15 @@ static void close_canon_menu()
  
  static void menu_open() 
  { 
 +#ifdef FEATURE_FILMROLL
++#ifdef FEATURE_FILMOS_MODULE
++    if (filmroll_menu_requested())      /* 0: the module isn't loaded, ML's menu opens */
++        return;
++#else
 +    filmroll_menu_requested();
 +    return;
++#endif
 +#endif
      if (menu_shown)
          return;
