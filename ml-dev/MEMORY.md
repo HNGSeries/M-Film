@@ -62,6 +62,10 @@ Enzo-Reveillon left 19 Magic Lantern features M-Film doesn't use out of it (zebr
 FPS override and the like; `LEAN_FEATURES` in fork/apply_fork.py) and his 5D Mark II starts at 705,792 bytes
 with the in-camera darkroom. The fork does the same for it (`LEAN`): 706,048 bytes at boot with today's code.
 
+The same cut doesn't build on the 650D (ML there needs FPS_OVERRIDE, FPS_RAMPING and FOCUS_PEAK). Without those
+three, a lean 650D with the darkroom takes 718,336 bytes: under the EOS M's 727,072, but above the 689,664 known
+to start on a 650D. Worth a tester's try before it replaces the no-darkroom release.
+
 ## What would fix the fixed ones
 
 The same as the 6D: give Magic Lantern a bigger slice of the pool at boot, and check that Canon keeps enough.
