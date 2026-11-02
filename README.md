@@ -160,7 +160,7 @@ still wrong. If you have one marked *needs a tester*, you can help: [TESTING.md]
 | Canon EOS 5D Mark III (firmware 1.2.3) | 1.2.3 | ⚠️ Tried, known problem | Starts and shoots; the in-camera darkroom can't find the RAWs ([#16](../../issues/16), [#37](../../issues/37)). Fixed in the next update. | `M-Film-camera-5D3.123.zip` |
 | Canon EOS 550D / Rebel T2i / Kiss X4 | 1.0.9 | 🔧 Too big for its boot memory: being fixed |  |  |
 | Canon EOS 600D / Rebel T3i / Kiss X5 | 1.0.2 | 🔧 Too big for its boot memory: being fixed |  |  |
-| Canon EOS 60D | 1.1.1 | ⚠️ Tried, known problem | Starts, shoots and develops; the prints come out magenta ([#25](../../issues/25)). Being fixed. | `M-Film-camera-60D.111.zip` |
+| Canon EOS 60D | 1.1.1 | ⚠️ Tried, known problem | Starts, shoots and develops; the prints come out magenta ([#25](../../issues/25)). Fixed in the next update. | `M-Film-camera-60D.111.zip` |
 | Canon EOS 1100D / Rebel T3 / Kiss X50 | 1.0.5 | 🔧 Too big for its boot memory: being fixed |  |  |
 | Canon EOS 500D / Rebel T1i / Kiss X3 | 1.1.1 | 🧪 Builds, needs a tester |  | `M-Film-camera-500D.111.zip` |
 | Canon EOS 50D | 1.0.9 | 🧪 Builds, needs a tester |  | `M-Film-camera-50D.109.zip` |
