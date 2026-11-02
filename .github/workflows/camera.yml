@@ -31,6 +31,9 @@ jobs:
         platform: [EOSM.202, 650D.104, 700D.115, 6D.116, 5D3.113, 5D3.123, 60D.111, 500D.111, 50D.109, 5D2.212]  # from ml-dev/cameras.txt
     runs-on: ubuntu-24.04
     name: camera ${{ matrix.platform }}
+    env:
+      # built and released without the in-camera darkroom: the full build doesn't fit at boot (cameras.txt)
+      NODARK: "650D.104 700D.115"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -45,11 +48,14 @@ jobs:
           git -C "$HOME/ml/magiclantern_simplified" checkout -q ed3e7c0dfacfdeaf3349dee73edf9e3621217462
           arm-none-eabi-gcc --version | head -1
       - name: Build
-        run: bash ml-dev/build_fork.sh ${{ matrix.platform }}
+        run: |
+          p=${{ matrix.platform }}
+          case " $NODARK " in *" $p "*) bash ml-dev/build_fork.sh $p --no-darkroom ;; *) bash ml-dev/build_fork.sh $p ;; esac
       - name: Zip
         run: |
           p=${{ matrix.platform }}
           if [ "$p" = EOSM.202 ]; then d=ml-dev/out/fork; else d=ml-dev/out/fork-$p; fi
+          case " $NODARK " in *" $p "*) d=ml-dev/out/fork-$p-nodark ;; esac
           cp ml-dev/CAMERA-README.txt "$d/M-FILM-README.txt"
           # the licence and the notices travel with the binaries (GPL-2.0 section 1; the MIT notice of
           # Film-Luts, whose LUTs the colour tables and samples in ML/ are made from)
@@ -132,3 +138,5 @@ jobs:
             **On the camera** (`M-Film-camera-<camera>.zip`): the Film OS with Magic Lantern. Unzip it onto the card
             and run *Firmware ver.* → update once (see M-FILM-README.txt in the zip). The EOS M build is tried on
             the camera; the others build but nobody has tried them yet: see TESTING.md before you put one on your camera.
+            The 650D and 700D builds have no in-camera darkroom (the full one is too big for them at boot):
+            develop their rolls with Darkrooms on a computer.

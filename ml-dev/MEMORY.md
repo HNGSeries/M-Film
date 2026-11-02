@@ -25,14 +25,14 @@ stops at power on and blinks the card light **3 long, 3 short, a pause**, foreve
 | Camera | Boot method | Limit (bytes) | Full build | No darkroom | Verdict |
 |---|---|---|---|---|---|
 | EOS M | sized to fit | 727,072 (found on the camera) | 715,552 | | ✅ works |
-| 650D | sized to fit | unknown | 743,680 | | ⚠️ above the EOS M's limit: try it |
-| 700D | sized to fit | unknown | 743,936 | | ⚠️ above the EOS M's limit: try it |
+| 650D | sized to fit | at least 689,664 (no darkroom starts) | 743,680 (black screen) | 689,664 | ✅ starts without the darkroom: released that way |
+| 700D | sized to fit | unknown | 743,936 (black screen, #19) | | 🧪 released without the darkroom, as the 650D |
 | 5D Mark III 1.1.3 | sized to fit | unknown | 737,536 | | try it |
 | 5D Mark III 1.2.3 | sized to fit | unknown | 733,440 | | try it |
 | 60D | sized to fit | unknown | 740,096 | | ✅ a tester's 60D starts (#3) |
 | 500D | sized to fit | unknown | 734,208 | | try it |
 | 50D | sized to fit | unknown | 716,032 | | try it |
-| 5D Mark II | sized to fit | unknown | 749,824 | | try it |
+| 5D Mark II | sized to fit | unknown: 705,792 starts (#18), 749,824 hangs | 756,992 (hangs); lean 706,048 | | 🧪 released lean (features left out, darkroom kept) |
 | 6D | fixed, raised by the fork | 868,096 (848K) | 740,864 | | ✅ starts (#3, #8) |
 | 100D | fixed | 605,952 (592K) | 741,888 | 684,288 | 🔧 too big, even without the darkroom |
 | 70D | fixed | 605,952 (592K) | 690,432 | 632,832 | 🔧 too big, even without the darkroom |
@@ -51,6 +51,20 @@ Where the fixed limits come from (`src/boot-d45-am.c`, `src/boot-d45-ch.c`):
 The sized-to-fit rows have no limit because nothing fixes one. The EOS M is built on the 650D and 700D, so a
 650D or 700D above its 727K may hang the same way. Their testers should be told to watch for a card light
 that stays on.
+
+That is what happened: the full 650D and 700D builds give a black screen at power on (a 650D tester by message,
+the 700D in #19). The 650D tester built it `--no-darkroom` (689,664 bytes at boot) and it starts with the film
+interface. So both are `nodark` in cameras.txt: CI builds and releases them without the darkroom, under the
+usual zip name. Their rolls are developed with Darkrooms.
+
+The 5D Mark II hangs at power on, or when the shutter is pressed, with the full build (#18, #20, #27, #32).
+Enzo-Reveillon left 19 Magic Lantern features M-Film doesn't use out of it (zebras, focus peaking, waveform,
+FPS override and the like; `LEAN_FEATURES` in fork/apply_fork.py) and his 5D Mark II starts at 705,792 bytes
+with the in-camera darkroom. The fork does the same for it (`LEAN`): 706,048 bytes at boot with today's code.
+
+The same cut doesn't build on the 650D (ML there needs FPS_OVERRIDE, FPS_RAMPING and FOCUS_PEAK). Without those
+three, a lean 650D with the darkroom takes 718,336 bytes: under the EOS M's 727,072, but above the 689,664 known
+to start on a 650D. Worth a tester's try before it replaces the no-darkroom release.
 
 ## What would fix the fixed ones
 

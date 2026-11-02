@@ -14,7 +14,7 @@ The camera side is free and open, for everyone.
 [![Buy the developer a coffee](https://img.shields.io/badge/Buy%20the%20developer%20a%20coffee-ffdd00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buy.stripe.com/7sY14p8d93QE5Ny5M58so02)
 
 [![License GPL-2.0](https://img.shields.io/badge/license-GPL--2.0-3b352f)](LICENSE)
-[![Cameras](https://img.shields.io/badge/cameras-1%20works%20%C2%B7%209%20in%20testing-3b352f)](#cameras)
+[![Cameras](https://img.shields.io/badge/cameras-2%20work%20%C2%B7%206%20with%20a%20problem%20%C2%B7%202%20in%20testing-3b352f)](#cameras)
 [![Films](https://img.shields.io/badge/films-72-3b352f)](FILMS.md)
 
 **English** · [ภาษาไทย](README.th.md) · [Films](#72-films) · [Cameras](#cameras) · [Darkrooms](#develop-on-your-computer-darkrooms) · [Take it further](PORTING.md)
@@ -144,27 +144,27 @@ from M-Film's own film models ([`ml-dev/films/films.py`](ml-dev/films/films.py))
 ## Cameras
 
 M-Film was made on the EOS M, where it works. It now builds for every camera on which Magic Lantern
-itself is mature (DIGIC 4 and 5), but those builds **haven't been tried on a camera yet**. If you have
-one of them, you can help: [TESTING.md](TESTING.md) says how (about 20 minutes, and you can always go back).
+itself is mature (DIGIC 4 and 5). Testers have tried most of them now: the table says how far each one got, and what's
+still wrong. If you have one marked *needs a tester*, you can help: [TESTING.md](TESTING.md) says how (about 20 minutes, and you can always go back).
 
 <!-- cameras:start -->
-| Camera | Canon firmware | Status | Card files |
-|---|---|---|---|
-| Canon EOS M | 2.0.2 | ✅ **Works** | `M-Film-camera-EOSM.202.zip` |
-| Canon EOS 100D / Rebel SL1 / Kiss X7 | 1.0.1 | 🔧 Too big for its boot memory: being fixed |  |
-| Canon EOS 650D / Rebel T4i / Kiss X6i | 1.0.4 | 🧪 Builds, needs a tester | `M-Film-camera-650D.104.zip` |
-| Canon EOS 700D / Rebel T5i / Kiss X7i | 1.1.5 | 🧪 Builds, needs a tester | `M-Film-camera-700D.115.zip` |
-| Canon EOS 6D | 1.1.6 | 🧪 Builds, needs a tester | `M-Film-camera-6D.116.zip` |
-| Canon EOS 70D | 1.1.2 | 🔧 Too big for its boot memory: being fixed |  |
-| Canon EOS 5D Mark III (firmware 1.1.3) | 1.1.3 | 🧪 Builds, needs a tester | `M-Film-camera-5D3.113.zip` |
-| Canon EOS 5D Mark III (firmware 1.2.3) | 1.2.3 | 🧪 Builds, needs a tester | `M-Film-camera-5D3.123.zip` |
-| Canon EOS 550D / Rebel T2i / Kiss X4 | 1.0.9 | 🔧 Too big for its boot memory: being fixed |  |
-| Canon EOS 600D / Rebel T3i / Kiss X5 | 1.0.2 | 🔧 Too big for its boot memory: being fixed |  |
-| Canon EOS 60D | 1.1.1 | 🧪 Builds, needs a tester | `M-Film-camera-60D.111.zip` |
-| Canon EOS 1100D / Rebel T3 / Kiss X50 | 1.0.5 | 🔧 Too big for its boot memory: being fixed |  |
-| Canon EOS 500D / Rebel T1i / Kiss X3 | 1.1.1 | 🧪 Builds, needs a tester | `M-Film-camera-500D.111.zip` |
-| Canon EOS 50D | 1.0.9 | 🧪 Builds, needs a tester | `M-Film-camera-50D.109.zip` |
-| Canon EOS 5D Mark II | 2.1.2 | 🧪 Builds, needs a tester | `M-Film-camera-5D2.212.zip` |
+| Camera | Canon firmware | Status | Notes | Card files |
+|---|---|---|---|---|
+| Canon EOS M | 2.0.2 | ✅ **Works** |  | `M-Film-camera-EOSM.202.zip` |
+| Canon EOS 100D / Rebel SL1 / Kiss X7 | 1.0.1 | 🔧 Too big for its boot memory: being fixed |  |  |
+| Canon EOS 650D / Rebel T4i / Kiss X6i | 1.0.4 | ⚠️ Without the in-camera darkroom (develop with Darkrooms) | The full build gives a black screen ([#34](../../issues/34)); a tester's 650D starts without the darkroom. Released that way since 0.1.3: develop on a computer. | `M-Film-camera-650D.104.zip` |
+| Canon EOS 700D / Rebel T5i / Kiss X7i | 1.1.5 | ⚠️ Without the in-camera darkroom (develop with Darkrooms) | The full build gives a black screen ([#19](../../issues/19)). Released without the darkroom since 0.1.3, as for the 650D: waiting for a tester. | `M-Film-camera-700D.115.zip` |
+| Canon EOS 6D | 1.1.6 | ✅ **Works** | Works since 0.1.2 ([#17](../../issues/17), [#22](../../issues/22)). | `M-Film-camera-6D.116.zip` |
+| Canon EOS 70D | 1.1.2 | 🔧 Too big for its boot memory: being fixed |  |  |
+| Canon EOS 5D Mark III (firmware 1.1.3) | 1.1.3 | ⚠️ Tried, known problem | Starts and shoots; the in-camera darkroom couldn't find the RAWs ([#31](../../issues/31)): fixed in 0.1.3. | `M-Film-camera-5D3.113.zip` |
+| Canon EOS 5D Mark III (firmware 1.2.3) | 1.2.3 | ⚠️ Tried, known problem | Starts and shoots; the in-camera darkroom couldn't find the RAWs ([#16](../../issues/16), [#37](../../issues/37)): fixed in 0.1.3. | `M-Film-camera-5D3.123.zip` |
+| Canon EOS 550D / Rebel T2i / Kiss X4 | 1.0.9 | 🔧 Too big for its boot memory: being fixed |  |  |
+| Canon EOS 600D / Rebel T3i / Kiss X5 | 1.0.2 | 🔧 Too big for its boot memory: being fixed |  |  |
+| Canon EOS 60D | 1.1.1 | ⚠️ Tried, known problem | Starts, shoots and develops; the prints came out magenta ([#25](../../issues/25)): fixed in 0.1.3. | `M-Film-camera-60D.111.zip` |
+| Canon EOS 1100D / Rebel T3 / Kiss X50 | 1.0.5 | 🔧 Too big for its boot memory: being fixed |  |  |
+| Canon EOS 500D / Rebel T1i / Kiss X3 | 1.1.1 | 🧪 Builds, needs a tester |  | `M-Film-camera-500D.111.zip` |
+| Canon EOS 50D | 1.0.9 | 🧪 Builds, needs a tester |  | `M-Film-camera-50D.109.zip` |
+| Canon EOS 5D Mark II | 2.1.2 | ⚠️ Tried, known problem | Most hang at power on: the build is too big at start-up ([#18](../../issues/18)). 0.1.3 has a smaller one (some Magic Lantern features left out, the darkroom kept) and fixes the pink prints: waiting for testers. | `M-Film-camera-5D2.212.zip` |
 
 **Not yet:** 7D (Magic Lantern's current source doesn't build it) · 200D, 750D, 77D, 80D, 7D Mark II, 5D Mark IV, 5DS R, 6D Mark II, 850D, M50, R, RP, R5, R6, SX70 HS, SX740 HS (Magic Lantern itself is still experimental on these).
 <!-- cameras:end -->

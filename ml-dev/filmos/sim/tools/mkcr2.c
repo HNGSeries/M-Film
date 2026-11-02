@@ -224,7 +224,10 @@ static void expose(int portrait, double ev)
                     for (int j = 0; j < 3; j++) cam[i] += cam_rgb[i][j] * lin[j];
                     cam[i] /= pre_mul[i];
                 }
-                int c = (y & 1) * 2 + (x & 1);        /* RGGB */
+                /* RGGB from the picture's top left, as LibRaw has every
+                 * Canon here: on a sensor whose picture starts on an odd
+                 * row (5D Mark II, 60D, 50D: 51) the red rows are the odd ones */
+                int c = ((y - CROP_T) & 1) * 2 + ((x - CROP_L) & 1);
                 double e = (c == 0 ? cam[0] : c == 3 ? cam[2] : cam[1]) / 0.18 * gain;
                 if (e < 0) e = 0;
                 val = e + sqrt(e + 1) * 0.6 * gauss();

@@ -1085,20 +1085,35 @@ static void hud_step()
      * does, and wipe what it left. Canon gets the screen back as soon as ours
      * goes (a Canon menu, playback, the display off). The film OS's own pages
      * take the buffer themselves (film_ui_open). */
-    static int canon_held = 0;
-    if (visible && !canon_held)
+    /* Canon's screen comes back only once ours has been gone a moment: the
+     * display isn't idle for a blink while a frame is taken, and giving the
+     * screen back then (and taking it again) flashed Canon's screen, and its
+     * picture of the frame, over ours (#17). The film OS's pages take the
+     * screen at once, and so does anything that isn't a blink. */
+    static int canon_held = 0, gone_since = 0;
+    if (visible)
     {
-        canon_gui_disable_front_buffer();
-        clrscr();
-        canon_held = 1;
-        hud_dirty = 1;
-        dbg("hud: Canon's screen held");
+        gone_since = 0;
+        if (!canon_held)
+        {
+            canon_gui_disable_front_buffer();
+            clrscr();
+            canon_held = 1;
+            hud_dirty = 1;
+            dbg("hud: Canon's screen held");
+        }
     }
-    else if (!visible && canon_held)
+    else if (canon_held)
     {
-        canon_held = 0;
-        if (!ui_running) canon_gui_enable_front_buffer(1);
-        dbg("hud: Canon's screen given back%s", ui_running ? " (to the film OS)" : "");
+        int now = get_ms_clock();
+        if (!gone_since) gone_since = now ? now : 1;
+        if (ui_running || now - gone_since > 700)
+        {
+            canon_held = 0;
+            gone_since = 0;
+            if (!ui_running) canon_gui_enable_front_buffer(1);
+            dbg("hud: Canon's screen given back%s", ui_running ? " (to the film OS)" : "");
+        }
     }
 #endif
 

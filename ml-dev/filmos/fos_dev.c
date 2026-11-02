@@ -354,6 +354,7 @@ struct fos_dev
 
     /* the raw */
     int raw_w, raw_h, orient;
+    int rphase;                         /* 1: the mosaic's red rows are the odd ones, see row_phase() */
     int crop_l, crop_t, crop_w, crop_h, ob_l, ob_r;
     int slices[3];
     int clrs, wide, high, bits, psv;
@@ -403,6 +404,27 @@ struct fos_dev
     int16_t *err_rows;
     uint8_t *idx;
 };
+
+/* Which raw rows are red-green: LibRaw has every Canon here RGGB from the
+ * top left of the picture, and on these sensors the picture starts on raw
+ * row 51 (LibRaw's identify.cpp, the canon[] table), so their red rows are
+ * the odd ones; the others start on an even row (EOS M, 650D, 700D, 100D 52;
+ * 6D, 70D 38; 5D Mark III 80; 500D 26; 1100D 18). Every left edge is even.
+ * Read as even ones, a picture's colours came out pink or magenta (5D Mark II
+ * #18, 60D #25). By the sensor's size, so a CR2 from any camera develops
+ * right on any build. */
+static int row_phase(int raw_w, int raw_h)
+{
+    static const uint16_t odd[][2] = {
+        { 5792, 3804 },     /* 5D Mark II */
+        { 5344, 3516 },     /* 550D, 600D, 60D */
+        { 5360, 3516 },     /* 7D */
+        { 4832, 3228 },     /* 50D */
+    };
+    for (unsigned i = 0; i < sizeof(odd) / sizeof(odd[0]); i++)
+        if (raw_w == odd[i][0] && raw_h == odd[i][1]) return 1;
+    return 0;
+}
 
 /* The sensor's colours, XYZ -> camera, and its white level: LibRaw's
  * colordata.cpp (the Adobe matrices), per camera the fork is built for.
@@ -707,6 +729,7 @@ static int setup_maps(struct fos_dev *d)
         d->ob_l = 0; d->ob_r = d->crop_l - 1;
     }
     if (d->ob_r > d->crop_l - 20) d->ob_r = d->crop_l - 20;
+    d->rphase = row_phase(d->raw_w, d->raw_h);
     int portrait = d->orient == 6 || d->orient == 8;
     d->rows_axis_x = portrait;
     d->oh = FOS_PRINT_H;
@@ -739,7 +762,7 @@ static int setup_maps(struct fos_dev *d)
         if (a < 0 || a >= d->crop_h) { d->rowoff[y] = OUT; continue; }
         int o = (int) ((long) a * rlen / d->crop_h);
         if (rflip) o = rlen - 1 - o;
-        if (y & 1) d->no_r[o]++; else d->ne_r[o]++;
+        if ((y ^ d->rphase) & 1) d->no_r[o]++; else d->ne_r[o]++;
         d->rowoff[y] = 3 * (portrait ? d->ox0 + o : o * FOS_PRINT_W);
     }
     /* raw columns: segment k of them (in raw order) makes print line o */
@@ -1103,6 +1126,7 @@ static __attribute__((noinline)) void scatter(struct fos_dev *d, const uint16_t 
     const int pic0 = d->crop_l, pic1 = d->crop_l + d->crop_w;
     const uint8_t *desc = d->seg_desc;
     int sx = d->sx, sy = d->sy, sw = d->sw, sx0 = d->sx0;
+    const int rphase = d->rphase;
     int64_t black_sum = d->black_sum;
     long black_n = d->black_n;
     while (n > 0)
@@ -1121,10 +1145,10 @@ static __attribute__((noinline)) void scatter(struct fos_dev *d, const uint16_t 
                 if (colob[x]) { black_sum += src[x - x0]; black_n++; }
             if (pa < pb)
             {
-                /* sample of raw column x at at[x]; RGGB at the sensor's top
-                 * left: the even columns' colour, then the odd ones' */
+                /* sample of raw column x at at[x]; RG rows then GB rows
+                 * (row_phase), the even columns' colour then the odd ones' */
                 const uint16_t *at = src - x0;
-                uint32_t *row = sums + ro + (sy & 1);
+                uint32_t *row = sums + ro + ((sy ^ rphase) & 1);
                 /* the segments it touches, and those it has whole (a row
                  * of the picture is in two of Canon's slices) */
                 int k0 = seg_of[pa], k1 = seg_of[pb - 1] + 1;
