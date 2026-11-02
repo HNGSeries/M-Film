@@ -58,13 +58,13 @@ edit("src/zebra.c",
      '#include "zebra.h"\n#include "filmroll.h"\n',
      '#include "filmroll.h"')
 
-# the Magic Lantern menu never opens: whatever asks for it (buttons,
-# modules, scripts) gets the film OS home instead
+# the Magic Lantern menu never opens while shooting stills: whatever asks
+# for it (buttons, modules, scripts) gets the film OS home instead. Movie
+# mode has no film OS, so there the Magic Lantern menu opens as usual.
 edit("src/menu.c",
      "static void menu_open() \n{ \n    if (menu_shown)\n        return;\n",
      "static void menu_open() \n{ \n#ifdef FEATURE_FILMROLL\n"
-     "    filmroll_menu_requested();\n"
-     "    return;\n"
+     "    if (filmroll_menu_requested()) return;\n"
      "#endif\n"
      "    if (menu_shown)\n        return;\n",
      "filmroll_menu_requested")
@@ -72,6 +72,21 @@ edit("src/menu.c",
      '#include "powersave.h"\n',
      '#include "powersave.h"\n#include "filmroll.h"\n',
      '#include "filmroll.h"')
+
+# A checkout patched by the older fork still swallows the menu everywhere
+# (it called filmroll_menu_requested() and always returned). Let the menu
+# open in movie mode, so running this script again upgrades that tree.
+p = root / "src/menu.c"
+old_menu = ("#ifdef FEATURE_FILMROLL\n"
+            "    filmroll_menu_requested();\n"
+            "    return;\n"
+            "#endif\n")
+new_menu = ("#ifdef FEATURE_FILMROLL\n"
+            "    if (filmroll_menu_requested()) return;\n"
+            "#endif\n")
+if old_menu in p.read_text():
+    p.write_text(p.read_text().replace(old_menu, new_menu, 1))
+    print("  src/menu.c: Magic Lantern menu restored in movie mode (upgraded older fork)")
 
 # lua doesn't build with this toolchain (newlib header clash) and isn't needed
 edit("modules/Makefile",

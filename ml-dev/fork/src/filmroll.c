@@ -7,8 +7,10 @@
  *
  *  - the film OS is the camera's own interface: the film shelf at start
  *    up, home and its settings pages instead of the Magic Lantern menu.
- *    The ML menu is gone: what used to open it (two-finger tap, long
- *    press on DOWN, modules) opens home.
+ *    While shooting stills the ML menu is gone: what used to open it
+ *    (two-finger tap, long press on DOWN, modules) opens home. In movie
+ *    mode there is no film OS, so the Magic Lantern menu and its
+ *    LiveView overlays are Magic Lantern's again.
  *  - an SLR-viewfinder HUD in LiveView: aperture scale with meter needle,
  *    red LED readout that lights on half-shutter, frame counter, wind
  *  - PLAY opens the prints the camera has developed, never Canon's
@@ -984,11 +986,12 @@ static int plate_visible()
         && !is_movie_mode() && !ui_running;
 }
 
-/* Magic Lantern's own LiveView overlays never draw: the film OS (or
- * Canon's clean screen) is all you see */
+/* Magic Lantern's own LiveView overlays step aside for the film OS (or
+ * Canon's clean screen) while shooting stills. In movie mode there is no
+ * film OS, so zebras, peaking and the rest are Magic Lantern's again. */
 int filmroll_overlays_active()
 {
-    return 1;
+    return !is_movie_mode();
 }
 
 /* the HUD draws with Canon's palette */
@@ -1204,6 +1207,11 @@ static int ui_key(struct event *event, int key)
 
 static unsigned int lv_key(unsigned int key)
 {
+    /* movie mode belongs to Magic Lantern and Canon: the film OS stays out
+     * of its menu, its keys and its screen */
+    if (is_movie_mode())
+        return 1;
+
     /* what used to open the Magic Lantern menu opens home instead */
     if (key == MODULE_KEY_TRASH || key == MODULE_KEY_TOUCH_2_FINGER)
     {
@@ -1310,10 +1318,16 @@ int handle_filmroll_keys(struct event *event)
 
 /* ---------------------------------------------------------------- the ML menu, replaced */
 
-void filmroll_menu_requested()
+/* The film OS owns the menu while shooting stills. Movie mode has no film
+ * OS, so it hands the menu back to Magic Lantern (0 = let it open). */
+int filmroll_menu_requested()
 {
+    if (is_movie_mode())
+        return 0;
+
     if (shooting_screen())
         open_ui(FOS_OPEN_HOME);
+    return 1;
 }
 
 static void filmroll_init()

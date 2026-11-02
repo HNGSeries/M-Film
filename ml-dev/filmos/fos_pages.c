@@ -913,6 +913,19 @@ void roll_enter(int arg)
     sheet.x = 0; sheet.v = 0;
     rewinding = 0;
     roll_bake();
+
+    /* Basic mode: a finished roll goes straight to the darkroom, with no
+     * end-of-roll sheet to answer (the same as pressing SET on it) */
+    if (asking_rewind && !ui_realistic())
+    {
+        asking_rewind = 0;
+        rewinding = 1;
+        rewind_t = 1500;                    /* Basic: no rewinding to watch */
+        rewind_then = 1;                    /* develop it */
+        rewind_number = ui_roll.number;
+        fos_port_action(FA_REWIND, 0, 0);
+        ui_damage_all();
+    }
 }
 
 void roll_key(int k)
