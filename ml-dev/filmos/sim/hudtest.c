@@ -26,7 +26,7 @@ int main(int argc, char **argv)
     h.iso = 400;
     fos_gfx_init();
     sim_fonts();
-    if (argc > 1 && argv[1][0] == 'p') { h.want = h.fstop - 2; fos_hud_plate(ov, 960, &h, &p); }
+    if (argc > 1 && argv[1][0] == 'p') { h.want = h.fstop + 2; fos_hud_plate(ov, 960, &h, &p); }
     else fos_hud_draw(ov, 960, &h, &p);
 
     static uint8_t lv[480 * 720 * 3];

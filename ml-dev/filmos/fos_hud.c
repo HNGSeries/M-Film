@@ -337,7 +337,7 @@ void fos_hud_plate(uint8_t *vram, int pitch, const struct fos_hud *h, const stru
     text_gray(&fos_font_xs, mx1 + 16, my + 5, "OVER", 30, 24);
     if (h->lit && h->meter)
     {
-        int thirds = h->fstop - h->want;            /* + : more light than the aperture set wants */
+        int thirds = h->want - h->fstop;            /* + : brighter than the aperture set wants (over) */
         int out = thirds > 6 || thirds < -6;
         thirds = thirds > 6 ? 6 : thirds < -6 ? -6 : thirds;
         if (!out || h->blink)
