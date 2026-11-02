@@ -185,16 +185,37 @@ index c70b6b12b..2eb976d7c 100644
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/5D2.212/features.h b/platform/5D2.212/features.h
-index 51957a6ab..d6d5139d4 100644
+index 51957a6ab..5a40c3f0e 100644
 --- a/platform/5D2.212/features.h
 +++ b/platform/5D2.212/features.h
-@@ -7,3 +7,6 @@
+@@ -7,3 +7,27 @@
  
  
  #define FEATURE_LV_FOCUS_BOX_SNAP_TO_X5_RAW
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
++
++/* film-mode fork: lean, to fit at boot */
++#undef FEATURE_ZEBRA
++#undef FEATURE_ZEBRA_FAST
++#undef FEATURE_FOCUS_PEAK
++#undef FEATURE_GHOST_IMAGE
++#undef FEATURE_SPOTMETER
++#undef FEATURE_FALSE_COLOR
++#undef FEATURE_WAVEFORM
++#undef FEATURE_RAW_SPOTMETER
++#undef FEATURE_RAW_ZEBRAS
++#undef FEATURE_HDR_VIDEO
++#undef FEATURE_FPS_OVERRIDE
++#undef FEATURE_FPS_RAMPING
++#undef FEATURE_MOVIE_LOGGING
++#undef FEATURE_GRADUAL_EXPOSURE
++#undef FEATURE_TRAP_FOCUS
++#undef FEATURE_FOLLOW_FOCUS
++#undef FEATURE_RACK_FOCUS
++#undef FEATURE_AUDIO_METERS
++#undef FEATURE_HDR_BRACKETING
 diff --git a/platform/5D2.212/modules.included b/platform/5D2.212/modules.included
 index eddc7617e..6bfdee970 100644
 --- a/platform/5D2.212/modules.included
@@ -576,10 +597,10 @@ index 2201e76c7..01865665a 100755
      addr_AllocMem_end[1] = MOV_R0_0x4E0000_INSTR;
 diff --git a/src/filmroll.c b/src/filmroll.c
 new file mode 100644
-index 000000000..c0415b929
+index 000000000..642db0176
 --- /dev/null
 +++ b/src/filmroll.c
-@@ -0,0 +1,1454 @@
+@@ -0,0 +1,1469 @@
 +/* filmroll: a Canon camera as a film camera (built into this ML fork).
 + * Made on the EOS M; 100D, 650D, 700D and others build from the same code.
 + *
@@ -1667,20 +1688,35 @@ index 000000000..c0415b929
 +     * does, and wipe what it left. Canon gets the screen back as soon as ours
 +     * goes (a Canon menu, playback, the display off). The film OS's own pages
 +     * take the buffer themselves (film_ui_open). */
-+    static int canon_held = 0;
-+    if (visible && !canon_held)
++    /* Canon's screen comes back only once ours has been gone a moment: the
++     * display isn't idle for a blink while a frame is taken, and giving the
++     * screen back then (and taking it again) flashed Canon's screen, and its
++     * picture of the frame, over ours (#17). The film OS's pages take the
++     * screen at once, and so does anything that isn't a blink. */
++    static int canon_held = 0, gone_since = 0;
++    if (visible)
 +    {
-+        canon_gui_disable_front_buffer();
-+        clrscr();
-+        canon_held = 1;
-+        hud_dirty = 1;
-+        dbg("hud: Canon's screen held");
++        gone_since = 0;
++        if (!canon_held)
++        {
++            canon_gui_disable_front_buffer();
++            clrscr();
++            canon_held = 1;
++            hud_dirty = 1;
++            dbg("hud: Canon's screen held");
++        }
 +    }
-+    else if (!visible && canon_held)
++    else if (canon_held)
 +    {
-+        canon_held = 0;
-+        if (!ui_running) canon_gui_enable_front_buffer(1);
-+        dbg("hud: Canon's screen given back%s", ui_running ? " (to the film OS)" : "");
++        int now = get_ms_clock();
++        if (!gone_since) gone_since = now ? now : 1;
++        if (ui_running || now - gone_since > 700)
++        {
++            canon_held = 0;
++            gone_since = 0;
++            if (!ui_running) canon_gui_enable_front_buffer(1);
++            dbg("hud: Canon's screen given back%s", ui_running ? " (to the film OS)" : "");
++        }
 +    }
 +#endif
 +
@@ -3642,7 +3678,7 @@ index 000000000..6d753e3da
 +}
 diff --git a/src/fos_dev.c b/src/fos_dev.c
 new file mode 100644
-index 000000000..3d034217c
+index 000000000..fd6efba0a
 --- /dev/null
 +++ b/src/fos_dev.c
 @@ -0,0 +1,2121 @@
@@ -5769,10 +5805,10 @@ index 000000000..3d034217c
 +}
 diff --git a/src/fos_dev.h b/src/fos_dev.h
 new file mode 100644
-index 000000000..9403bf967
+index 000000000..e5241836d
 --- /dev/null
 +++ b/src/fos_dev.h
-@@ -0,0 +1,165 @@
+@@ -0,0 +1,168 @@
 +/* fos_dev: developing film in the camera.
 + *
 + * A frame's CR2 RAW becomes a print for the screen: 720 x 480 in its own
@@ -5817,8 +5853,11 @@ index 000000000..9403bf967
 +
 +/* ---------------------------------------------------------------- prints */
 +
++/* the camera's screen; the web darkroom builds bigger prints with -D */
++#ifndef FOS_PRINT_W
 +#define FOS_PRINT_W         720
 +#define FOS_PRINT_H         480
++#endif
 +#define FOS_PRINT_COLOURS   240         /* palette indices 1..240 */
 +#define FOS_FIXED_BASE      241         /* 241..254: the same in every palette */
 +#define FOS_FIXED_N         14          /* 241..254 */
@@ -12536,7 +12575,7 @@ index 000000000..22d1f64ea
 +#endif
 diff --git a/src/fos_hud.c b/src/fos_hud.c
 new file mode 100644
-index 000000000..315a92e2c
+index 000000000..3d897a8e9
 --- /dev/null
 +++ b/src/fos_hud.c
 @@ -0,0 +1,371 @@
@@ -12879,7 +12918,7 @@ index 000000000..315a92e2c
 +    text_gray(&fos_font_xs, mx1 + 16, my + 5, "OVER", 30, 24);
 +    if (h->lit && h->meter)
 +    {
-+        int thirds = h->fstop - h->want;            /* + : more light than the aperture set wants */
++        int thirds = h->want - h->fstop;            /* + : brighter than the aperture set wants (over) */
 +        int out = thirds > 6 || thirds < -6;
 +        thirds = thirds > 6 ? 6 : thirds < -6 ? -6 : thirds;
 +        if (!out || h->blink)
@@ -13341,7 +13380,7 @@ index 000000000..ae60ddb83
 +#endif
 diff --git a/src/fos_lab.c b/src/fos_lab.c
 new file mode 100644
-index 000000000..bee53acdc
+index 000000000..7e07e044b
 --- /dev/null
 +++ b/src/fos_lab.c
 @@ -0,0 +1,391 @@
