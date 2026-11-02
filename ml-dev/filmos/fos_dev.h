@@ -42,8 +42,11 @@ void fos_film_color(const struct fos_look *f, const float lin[3], float out[3]);
 
 /* ---------------------------------------------------------------- prints */
 
+/* the camera's screen; the web darkroom builds bigger prints with -D */
+#ifndef FOS_PRINT_W
 #define FOS_PRINT_W         720
 #define FOS_PRINT_H         480
+#endif
 #define FOS_PRINT_COLOURS   240         /* palette indices 1..240 */
 #define FOS_FIXED_BASE      241         /* 241..254: the same in every palette */
 #define FOS_FIXED_N         14          /* 241..254 */
