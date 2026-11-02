@@ -32,7 +32,7 @@ stops at power on and blinks the card light **3 long, 3 short, a pause**, foreve
 | 60D | sized to fit | unknown | 740,096 | | ✅ a tester's 60D starts (#3) |
 | 500D | sized to fit | unknown | 734,208 | | try it |
 | 50D | sized to fit | unknown | 716,032 | | try it |
-| 5D Mark II | sized to fit | unknown | 749,824 | | try it |
+| 5D Mark II | sized to fit | unknown: 705,792 starts (#18), 749,824 hangs | 756,992 (hangs); lean 706,048 | | 🧪 released lean (features left out, darkroom kept) |
 | 6D | fixed, raised by the fork | 868,096 (848K) | 740,864 | | ✅ starts (#3, #8) |
 | 100D | fixed | 605,952 (592K) | 741,888 | 684,288 | 🔧 too big, even without the darkroom |
 | 70D | fixed | 605,952 (592K) | 690,432 | 632,832 | 🔧 too big, even without the darkroom |
@@ -56,6 +56,11 @@ That is what happened: the full 650D and 700D builds give a black screen at powe
 the 700D in #19). The 650D tester built it `--no-darkroom` (689,664 bytes at boot) and it starts with the film
 interface. So both are `nodark` in cameras.txt: CI builds and releases them without the darkroom, under the
 usual zip name. Their rolls are developed with Darkrooms.
+
+The 5D Mark II hangs at power on, or when the shutter is pressed, with the full build (#18, #20, #27, #32).
+Enzo-Reveillon left 19 Magic Lantern features M-Film doesn't use out of it (zebras, focus peaking, waveform,
+FPS override and the like; `LEAN_FEATURES` in fork/apply_fork.py) and his 5D Mark II starts at 705,792 bytes
+with the in-camera darkroom. The fork does the same for it (`LEAN`): 706,048 bytes at boot with today's code.
 
 ## What would fix the fixed ones
 

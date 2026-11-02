@@ -28,7 +28,7 @@ EOSM.202      working   727072      Canon EOS M
 1100D.105     memory    524032      Canon EOS 1100D / Rebel T3 / Kiss X50
 500D.111      testing   -           Canon EOS 500D / Rebel T1i / Kiss X3
 50D.109       testing   -           Canon EOS 50D
-5D2.212       issues    -           Canon EOS 5D Mark II | Most hang at power on: the build is too big at start-up (#18). A smaller build and a fix for pink prints come in the next update. | ส่วนใหญ่ค้างตอนเปิด เพราะ build ใหญ่เกินหน่วยความจำตอนบูต (#18) อัปเดตหน้าจะมี build ที่เล็กลงและแก้รูปสีชมพู
+5D2.212       issues    -           Canon EOS 5D Mark II | Most hang at power on: the build is too big at start-up (#18). The next update has a smaller one (some Magic Lantern features left out, the darkroom kept) and fixes the pink prints. | ส่วนใหญ่ค้างตอนเปิด เพราะ build ใหญ่เกินหน่วยความจำตอนบูต (#18) อัปเดตหน้าจะมี build ที่เล็กลง (ตัดบางฟีเจอร์ของ Magic Lantern ออก แต่ห้องมืดยังอยู่) และแก้รูปสีชมพู
 7D.203        no        -           Canon EOS 7D (Magic Lantern's current source doesn't build it)
 200D.101      no        -           Canon EOS 200D / Rebel SL2
 750D.110      no        -           Canon EOS 750D / Rebel T6i

@@ -99,6 +99,12 @@ edit("src/boot-d45-am.c",
      "    #elif defined(CONFIG_100D) || defined(CONFIG_70D)\n",
      "film-mode fork: R0 0x44C000 -> 0x520000")
 
+LEAN = {"5D2.212"}
+LEAN_FEATURES = ["ZEBRA", "ZEBRA_FAST", "FOCUS_PEAK", "GHOST_IMAGE", "SPOTMETER", "FALSE_COLOR", "WAVEFORM",
+                 "RAW_SPOTMETER", "RAW_ZEBRAS", "HDR_VIDEO", "FPS_OVERRIDE", "FPS_RAMPING", "MOVIE_LOGGING",
+                 "GRADUAL_EXPOSURE", "TRAP_FOCUS", "FOLLOW_FOCUS", "RACK_FOCUS", "AUDIO_METERS", "HDR_BRACKETING"]
+
+
 def platform(name):
     """FEATURE_FILMROLL, our objects, and no lua, for one camera."""
     # build it in
@@ -108,6 +114,15 @@ def platform(name):
         print(f"  platform/{name}/features.h: patched")
     else:
         print(f"  platform/{name}/features.h: already applied")
+    # Cameras whose build is too big at boot: Magic Lantern features M-Film doesn't use, left out
+    # (Enzo-Reveillon's list on his 5D Mark II, #18). VECTORSCOPE, MAGIC_ZOOM, RAW_HISTOGRAM and
+    # INTERVALOMETER stay: ML doesn't build without them.
+    if name in LEAN:
+        p = root / f"platform/{name}/features.h"
+        if "film-mode fork: lean" not in p.read_text():
+            undef = "".join(f"#undef FEATURE_{f}\n" for f in LEAN_FEATURES)
+            p.write_text(p.read_text().rstrip("\n") + "\n\n/* film-mode fork: lean, to fit at boot */\n" + undef)
+            print(f"  platform/{name}/features.h: lean")
     # our objects. Rewritten every time (older versions of this fork
     # listed only filmroll.o), so the list always matches the sources.
     # (no fos_font: the fonts go on the card as ML/DATA/FOSFONT.BIN, see fos_gfx.h)

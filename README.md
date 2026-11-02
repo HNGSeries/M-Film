@@ -164,7 +164,7 @@ still wrong. If you have one marked *needs a tester*, you can help: [TESTING.md]
 | Canon EOS 1100D / Rebel T3 / Kiss X50 | 1.0.5 | 🔧 Too big for its boot memory: being fixed |  |  |
 | Canon EOS 500D / Rebel T1i / Kiss X3 | 1.1.1 | 🧪 Builds, needs a tester |  | `M-Film-camera-500D.111.zip` |
 | Canon EOS 50D | 1.0.9 | 🧪 Builds, needs a tester |  | `M-Film-camera-50D.109.zip` |
-| Canon EOS 5D Mark II | 2.1.2 | ⚠️ Tried, known problem | Most hang at power on: the build is too big at start-up ([#18](../../issues/18)). A smaller build and a fix for pink prints come in the next update. | `M-Film-camera-5D2.212.zip` |
+| Canon EOS 5D Mark II | 2.1.2 | ⚠️ Tried, known problem | Most hang at power on: the build is too big at start-up ([#18](../../issues/18)). The next update has a smaller one (some Magic Lantern features left out, the darkroom kept) and fixes the pink prints. | `M-Film-camera-5D2.212.zip` |
 
 **Not yet:** 7D (Magic Lantern's current source doesn't build it) · 200D, 750D, 77D, 80D, 7D Mark II, 5D Mark IV, 5DS R, 6D Mark II, 850D, M50, R, RP, R5, R6, SX70 HS, SX740 HS (Magic Lantern itself is still experimental on these).
 <!-- cameras:end -->

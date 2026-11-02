@@ -164,7 +164,7 @@ M-Film ทำบน EOS M และใช้ได้จริงบนรุ่
 | Canon EOS 1100D / Rebel T3 / Kiss X50 | 1.0.5 | 🔧 ใหญ่เกินหน่วยความจำตอนบูต: กำลังแก้ |  |  |
 | Canon EOS 500D / Rebel T1i / Kiss X3 | 1.1.1 | 🧪 build ได้แล้ว รอคนทดสอบ |  | `M-Film-camera-500D.111.zip` |
 | Canon EOS 50D | 1.0.9 | 🧪 build ได้แล้ว รอคนทดสอบ |  | `M-Film-camera-50D.109.zip` |
-| Canon EOS 5D Mark II | 2.1.2 | ⚠️ ลองแล้ว ยังมีปัญหา | ส่วนใหญ่ค้างตอนเปิด เพราะ build ใหญ่เกินหน่วยความจำตอนบูต ([#18](../../issues/18)) อัปเดตหน้าจะมี build ที่เล็กลงและแก้รูปสีชมพู | `M-Film-camera-5D2.212.zip` |
+| Canon EOS 5D Mark II | 2.1.2 | ⚠️ ลองแล้ว ยังมีปัญหา | ส่วนใหญ่ค้างตอนเปิด เพราะ build ใหญ่เกินหน่วยความจำตอนบูต ([#18](../../issues/18)) อัปเดตหน้าจะมี build ที่เล็กลง (ตัดบางฟีเจอร์ของ Magic Lantern ออก แต่ห้องมืดยังอยู่) และแก้รูปสีชมพู | `M-Film-camera-5D2.212.zip` |
 
 **ยังไม่รองรับ:** 7D (source ปัจจุบันของ Magic Lantern build รุ่นนี้ไม่ได้) · 200D, 750D, 77D, 80D, 7D Mark II, 5D Mark IV, 5DS R, 6D Mark II, 850D, M50, R, RP, R5, R6, SX70 HS, SX740 HS (Magic Lantern เองยังเป็นรุ่นทดลองบนกล้องเหล่านี้)
 <!-- cameras:end -->
