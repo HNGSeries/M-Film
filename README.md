@@ -152,8 +152,8 @@ one of them, you can help: [TESTING.md](TESTING.md) says how (about 20 minutes, 
 |---|---|---|---|
 | Canon EOS M | 2.0.2 | ✅ **Works** | `M-Film-camera-EOSM.202.zip` |
 | Canon EOS 100D / Rebel SL1 / Kiss X7 | 1.0.1 | 🔧 Too big for its boot memory: being fixed |  |
-| Canon EOS 650D / Rebel T4i / Kiss X6i | 1.0.4 | 🧪 Builds, needs a tester | `M-Film-camera-650D.104.zip` |
-| Canon EOS 700D / Rebel T5i / Kiss X7i | 1.1.5 | 🧪 Builds, needs a tester | `M-Film-camera-700D.115.zip` |
+| Canon EOS 650D / Rebel T4i / Kiss X6i | 1.0.4 | 🧪 Without the in-camera darkroom (develop with Darkrooms), needs a tester | `M-Film-camera-650D.104.zip` |
+| Canon EOS 700D / Rebel T5i / Kiss X7i | 1.1.5 | 🧪 Without the in-camera darkroom (develop with Darkrooms), needs a tester | `M-Film-camera-700D.115.zip` |
 | Canon EOS 6D | 1.1.6 | 🧪 Builds, needs a tester | `M-Film-camera-6D.116.zip` |
 | Canon EOS 70D | 1.1.2 | 🔧 Too big for its boot memory: being fixed |  |
 | Canon EOS 5D Mark III (firmware 1.1.3) | 1.1.3 | 🧪 Builds, needs a tester | `M-Film-camera-5D3.113.zip` |

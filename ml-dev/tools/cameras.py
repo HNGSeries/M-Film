@@ -1,5 +1,5 @@
 """ml-dev/cameras.txt -> the camera tables in README.md, README.th.md and TESTING.md, and the
-cameras CI builds (.github/workflows/camera.yml). Run after changing cameras.txt:
+cameras CI builds (.github/workflows/camera.yml, and which of them without the darkroom). Run after changing cameras.txt:
 
     python3 ml-dev/tools/cameras.py
 """
@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[2]
 STATUS = {
     "working": "✅ **Works**",
     "testing": "🧪 Builds, needs a tester",
+    "nodark": "🧪 Without the in-camera darkroom (develop with Darkrooms), needs a tester",
     "planned": "⏳ Planned",
     "memory": "🔧 Too big for its boot memory: being fixed",
     "no": "— Not yet",
@@ -20,6 +21,7 @@ WHY_NO = "Magic Lantern itself is still experimental on these"
 STATUS_TH = {
     "working": "✅ **ใช้ได้**",
     "testing": "🧪 build ได้แล้ว รอคนทดสอบ",
+    "nodark": "🧪 ไม่มีห้องมืดในกล้อง (ล้างด้วย Darkrooms) รอคนทดสอบ",
     "planned": "⏳ วางแผนไว้",
     "memory": "🔧 ใหญ่เกินหน่วยความจำตอนบูต: กำลังแก้",
 }
@@ -58,8 +60,8 @@ def main():
     def table(head, status, not_yet, why_text, end="."):
         rows = [head, "|---|---|---|---|"]
         for c in cams:
-            if c["status"] in ("working", "testing", "memory", "planned"):
-                dl = f"`M-Film-camera-{c['plat']}.zip`" if c["status"] in ("working", "testing") else ""
+            if c["status"] in ("working", "testing", "nodark", "memory", "planned"):
+                dl = f"`M-Film-camera-{c['plat']}.zip`" if c["status"] in ("working", "testing", "nodark") else ""
                 rows.append(f"| {c['name']} | {c['fw']} | {status[c['status']]} | {dl} |")
         # the ones Magic Lantern isn't ready on: one line, grouped by why
         why = {}
@@ -76,7 +78,7 @@ def main():
     replace(ROOT / "README.th.md", "<!-- cameras:start -->", "<!-- cameras:end -->", th)
     replace(ROOT / "README.md", "<!-- cameras:start -->", "<!-- cameras:end -->", rows)
 
-    built = [c for c in cams if c["status"] in ("working", "testing")]
+    built = [c for c in cams if c["status"] in ("working", "testing", "nodark")]
     rows = ["| Camera | Canon firmware it needs | File |", "|---|---|---|"]
     rows += [f"| {c['name']} | {c['fw']} | `M-Film-camera-{c['plat']}.zip` |" for c in built]
     replace(ROOT / "TESTING.md", "<!-- cameras:start -->", "<!-- cameras:end -->", "\n".join(rows))
@@ -85,9 +87,11 @@ def main():
     text = wf.read_text(encoding="utf-8")
     text = re.sub(r"(        platform: )\[[^\]]*\]( *# from ml-dev/cameras.txt)?",
                   lambda m: m.group(1) + "[" + ", ".join(c["plat"] for c in built) + "]  # from ml-dev/cameras.txt", text, count=1)
+    text = re.sub(r"(      NODARK: \")[^\"]*(\")",
+                  lambda m: m.group(1) + " ".join(c["plat"] for c in cams if c["status"] == "nodark") + m.group(2), text, count=1)
     wf.write_text(text, encoding="utf-8")
     print(f"{len(cams)} cameras: {sum(c['status'] == 'working' for c in cams)} working, "
-          f"{sum(c['status'] == 'testing' for c in cams)} testing, {sum(c['status'] == 'memory' for c in cams)} too big at boot")
+          f"{sum(c['status'] == 'testing' for c in cams)} testing, {sum(c['status'] == 'nodark' for c in cams)} without the darkroom, {sum(c['status'] == 'memory' for c in cams)} too big at boot")
 
 
 if __name__ == "__main__":

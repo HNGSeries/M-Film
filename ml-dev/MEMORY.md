@@ -25,8 +25,8 @@ stops at power on and blinks the card light **3 long, 3 short, a pause**, foreve
 | Camera | Boot method | Limit (bytes) | Full build | No darkroom | Verdict |
 |---|---|---|---|---|---|
 | EOS M | sized to fit | 727,072 (found on the camera) | 715,552 | | ✅ works |
-| 650D | sized to fit | unknown | 743,680 | | ⚠️ above the EOS M's limit: try it |
-| 700D | sized to fit | unknown | 743,936 | | ⚠️ above the EOS M's limit: try it |
+| 650D | sized to fit | at least 689,664 (no darkroom starts) | 743,680 (black screen) | 689,664 | ✅ starts without the darkroom: released that way |
+| 700D | sized to fit | unknown | 743,936 (black screen, #19) | | 🧪 released without the darkroom, as the 650D |
 | 5D Mark III 1.1.3 | sized to fit | unknown | 737,536 | | try it |
 | 5D Mark III 1.2.3 | sized to fit | unknown | 733,440 | | try it |
 | 60D | sized to fit | unknown | 740,096 | | ✅ a tester's 60D starts (#3) |
@@ -51,6 +51,11 @@ Where the fixed limits come from (`src/boot-d45-am.c`, `src/boot-d45-ch.c`):
 The sized-to-fit rows have no limit because nothing fixes one. The EOS M is built on the 650D and 700D, so a
 650D or 700D above its 727K may hang the same way. Their testers should be told to watch for a card light
 that stays on.
+
+That is what happened: the full 650D and 700D builds give a black screen at power on (a 650D tester by message,
+the 700D in #19). The 650D tester built it `--no-darkroom` (689,664 bytes at boot) and it starts with the film
+interface. So both are `nodark` in cameras.txt: CI builds and releases them without the darkroom, under the
+usual zip name. Their rolls are developed with Darkrooms.
 
 ## What would fix the fixed ones
 

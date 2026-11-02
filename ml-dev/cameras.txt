@@ -3,6 +3,9 @@
 #   status:   working  tried on the camera, works
 #             testing  builds; waiting for someone to try it on the camera
 #             planned  not started yet, but should be possible
+#             nodark   the full build is too big at boot on it, so it's built and released without the
+#                      in-camera darkroom (build_fork.sh --no-darkroom): rolls are developed with
+#                      Darkrooms on a computer. 650D: a tester's 650D starts with it, the full one doesn't
 #             memory   builds, but bigger than the memory Magic Lantern gets at boot on it: the camera
 #                      would stop at power on (3 long, 3 short blinks), so it isn't built or released
 #                      until that reservation is raised for it, as for the 6D (MEMORY.md)
@@ -12,8 +15,8 @@
 #              100D, 70D, 550D, 600D, 1100D: the fixed reservation of Magic Lantern's boot code, MEMORY.md)
 EOSM.202      working   727072      Canon EOS M
 100D.101      memory    605952      Canon EOS 100D / Rebel SL1 / Kiss X7
-650D.104      testing   -           Canon EOS 650D / Rebel T4i / Kiss X6i
-700D.115      testing   -           Canon EOS 700D / Rebel T5i / Kiss X7i
+650D.104      nodark    689664      Canon EOS 650D / Rebel T4i / Kiss X6i
+700D.115      nodark    -           Canon EOS 700D / Rebel T5i / Kiss X7i
 6D.116        testing   868096      Canon EOS 6D
 70D.112       memory    605952      Canon EOS 70D
 5D3.113       testing   -           Canon EOS 5D Mark III (firmware 1.1.3)

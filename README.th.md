@@ -152,8 +152,8 @@ M-Film ทำบน EOS M และใช้ได้จริงบนรุ่
 |---|---|---|---|
 | Canon EOS M | 2.0.2 | ✅ **ใช้ได้** | `M-Film-camera-EOSM.202.zip` |
 | Canon EOS 100D / Rebel SL1 / Kiss X7 | 1.0.1 | 🔧 ใหญ่เกินหน่วยความจำตอนบูต: กำลังแก้ |  |
-| Canon EOS 650D / Rebel T4i / Kiss X6i | 1.0.4 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-650D.104.zip` |
-| Canon EOS 700D / Rebel T5i / Kiss X7i | 1.1.5 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-700D.115.zip` |
+| Canon EOS 650D / Rebel T4i / Kiss X6i | 1.0.4 | 🧪 ไม่มีห้องมืดในกล้อง (ล้างด้วย Darkrooms) รอคนทดสอบ | `M-Film-camera-650D.104.zip` |
+| Canon EOS 700D / Rebel T5i / Kiss X7i | 1.1.5 | 🧪 ไม่มีห้องมืดในกล้อง (ล้างด้วย Darkrooms) รอคนทดสอบ | `M-Film-camera-700D.115.zip` |
 | Canon EOS 6D | 1.1.6 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-6D.116.zip` |
 | Canon EOS 70D | 1.1.2 | 🔧 ใหญ่เกินหน่วยความจำตอนบูต: กำลังแก้ |  |
 | Canon EOS 5D Mark III (firmware 1.1.3) | 1.1.3 | 🧪 build ได้แล้ว รอคนทดสอบ | `M-Film-camera-5D3.113.zip` |
