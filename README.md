@@ -14,7 +14,7 @@ The camera side is free and open, for everyone.
 [![Buy the developer a coffee](https://img.shields.io/badge/Buy%20the%20developer%20a%20coffee-ffdd00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buy.stripe.com/7sY14p8d93QE5Ny5M58so02)
 
 [![License GPL-2.0](https://img.shields.io/badge/license-GPL--2.0-3b352f)](LICENSE)
-[![Cameras](https://img.shields.io/badge/cameras-2%20work%20%C2%B7%206%20with%20a%20problem%20%C2%B7%207%20in%20testing-3b352f)](#cameras)
+[![Cameras](https://img.shields.io/badge/cameras-3%20work%20%C2%B7%206%20with%20a%20problem%20%C2%B7%206%20in%20testing-3b352f)](#cameras)
 [![Films](https://img.shields.io/badge/films-72-3b352f)](FILMS.md)
 
 **English** · [ภาษาไทย](README.th.md) · [Films](#72-films) · [Cameras](#cameras) · [Darkrooms](#develop-on-your-computer-darkrooms) · [Take it further](PORTING.md)
@@ -158,7 +158,7 @@ still wrong. If you have one marked *needs a tester*, you can help: [TESTING.md]
 | Canon EOS 70D | 1.1.2 | 🧪 Builds, needs a tester | New: the film OS now loads as a module after start-up, so the build fits its boot memory (511,744 of 605,952 bytes). Needs a first tester. | `M-Film-camera-70D.112.zip` |
 | Canon EOS 5D Mark III (firmware 1.1.3) | 1.1.3 | ⚠️ Tried, known problem | Starts and shoots; the in-camera darkroom couldn't find the RAWs ([#31](../../issues/31)): fixed in 0.1.3. | `M-Film-camera-5D3.113.zip` (to test: `-module.zip`) |
 | Canon EOS 5D Mark III (firmware 1.2.3) | 1.2.3 | ⚠️ Tried, known problem | Starts and shoots; the in-camera darkroom couldn't find the RAWs ([#16](../../issues/16), [#37](../../issues/37)): fixed in 0.1.3. | `M-Film-camera-5D3.123.zip` (to test: `-module.zip`) |
-| Canon EOS 550D / Rebel T2i / Kiss X4 | 1.0.9 | 🧪 Builds, needs a tester | New: the film OS now loads as a module after start-up, so the build fits its boot memory (572,672 of 589,568 bytes). Needs a first tester. | `M-Film-camera-550D.109.zip` |
+| Canon EOS 550D / Rebel T2i / Kiss X4 | 1.0.9 | ✅ **Works** | Startup, Av shooting and in-camera development tested with fix 8b0bf62 ([#48](../../issues/48)); original 0.1.4 module did not load. Broader testing is ongoing. | `M-Film-camera-550D.109.zip` |
 | Canon EOS 600D / Rebel T3i / Kiss X5 | 1.0.2 | 🧪 Builds, needs a tester | New: the film OS now loads as a module after start-up, so the build fits its boot memory (537,856 of 589,824 bytes). Needs a first tester. | `M-Film-camera-600D.102.zip` |
 | Canon EOS 60D | 1.1.1 | ⚠️ Tried, known problem | Starts, shoots and develops; the prints came out magenta ([#25](../../issues/25)): fixed in 0.1.3. | `M-Film-camera-60D.111.zip` (to test: `-module.zip`) |
 | Canon EOS 1100D / Rebel T3 / Kiss X50 | 1.0.5 | 🧪 Builds, needs a tester | New: the film OS now loads as a module after start-up, so the build fits its boot memory (493,056 of 524,032 bytes). Needs a first tester. | `M-Film-camera-1100D.105.zip` |
