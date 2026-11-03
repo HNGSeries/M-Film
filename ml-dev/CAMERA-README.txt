@@ -26,6 +26,9 @@ Update to a new version
 If the camera doesn't start (black screen, card light stays on): take the battery out, take the
 card out, and the camera starts normally without it. Tell us (see TESTING.md).
 
+If Magic Lantern's own menu shows instead of the film shelf: on some cameras the film OS is a
+module (ML/modules/filmos.mo), and it didn't load. Its line in the Modules tab says why. Tell us.
+
 Remove: format the card in the camera, or delete autoexec.bin and ML/.
 Logs for a bug report: ML/FILMROLL.LOG on the card.
 

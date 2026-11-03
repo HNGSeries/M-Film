@@ -11,21 +11,24 @@
 #                      would stop at power on (3 long, 3 short blinks), so it isn't built or released
 #                      until that reservation is raised for it, as for the 6D (MEMORY.md)
 #             no       not for now: Magic Lantern itself is experimental there (DIGIC 6 and later)
+#   :module   after the status (e.g. testing:module): built with the film OS as a module
+#             (build_fork.sh --module): ML/modules/filmos.mo, loaded after boot, so autoexec.bin keeps
+#             only Magic Lantern and three hooks, ~180 KB less at boot (MEMORY.md)
 #   boot-limit: the largest autoexec.bin (bytes at boot) known to start on it, - if not known yet
 #             (6D: what the fork reserves for ML at boot, see the 6D edit in fork/apply_fork.py;
 #              100D, 70D, 550D, 600D, 1100D: the fixed reservation of Magic Lantern's boot code, MEMORY.md)
 EOSM.202      working   727072      Canon EOS M
-100D.101      memory    605952      Canon EOS 100D / Rebel SL1 / Kiss X7
+100D.101      testing:module  605952      Canon EOS 100D / Rebel SL1 / Kiss X7 | New: the film OS now loads as a module after start-up, so the build fits its boot memory (562,944 of 605,952 bytes). Needs a first tester. | ใหม่: film OS โหลดเป็นโมดูลหลังเปิดกล้อง build จึงพอดีหน่วยความจำตอนบูตแล้ว (562,944 จาก 605,952 ไบต์) รอคนลองเป็นคนแรก
 650D.104      nodark    689664      Canon EOS 650D / Rebel T4i / Kiss X6i | The full build gives a black screen (#34); a tester's 650D starts without the darkroom. Released that way since 0.1.3: develop on a computer. | build เต็มจอดำ (#34) ผู้ทดสอบลองแบบไม่มีห้องมืดแล้วเปิดได้ ตั้งแต่ 0.1.3 ออกแบบนั้น ล้างบนคอม
 700D.115      nodark    -           Canon EOS 700D / Rebel T5i / Kiss X7i | The full build gives a black screen (#19). Released without the darkroom since 0.1.3, as for the 650D: waiting for a tester. | build เต็มจอดำ (#19) ตั้งแต่ 0.1.3 ออกแบบไม่มีห้องมืด เหมือน 650D รอคนลอง
 6D.116        working   868096      Canon EOS 6D | Works since 0.1.2 (#17, #22). | ใช้ได้ตั้งแต่ 0.1.2 (#17, #22)
-70D.112       memory    605952      Canon EOS 70D
+70D.112       testing:module  605952      Canon EOS 70D | New: the film OS now loads as a module after start-up, so the build fits its boot memory (511,744 of 605,952 bytes). Needs a first tester. | ใหม่: film OS โหลดเป็นโมดูลหลังเปิดกล้อง build จึงพอดีหน่วยความจำตอนบูตแล้ว (511,744 จาก 605,952 ไบต์) รอคนลองเป็นคนแรก
 5D3.113       issues    -           Canon EOS 5D Mark III (firmware 1.1.3) | Starts and shoots; the in-camera darkroom couldn't find the RAWs (#31): fixed in 0.1.3. | เปิดและถ่ายได้ ห้องมืดในกล้องหาไฟล์ RAW ไม่เจอ (#31) แก้แล้วใน 0.1.3
 5D3.123       issues    -           Canon EOS 5D Mark III (firmware 1.2.3) | Starts and shoots; the in-camera darkroom couldn't find the RAWs (#16, #37): fixed in 0.1.3. | เปิดและถ่ายได้ ห้องมืดในกล้องหาไฟล์ RAW ไม่เจอ (#16, #37) แก้แล้วใน 0.1.3
-550D.109      memory    589568      Canon EOS 550D / Rebel T2i / Kiss X4
-600D.102      memory    589824      Canon EOS 600D / Rebel T3i / Kiss X5
+550D.109      testing:module  589568      Canon EOS 550D / Rebel T2i / Kiss X4 | New: the film OS now loads as a module after start-up, so the build fits its boot memory (572,672 of 589,568 bytes). Needs a first tester. | ใหม่: film OS โหลดเป็นโมดูลหลังเปิดกล้อง build จึงพอดีหน่วยความจำตอนบูตแล้ว (572,672 จาก 589,568 ไบต์) รอคนลองเป็นคนแรก
+600D.102      testing:module  589824      Canon EOS 600D / Rebel T3i / Kiss X5 | New: the film OS now loads as a module after start-up, so the build fits its boot memory (537,856 of 589,824 bytes). Needs a first tester. | ใหม่: film OS โหลดเป็นโมดูลหลังเปิดกล้อง build จึงพอดีหน่วยความจำตอนบูตแล้ว (537,856 จาก 589,824 ไบต์) รอคนลองเป็นคนแรก
 60D.111       issues    -           Canon EOS 60D | Starts, shoots and develops; the prints came out magenta (#25): fixed in 0.1.3. | เปิด ถ่าย และล้างได้ รูปออกสีม่วงอมชมพู (#25) แก้แล้วใน 0.1.3
-1100D.105     memory    524032      Canon EOS 1100D / Rebel T3 / Kiss X50
+1100D.105     testing:module  524032      Canon EOS 1100D / Rebel T3 / Kiss X50 | New: the film OS now loads as a module after start-up, so the build fits its boot memory (493,056 of 524,032 bytes). Needs a first tester. | ใหม่: film OS โหลดเป็นโมดูลหลังเปิดกล้อง build จึงพอดีหน่วยความจำตอนบูตแล้ว (493,056 จาก 524,032 ไบต์) รอคนลองเป็นคนแรก
 500D.111      testing   -           Canon EOS 500D / Rebel T1i / Kiss X3
 50D.109       testing   -           Canon EOS 50D
 5D2.212       issues    -           Canon EOS 5D Mark II | Most hang at power on: the build is too big at start-up (#18). 0.1.3 has a smaller one (some Magic Lantern features left out, the darkroom kept) and fixes the pink prints: waiting for testers. | ส่วนใหญ่ค้างตอนเปิด เพราะ build ใหญ่เกินหน่วยความจำตอนบูต (#18) 0.1.3 มี build ที่เล็กลง (ตัดบางฟีเจอร์ของ Magic Lantern ออก แต่ห้องมืดยังอยู่) และแก้รูปสีชมพู รอคนลอง

@@ -17,6 +17,9 @@ from pathlib import Path
 root = Path(sys.argv[1])
 # --no-darkroom: the film OS without its in-camera darkroom (fos_nodark.c in its place), ~60 KB less at boot
 NO_DARKROOM = "--no-darkroom" in sys.argv[2:]
+# --module: the film OS is a module (ML/modules/filmos.mo, built by build_fork.sh) loaded after boot;
+# autoexec.bin keeps only the three hooks (filmhook.c), ~190 KB less at boot
+MODULE = "--module" in sys.argv[2:]
 PLATFORMS = [a for a in sys.argv[2:] if not a.startswith("--")] or ["EOSM.202"]
 
 
@@ -63,8 +66,13 @@ edit("src/zebra.c",
 edit("src/menu.c",
      "static void menu_open() \n{ \n    if (menu_shown)\n        return;\n",
      "static void menu_open() \n{ \n#ifdef FEATURE_FILMROLL\n"
+     "#ifdef FEATURE_FILMOS_MODULE\n"
+     "    if (filmroll_menu_requested())      /* 0: the module isn't loaded, ML's menu opens */\n"
+     "        return;\n"
+     "#else\n"
      "    filmroll_menu_requested();\n"
      "    return;\n"
+     "#endif\n"
      "#endif\n"
      "    if (menu_shown)\n        return;\n",
      "filmroll_menu_requested")
@@ -105,6 +113,14 @@ LEAN_FEATURES = ["ZEBRA", "ZEBRA_FAST", "FOCUS_PEAK", "GHOST_IMAGE", "SPOTMETER"
                  "GRADUAL_EXPOSURE", "TRAP_FOCUS", "FOLLOW_FOCUS", "RACK_FOCUS", "AUDIO_METERS", "HDR_BRACKETING"]
 
 
+def film_os_objects():
+    """The film OS's objects in autoexec.bin. (build_fork.sh --module builds the same list into filmos.mo.)"""
+    objs = ["filmroll", "fos_gfx", "fos_film", "fos_ui", "fos_shelf", "fos_pages", "fos_hud", "fos_print"]
+    objs += ["fos_nodark"] if NO_DARKROOM else ["fos_dark", "fos_dev", "fos_lab", "fos_looks", "fos_jpeg"]
+    return objs
+
+
+
 def platform(name):
     """FEATURE_FILMROLL, our objects, and no lua, for one camera."""
     # build it in
@@ -117,6 +133,16 @@ def platform(name):
     # Cameras whose build is too big at boot: Magic Lantern features M-Film doesn't use, left out
     # (Enzo-Reveillon's list on his 5D Mark II, #18). VECTORSCOPE, MAGIC_ZOOM, RAW_HISTOGRAM and
     # INTERVALOMETER stay: ML doesn't build without them.
+    # --module: the film OS is filmos.mo; the core's hooks may find it missing (filmhook.c)
+    p = root / f"platform/{name}/features.h"
+    text = p.read_text()
+    mark = "\n/* film-mode fork: the film OS is a module (build_fork.sh --module) */\n#define FEATURE_FILMOS_MODULE\n"
+    if MODULE and mark not in text:
+        p.write_text(text.rstrip("\n") + "\n" + mark)
+        print(f"  platform/{name}/features.h: film OS as a module")
+    elif not MODULE and mark in text:
+        p.write_text(text.replace(mark, ""))
+        print(f"  platform/{name}/features.h: film OS built in")
     if name in LEAN:
         p = root / f"platform/{name}/features.h"
         if "film-mode fork: lean" not in p.read_text():
@@ -126,8 +152,9 @@ def platform(name):
     # our objects. Rewritten every time (older versions of this fork
     # listed only filmroll.o), so the list always matches the sources.
     # (no fos_font: the fonts go on the card as ML/DATA/FOSFONT.BIN, see fos_gfx.h)
-    FOS_OBJS = ["filmroll", "fos_gfx", "fos_film", "fos_ui", "fos_shelf", "fos_pages", "fos_hud", "fos_print"]
-    FOS_OBJS += ["fos_nodark"] if NO_DARKROOM else ["fos_dark", "fos_dev", "fos_lab", "fos_looks", "fos_jpeg"]
+    FOS_OBJS = film_os_objects()
+    if MODULE:
+        FOS_OBJS = ["filmhook"]     # the film OS itself is the module (build_fork.sh)
     p = root / f"platform/{name}/Makefile"
     lines = p.read_text().split("\n")
     out, skip = [], False
@@ -135,7 +162,7 @@ def platform(name):
         if skip:
             skip = line.rstrip().endswith("\\")
             continue
-        if line.startswith("ML_SRC_EXTRA_OBJS +=") and ("filmroll" in line or "fos_" in line):
+        if line.startswith("ML_SRC_EXTRA_OBJS +=") and ("filmroll" in line or "fos_" in line or "filmhook" in line):
             skip = line.rstrip().endswith("\\")
             continue
         out.append(line)

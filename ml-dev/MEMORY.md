@@ -66,7 +66,54 @@ The same cut doesn't build on the 650D (ML there needs FPS_OVERRIDE, FPS_RAMPING
 three, a lean 650D with the darkroom takes 718,336 bytes: under the EOS M's 727,072, but above the 689,664 known
 to start on a 650D. Worth a tester's try before it replaces the no-darkroom release.
 
-## What would fix the fixed ones
+## The film OS as a module (`build_fork.sh --module`)
+
+The film OS is about 180 KB of code and data. Built in, all of it is part of `autoexec.bin` and comes out
+of the memory the camera gives Magic Lantern at power on. As a module it isn't: autoexec.bin keeps Magic
+Lantern and three hooks (`fork/src/filmhook.c`), and the film OS is `ML/modules/filmos.mo`, which Magic
+Lantern's module loader puts into Canon's memory after boot (about 216 KB there: 185 KB of code, 35 KB
+of data). The film OS itself doesn't change: the same sources, built for one camera
+(`fork/module/Makefile`), with the same libm and libgcc as autoexec.bin, so it develops the same prints.
+
+Boot size with `--module`, full film OS with the darkroom (2026-11, gcc 13.2):
+
+| Camera | Built in (the survey above) | As a module | Limit | |
+|---|---|---|---|---|
+| EOS M | 720,416 | 536,864 | 727,072 | |
+| 650D | 743,680 | 564,992 | 689,664 (no darkroom starts) | the darkroom back, under what starts |
+| 700D | 743,936 | 565,248 | unknown | as the 650D |
+| 6D | 740,864 | 562,176 | 868,096 | |
+| 5D Mark III 1.1.3 / 1.2.3 | 737,536 / 733,440 | 558,592 / 554,496 | unknown | |
+| 60D | 740,096 | 561,152 | unknown | |
+| 500D | 734,208 | 555,264 | unknown | |
+| 50D | 716,032 | 537,344 | unknown | |
+| 5D Mark II (lean) | 706,048 | 520,192 | 705,792 starts | under what starts |
+| 100D | 741,888 | 562,944 | 605,952 | ✅ fits |
+| 70D | 690,432 | 511,744 | 605,952 | ✅ fits |
+| 550D | 751,616 | 572,672 | 589,568 | ✅ fits (16 KB to spare) |
+| 600D | 716,800 | 537,856 | 589,824 | ✅ fits |
+| 1100D | 672,000 | 493,056 | 524,032 | ✅ fits |
+
+The five fixed-reservation cameras are built this way (`testing:module` in `cameras.txt`), with nothing
+of Magic Lantern left out. The others keep the built-in film OS in their main zip; since 0.1.4 each release also has
+`M-Film-camera-<camera>-module.zip` (CI job `camera-module`), so testers can try the module on every camera.
+
+What only a camera can tell:
+- **Canon's memory after boot.** The module and the loader's work while linking it (it reads the file and
+  links it with TCC) come out of Canon's own memory, which Canon also uses. The one figure known so far: the
+  6D had 2,192 KB free with stock Magic Lantern (below). Where there isn't enough, the module fails to load.
+- **If the module doesn't load**, the camera starts with Magic Lantern alone: the hooks answer as if there
+  were no film OS, so MENU opens Magic Lantern's own menu (Modules tab: why it didn't load). After a crash
+  while loading modules, Magic Lantern skips them at the next start and says so.
+- **Settings.** The module keeps them in `ML/SETTINGS/filmos.cfg`. The first time it starts it takes the
+  `filmroll.*` ones from `magiclantern.cfg`, so a camera moving from the built-in film OS keeps its roll.
+
+How the module is checked when it's built (`build_fork.sh`): every name it needs must be exported by that
+camera's autoexec.bin (`*.sym`), it must not define a name autoexec.bin has (only its entry points stay
+global), and nothing in it calls into autoexec.bin with a short branch (libm's `__errno` goes to the
+module's own `fos_errno`), so it works wherever the loader puts it.
+
+## What would fix the fixed ones (built in)
 
 The same as the 6D: give Magic Lantern a bigger slice of the pool at boot, and check that Canon keeps enough.
 - **70D:** its pool starts and ends where the 6D's does (`0x44C000`–`0xD3C000`), so the 6D's `0x520000` (848K)

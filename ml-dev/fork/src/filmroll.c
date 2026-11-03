@@ -26,6 +26,15 @@
  * logged even in burst mode.
  */
 
+#ifdef MODULE
+/* ML/modules/filmos.mo is built for one camera (fork/module/Makefile), so it
+ * takes that camera's definitions, as autoexec.bin does */
+#include "internals.h"
+#include "internals-common.h"
+#include "features.h"
+#include "consts.h"
+#include "gui.h"        /* ahead of dryos.h's gui-common.h, as in autoexec.bin */
+#endif
 #include <dryos.h>
 #include <module.h>
 #include <property.h>
@@ -44,6 +53,13 @@
 #include <tasks.h>
 #include <mem.h>
 #include <powersave.h>
+#ifdef MODULE
+/* built as ML/modules/filmos.mo (build_fork.sh --module): the core keeps
+ * these three names for its shim (filmhook.c), the module's own go by others */
+#define handle_filmroll_keys     fr_handle_keys
+#define filmroll_menu_requested  fr_menu_requested
+#define filmroll_overlays_active fr_overlays_active
+#endif
 #include "filmroll.h"
 #include "fos.h"
 #include "fos_dev.h"
@@ -1325,11 +1341,20 @@ int handle_filmroll_keys(struct event *event)
 
 /* ---------------------------------------------------------------- the ML menu, replaced */
 
+#ifdef MODULE
+int filmroll_menu_requested()
+{
+    if (shooting_screen())
+        open_ui(FOS_OPEN_HOME);
+    return 1;
+}
+#else
 void filmroll_menu_requested()
 {
     if (shooting_screen())
         open_ui(FOS_OPEN_HOME);
 }
+#endif
 
 static void filmroll_init()
 {
@@ -1465,5 +1490,9 @@ static void filmroll_task()
     }
 }
 
+#ifndef MODULE
 INIT_FUNC("filmroll", filmroll_init);
 TASK_CREATE("film_main", filmroll_task, 0, 0x1e, 0x2000);
+#else
+#include "filmos_mod.h"
+#endif

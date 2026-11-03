@@ -1,5 +1,6 @@
 """ml-dev/cameras.txt -> the camera tables in README.md, README.th.md and TESTING.md, and the
-cameras CI builds (.github/workflows/camera.yml, and which of them without the darkroom). Run after changing cameras.txt:
+cameras CI builds (.github/workflows/camera.yml, and which of them without the darkroom or with the
+film OS as a module). Run after changing cameras.txt:
 
     python3 ml-dev/tools/cameras.py
 """
@@ -39,9 +40,11 @@ def cameras():
         if not line.strip() or line.startswith("#"):
             continue
         plat, status, limit, rest = line.split(None, 3)
+        # "testing:module": the film OS is built as a module for it (build_fork.sh --module)
+        status, _, build = status.partition(":")
         name, note, note_th = (rest.split(" | ") + ["", ""])[:3]
         fw = plat.split(".")[1]
-        out.append({"plat": plat, "status": status, "limit": limit, "name": name.strip(),
+        out.append({"plat": plat, "status": status, "module": build == "module", "limit": limit, "name": name.strip(),
                     "note": note.strip(), "note_th": note_th.strip() or note.strip(),
                     "fw": ".".join(fw) if fw.isdigit() else fw})
     return out
@@ -71,6 +74,8 @@ def main():
         for c in cams:
             if c["status"] in ("working", "issues", "testing", "nodark", "memory", "planned"):
                 dl = f"`M-Film-camera-{c['plat']}.zip`" if c["status"] in ("working", "issues", "testing", "nodark") else ""
+                if dl and not c["module"]:
+                    dl += f" (to test: `-module.zip`)" if not th else f" (ทดสอบ: `-module.zip`)"
                 rows.append(f"| {c['name']} | {c['fw']} | {status[c['status']]} | {issue_links(c['note_th' if th else 'note'])} | {dl} |")
         # the ones Magic Lantern isn't ready on: one line, grouped by why
         why = {}
@@ -98,7 +103,8 @@ def main():
 
     built = [c for c in cams if c["status"] in ("working", "issues", "testing", "nodark")]
     rows = ["| Camera | Canon firmware it needs | File |", "|---|---|---|"]
-    rows += [f"| {c['name']} | {c['fw']} | `M-Film-camera-{c['plat']}.zip` |" for c in built]
+    rows += [f"| {c['name']} | {c['fw']} | `M-Film-camera-{c['plat']}.zip`"
+             + ("" if c["module"] else f" · `M-Film-camera-{c['plat']}-module.zip`") + " |" for c in built]
     replace(ROOT / "TESTING.md", "<!-- cameras:start -->", "<!-- cameras:end -->", "\n".join(rows))
 
     wf = ROOT / ".github" / "workflows" / "camera.yml"
@@ -107,6 +113,10 @@ def main():
                   lambda m: m.group(1) + "[" + ", ".join(c["plat"] for c in built) + "]  # from ml-dev/cameras.txt", text, count=1)
     text = re.sub(r"(      NODARK: \")[^\"]*(\")",
                   lambda m: m.group(1) + " ".join(c["plat"] for c in cams if c["status"] == "nodark") + m.group(2), text, count=1)
+    text = re.sub(r"(        platform: )\[[^\]]*\]( *# from ml-dev/cameras.txt: built, and not \":module\")",
+                  lambda m: m.group(1) + "[" + ", ".join(c["plat"] for c in built if not c["module"]) + "]" + m.group(2), text, count=1)
+    text = re.sub(r"(      MODULE: \")[^\"]*(\")",
+                  lambda m: m.group(1) + " ".join(c["plat"] for c in built if c["module"]) + m.group(2), text, count=1)
     wf.write_text(text, encoding="utf-8")
     print(f"{len(cams)} cameras: {sum(c['status'] == 'working' for c in cams)} working, {sum(c['status'] == 'issues' for c in cams)} with a problem, "
           f"{sum(c['status'] == 'testing' for c in cams)} testing, {sum(c['status'] == 'nodark' for c in cams)} without the darkroom, {sum(c['status'] == 'memory' for c in cams)} too big at boot")

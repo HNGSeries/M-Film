@@ -28,12 +28,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [EOSM.202, 650D.104, 700D.115, 6D.116, 5D3.113, 5D3.123, 60D.111, 500D.111, 50D.109, 5D2.212]  # from ml-dev/cameras.txt
+        platform: [EOSM.202, 100D.101, 650D.104, 700D.115, 6D.116, 70D.112, 5D3.113, 5D3.123, 550D.109, 600D.102, 60D.111, 1100D.105, 500D.111, 50D.109, 5D2.212]  # from ml-dev/cameras.txt
     runs-on: ubuntu-24.04
     name: camera ${{ matrix.platform }}
     env:
       # built and released without the in-camera darkroom: the full build doesn't fit at boot (cameras.txt)
       NODARK: "650D.104 700D.115"
+      # built with the film OS as a module (ML/modules/filmos.mo), loaded after boot (cameras.txt ":module")
+      MODULE: "100D.101 70D.112 550D.109 600D.102 1100D.105"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -50,12 +52,17 @@ jobs:
       - name: Build
         run: |
           p=${{ matrix.platform }}
-          case " $NODARK " in *" $p "*) bash ml-dev/build_fork.sh $p --no-darkroom ;; *) bash ml-dev/build_fork.sh $p ;; esac
+          f=""
+          case " $NODARK " in *" $p "*) f="$f --no-darkroom" ;; esac
+          case " $MODULE " in *" $p "*) f="$f --module" ;; esac
+          bash ml-dev/build_fork.sh $p $f
       - name: Zip
         run: |
           p=${{ matrix.platform }}
-          if [ "$p" = EOSM.202 ]; then d=ml-dev/out/fork; else d=ml-dev/out/fork-$p; fi
-          case " $NODARK " in *" $p "*) d=ml-dev/out/fork-$p-nodark ;; esac
+          s=""
+          case " $NODARK " in *" $p "*) s="$s-nodark" ;; esac
+          case " $MODULE " in *" $p "*) s="$s-module" ;; esac
+          if [ "$p" = EOSM.202 ] && [ -z "$s" ]; then d=ml-dev/out/fork; else d=ml-dev/out/fork-$p$s; fi
           cp ml-dev/CAMERA-README.txt "$d/M-FILM-README.txt"
           # the licence and the notices travel with the binaries (GPL-2.0 section 1; the MIT notice of
           # Film-Luts, whose LUTs the colour tables and samples in ML/ are made from)
@@ -69,15 +76,15 @@ jobs:
           path: M-Film-camera-${{ matrix.platform }}.zip
           if-no-files-found: error
 
-  # builds for testers, not for releases: cameras where the full one may not fit (see the issue that
-  # asked for it). Their artifacts are named test-..., which the release leaves out.
-  camera-test:
+  # the film OS as a module (build_fork.sh --module) for every camera whose zip above has it built in:
+  # released next to it as M-Film-camera-<camera>-module.zip, for testers to try (ml-dev/MEMORY.md)
+  camera-module:
     strategy:
       fail-fast: false
       matrix:
-        platform: [6D.116]    # built --no-darkroom
+        platform: [EOSM.202, 650D.104, 700D.115, 6D.116, 5D3.113, 5D3.123, 60D.111, 500D.111, 50D.109, 5D2.212]  # from ml-dev/cameras.txt: built, and not ":module"
     runs-on: ubuntu-24.04
-    name: camera ${{ matrix.platform }} (no darkroom, for testing)
+    name: camera ${{ matrix.platform }} (film OS as a module)
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -92,26 +99,65 @@ jobs:
           git -C "$HOME/ml/magiclantern_simplified" checkout -q ed3e7c0dfacfdeaf3349dee73edf9e3621217462
           arm-none-eabi-gcc --version | head -1
       - name: Build
-        run: bash ml-dev/build_fork.sh ${{ matrix.platform }} --no-darkroom
+        run: bash ml-dev/build_fork.sh ${{ matrix.platform }} --module
       - name: Zip
         run: |
           p=${{ matrix.platform }}
-          d=ml-dev/out/fork-$p-nodark
+          d=ml-dev/out/fork-$p-module
+          cp ml-dev/CAMERA-README.txt "$d/M-FILM-README.txt"
+          cp LICENSE "$d/LICENSE.txt"
+          cp THIRD_PARTY.md "$d/THIRD_PARTY.txt"
+          (cd "$d" && zip -qr "$GITHUB_WORKSPACE/M-Film-camera-$p-module.zip" .)
+          ls -la M-Film-camera-$p-module.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M-Film-camera-${{ matrix.platform }}-module
+          path: M-Film-camera-${{ matrix.platform }}-module.zip
+          if-no-files-found: error
+
+  # builds for testers, not for releases. Their artifacts are named test-..., which the release leaves out.
+  camera-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { platform: 6D.116,   flags: --no-darkroom, suffix: -nodark }
+    runs-on: ubuntu-24.04
+    name: camera ${{ matrix.platform }}${{ matrix.suffix }} (for testing)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"   # ML's module build still imports distutils (gone in 3.12)
+      - name: Toolchain and Magic Lantern (the commit the fork is made against)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gcc-arm-none-eabi binutils-arm-none-eabi zip
+          python -m pip install -q numpy scipy pillow segno docutils
+          git clone -q --filter=blob:none https://github.com/reticulatedpines/magiclantern_simplified.git "$HOME/ml/magiclantern_simplified"
+          git -C "$HOME/ml/magiclantern_simplified" checkout -q ed3e7c0dfacfdeaf3349dee73edf9e3621217462
+          arm-none-eabi-gcc --version | head -1
+      - name: Build
+        run: bash ml-dev/build_fork.sh ${{ matrix.platform }} ${{ matrix.flags }}
+      - name: Zip
+        run: |
+          p=${{ matrix.platform }}
+          d=ml-dev/out/fork-$p${{ matrix.suffix }}
           cp ml-dev/CAMERA-README.txt "$d/M-FILM-README.txt"
           # the licence and the notices travel with the binaries (GPL-2.0 section 1; the MIT notice of
           # Film-Luts, whose LUTs the colour tables and samples in ML/ are made from)
           cp LICENSE "$d/LICENSE.txt"
           cp THIRD_PARTY.md "$d/THIRD_PARTY.txt"
-          (cd "$d" && zip -qr "$GITHUB_WORKSPACE/M-Film-camera-$p-nodark.zip" .)
-          ls -la M-Film-camera-$p-nodark.zip
+          (cd "$d" && zip -qr "$GITHUB_WORKSPACE/M-Film-camera-$p${{ matrix.suffix }}.zip" .)
+          ls -la M-Film-camera-$p${{ matrix.suffix }}.zip
       - uses: actions/upload-artifact@v4
         with:
-          name: test-M-Film-camera-${{ matrix.platform }}-nodark
-          path: M-Film-camera-${{ matrix.platform }}-nodark.zip
+          name: test-M-Film-camera-${{ matrix.platform }}${{ matrix.suffix }}
+          path: M-Film-camera-${{ matrix.platform }}${{ matrix.suffix }}.zip
           if-no-files-found: error
 
   release:
-    needs: [camera]
+    needs: [camera, camera-module]
     if: ${{ startsWith(github.ref, 'refs/tags/v') || inputs.tag != '' }}
     runs-on: ubuntu-latest
     steps:
