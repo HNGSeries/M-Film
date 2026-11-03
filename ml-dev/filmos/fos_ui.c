@@ -95,6 +95,12 @@ void ui_damage_all()
     ui_damage(0, FOS_H);
 }
 
+void fos_ui_overdrawn()
+{
+    ui_clobbered = 1;
+    ui_damage_all();
+}
+
 /* ---------------------------------------------------------------- widgets */
 
 void ui_bg_restore(int x, int y, int w, int h)

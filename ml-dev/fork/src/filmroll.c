@@ -621,6 +621,8 @@ int fos_port_ms()
     return get_ms_clock();
 }
 
+static void ui_overdrawn_check();
+
 void fos_port_sleep(int ms)
 {
     msleep(ms);
@@ -646,6 +648,7 @@ void fos_port_sleep(int ms)
         palette_ours();
         ui_last_palette = now;
     }
+    ui_overdrawn_check();
 }
 
 int fos_port_key()
@@ -680,6 +683,49 @@ int fos_port_abort()
     return 0;
 }
 
+/* Canon drawing over the film OS. On some DSLRs (the 60D's exposure scale,
+ * #25 #49; the 550D's battery icon, #50) Canon keeps drawing its own screen
+ * straight onto the one we show, with its buffer held or not. Each row we
+ * put on the screen leaves a sum of what it holds; every 50 ms half the
+ * rows are read back, and a row that no longer matches means Canon drew
+ * there: the film OS then paints the whole screen again at once. The same
+ * as the top plate's check (plate_overdrawn), for every film OS screen. */
+static uint32_t ui_row_sum[FOS_H];
+
+static uint32_t row_sum(const uint8_t *row)
+{
+    const uint32_t *w = (const uint32_t *) row;
+    uint32_t a = 0, b = 0;
+    for (int x = 0; x < FOS_W / 4; x += 2) { a += w[x]; b += a; }   /* every other 4 pixels */
+    return a ^ (b << 1);
+}
+
+static void ui_overdrawn_check()
+{
+    static int last = 0, half = 0, times = 0, in_a_row = 0, off = 0;
+    int now = get_ms_clock();
+    if (off || now - last < 50) return;
+    last = now;
+    uint8_t *vram = bmp_vram_real();
+    if (!vram || !DISPLAY_IS_ON) return;
+    half ^= 1;
+    int y = half;
+    for (; y < FOS_H; y += 2)
+        if (row_sum(vram + y * BMPPITCH) != ui_row_sum[y])
+            break;
+    if (y >= FOS_H) { in_a_row = 0; return; }
+    /* never matching even after painting it again (2 s of checks): this
+     * camera doesn't read back what we wrote, so stop checking */
+    if (++in_a_row > 40)
+    {
+        off = 1;
+        dbg("film os: the screen never reads back as drawn (row %d), not checking it", y);
+        return;
+    }
+    if (times++ % 50 == 0) dbg("film os: Canon drew over the screen (%d times, row %d)", times, y);
+    fos_ui_overdrawn();
+}
+
 void fos_port_present(const uint8_t *rows, int pitch, int y0, int y1)
 {
     uint8_t *vram = bmp_vram_real();
@@ -688,7 +734,10 @@ void fos_port_present(const uint8_t *rows, int pitch, int y0, int y1)
     y0 = COERCE(y0, 0, FOS_H);
     y1 = COERCE(y1, y0, FOS_H);
     for (int y = y0; y < y1; y++)
+    {
         memcpy(vram + y * BMPPITCH, rows + (y - y0) * pitch, FOS_W);
+        ui_row_sum[y] = row_sum(vram + y * BMPPITCH);
+    }
 }
 
 void fos_port_palette()

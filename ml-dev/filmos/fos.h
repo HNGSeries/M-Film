@@ -220,6 +220,7 @@ void fos_hud_plate_clear(uint8_t *vram, int pitch, const struct fos_hud_palette 
 
 void fos_ui_init();
 void fos_ui_run(int screen);
+void fos_ui_overdrawn();            /* the port saw something else draw on the screen: paint it all again */
 
 /* canister art, fos_film.c; quality 2 = everything, 1 = no texture
  * filtering, 0 = no reflections either (the UI lowers it on a slow camera) */

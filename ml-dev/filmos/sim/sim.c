@@ -63,12 +63,49 @@ static void dump()
     last_dump = now_ms;
 }
 
+/* FOS_OVERDRAW=1: "Canon" scribbles on the screen every 700 ms, as the 60D
+ * and 550D do, and the port tells the film OS (fos_ui_overdrawn), as the
+ * camera's check does. Every scribbled row must be painted again within
+ * three frames, or the screen on show doesn't repaint all of itself. */
+static uint8_t overdrawn_row[FOS_H];
+static int overdraw_wait, overdraw_n, overdraw_missed;
+
+static void overdraw_step()
+{
+    static int on = -1, last = 0;
+    if (on < 0) on = getenv("FOS_OVERDRAW") != 0;
+    if (!on) return;
+    if (overdraw_wait && --overdraw_wait == 0)
+    {
+        int y0 = -1, y1 = -1;
+        for (int y = 0; y < FOS_H; y++) if (overdrawn_row[y]) { if (y0 < 0) y0 = y; y1 = y; }
+        if (y0 >= 0)
+        {
+            overdraw_missed++;
+            fprintf(stderr, "[%6d ms] overdraw: rows %d-%d not painted again\n", now_ms, y0, y1);
+            memset(overdrawn_row, 0, sizeof(overdrawn_row));
+        }
+    }
+    if (overdraw_wait || now_ms - last < 700) return;
+    last = now_ms;
+    int y0 = 40 + (overdraw_n * 97) % 360, x0 = 60 + (overdraw_n * 151) % 480;
+    for (int y = y0; y < y0 + 30; y++)
+    {
+        memset(&screen[y * FOS_W + x0], 255, 160);
+        overdrawn_row[y] = 1;
+    }
+    overdraw_n++;
+    overdraw_wait = 3;
+    fos_ui_overdrawn();
+}
+
 void fos_port_sleep(int ms)
 {
     /* FOS_FULL=1: every frame redrawn whole, to check the partial redraws */
     static int full = -1;
     if (full < 0) full = getenv("FOS_FULL") != 0;
     if (full) ui_clobbered = 1;
+    overdraw_step();
     if (frame_dirty)
     {
         now_ms += FRAME_MS;
@@ -93,7 +130,10 @@ int fos_port_abort()
 void fos_port_present(const uint8_t *rows, int pitch, int y0, int y1)
 {
     for (int y = y0; y < y1; y++)
+    {
         memcpy(&screen[y * FOS_W], &rows[(y - y0) * pitch], FOS_W);
+        overdrawn_row[y] = 0;
+    }
     frame_dirty = 1;
 }
 
@@ -239,5 +279,6 @@ int main(int argc, char **argv)
     fos_ui_run(open);
     if (frame_dirty) dump();
     fprintf(stderr, "%d frames, %d ms\n", frame_no, now_ms);
+    if (overdraw_n) fprintf(stderr, "overdraw: %d scribbles, %d not painted again\n", overdraw_n, overdraw_missed);
     return 0;
 }

@@ -141,28 +141,31 @@ index 9412f9301..6c9da4f53 100644
  mlv_play
  pic_view
 diff --git a/platform/550D.109/Makefile b/platform/550D.109/Makefile
-index d7b8d6f03..47d22dfd0 100644
+index d7b8d6f03..b7479c3a7 100644
 --- a/platform/550D.109/Makefile
 +++ b/platform/550D.109/Makefile
 @@ -22,6 +22,7 @@ ML_BOOT_OBJ = boot-d45-am.o
  ML_PICSTYLE_AUTO = n
  
  CONFIG_LVAPP_HACK_RELOC = y
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmhook.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/550D.109/features.h b/platform/550D.109/features.h
-index fd2485377..104598425 100644
+index fd2485377..bfd9a86c8 100644
 --- a/platform/550D.109/features.h
 +++ b/platform/550D.109/features.h
-@@ -12,3 +12,6 @@
+@@ -12,3 +12,9 @@
  #undef FEATURE_LV_BUTTON_RATE_UPDOWN // Canon uses up/down in play mode
  
  #undef FEATURE_BULB_TIMER_SHOW_PREVIOUS_PIC // screen remains black
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
++
++/* film-mode fork: the film OS is a module (build_fork.sh --module) */
++#define FEATURE_FILMOS_MODULE
 diff --git a/platform/550D.109/modules.included b/platform/550D.109/modules.included
 index edc1dfbba..b8ec816ba 100644
 --- a/platform/550D.109/modules.included
@@ -723,10 +726,10 @@ index 000000000..9ad612889
 +
 diff --git a/src/filmroll.c b/src/filmroll.c
 new file mode 100644
-index 000000000..7d265d8b8
+index 000000000..bd294ee00
 --- /dev/null
 +++ b/src/filmroll.c
-@@ -0,0 +1,1611 @@
+@@ -0,0 +1,1660 @@
 +/* filmroll: a Canon camera as a film camera (built into this ML fork).
 + * Made on the EOS M; 100D, 650D, 700D and others build from the same code.
 + *
@@ -1350,6 +1353,8 @@ index 000000000..7d265d8b8
 +    return get_ms_clock();
 +}
 +
++static void ui_overdrawn_check();
++
 +void fos_port_sleep(int ms)
 +{
 +    msleep(ms);
@@ -1375,6 +1380,7 @@ index 000000000..7d265d8b8
 +        palette_ours();
 +        ui_last_palette = now;
 +    }
++    ui_overdrawn_check();
 +}
 +
 +int fos_port_key()
@@ -1409,6 +1415,49 @@ index 000000000..7d265d8b8
 +    return 0;
 +}
 +
++/* Canon drawing over the film OS. On some DSLRs (the 60D's exposure scale,
++ * #25 #49; the 550D's battery icon, #50) Canon keeps drawing its own screen
++ * straight onto the one we show, with its buffer held or not. Each row we
++ * put on the screen leaves a sum of what it holds; every 50 ms half the
++ * rows are read back, and a row that no longer matches means Canon drew
++ * there: the film OS then paints the whole screen again at once. The same
++ * as the top plate's check (plate_overdrawn), for every film OS screen. */
++static uint32_t ui_row_sum[FOS_H];
++
++static uint32_t row_sum(const uint8_t *row)
++{
++    const uint32_t *w = (const uint32_t *) row;
++    uint32_t a = 0, b = 0;
++    for (int x = 0; x < FOS_W / 4; x += 2) { a += w[x]; b += a; }   /* every other 4 pixels */
++    return a ^ (b << 1);
++}
++
++static void ui_overdrawn_check()
++{
++    static int last = 0, half = 0, times = 0, in_a_row = 0, off = 0;
++    int now = get_ms_clock();
++    if (off || now - last < 50) return;
++    last = now;
++    uint8_t *vram = bmp_vram_real();
++    if (!vram || !DISPLAY_IS_ON) return;
++    half ^= 1;
++    int y = half;
++    for (; y < FOS_H; y += 2)
++        if (row_sum(vram + y * BMPPITCH) != ui_row_sum[y])
++            break;
++    if (y >= FOS_H) { in_a_row = 0; return; }
++    /* never matching even after painting it again (2 s of checks): this
++     * camera doesn't read back what we wrote, so stop checking */
++    if (++in_a_row > 40)
++    {
++        off = 1;
++        dbg("film os: the screen never reads back as drawn (row %d), not checking it", y);
++        return;
++    }
++    if (times++ % 50 == 0) dbg("film os: Canon drew over the screen (%d times, row %d)", times, y);
++    fos_ui_overdrawn();
++}
++
 +void fos_port_present(const uint8_t *rows, int pitch, int y0, int y1)
 +{
 +    uint8_t *vram = bmp_vram_real();
@@ -1417,7 +1466,10 @@ index 000000000..7d265d8b8
 +    y0 = COERCE(y0, 0, FOS_H);
 +    y1 = COERCE(y1, y0, FOS_H);
 +    for (int y = y0; y < y1; y++)
++    {
 +        memcpy(vram + y * BMPPITCH, rows + (y - y0) * pitch, FOS_W);
++        ui_row_sum[y] = row_sum(vram + y * BMPPITCH);
++    }
 +}
 +
 +void fos_port_palette()
@@ -2368,10 +2420,10 @@ index 000000000..c465a6cd1
 +#endif
 diff --git a/src/fos.h b/src/fos.h
 new file mode 100644
-index 000000000..f294ab5d9
+index 000000000..1df742bc0
 --- /dev/null
 +++ b/src/fos.h
-@@ -0,0 +1,242 @@
+@@ -0,0 +1,243 @@
 +/* fos: the film OS - the EOS M's own user interface on top of Magic Lantern.
 + *
 + * Everything the user sees (film shelf, home, settings, roll status,
@@ -2594,6 +2646,7 @@ index 000000000..f294ab5d9
 +
 +void fos_ui_init();
 +void fos_ui_run(int screen);
++void fos_ui_overdrawn();            /* the port saw something else draw on the screen: paint it all again */
 +
 +/* canister art, fos_film.c; quality 2 = everything, 1 = no texture
 + * filtering, 0 = no reflections either (the UI lowers it on a slow camera) */
@@ -16314,10 +16367,10 @@ index 000000000..f6292051c
 +}
 diff --git a/src/fos_ui.c b/src/fos_ui.c
 new file mode 100644
-index 000000000..8ba213a44
+index 000000000..03cf98f4c
 --- /dev/null
 +++ b/src/fos_ui.c
-@@ -0,0 +1,936 @@
+@@ -0,0 +1,942 @@
 +/* fos_ui: the loop, navigation, transitions and shared widgets of the
 + * film OS. The screens themselves are in fos_shelf.c and fos_pages.c.
 + *
@@ -16413,6 +16466,12 @@ index 000000000..8ba213a44
 +void ui_damage_all()
 +{
 +    ui_damage(0, FOS_H);
++}
++
++void fos_ui_overdrawn()
++{
++    ui_clobbered = 1;
++    ui_damage_all();
 +}
 +
 +/* ---------------------------------------------------------------- widgets */
