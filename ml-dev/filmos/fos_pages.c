@@ -286,7 +286,7 @@ enum { IT_TOGGLE, IT_CHOICE, IT_FSTOP, IT_ACTION, IT_INFO, IT_LEVEL, IT_PAGE };
 
 #define PAGE_SYSTEM  2
 #define PAGE_SCREEN  3
-#define SYS_SCREEN_ROW 2                /* where Screen colour sits in System */
+#define SYS_SCREEN_ROW 3                /* where Screen colour sits in System */
 #define ACT_SCR_RESET 100               /* handled here, not by the port */
 
 struct item
@@ -303,6 +303,7 @@ static const char *const wind_choices[] = { "Off", "Reminder", "Locks shutter" }
 static const char *const apkey_choices[] = { "Dial in Av", "Up / Down", "Menu only" };
 static const char *const start_choices[] = { "Off", "When no film", "Always" };
 static const char *const mode_choices[] = { "Basic", "Realistic" };
+static const char *const flip_choices[] = { "Auto", "Normal", "Upside down", "Mirrored" };
 
 static const struct item finder_items[] =
 {
@@ -326,6 +327,7 @@ static const struct item system_items[] =
     { "Start screen", IT_CHOICE, FS_STARTUP, start_choices, 3, "The film shelf when the camera turns on." },
     { "Boot animation", IT_TOGGLE, FS_BOOTANIM, 0, 0, "The aperture opening on the name at power on." },
     { "Screen colour", IT_PAGE, PAGE_SCREEN, 0, 0, "Match these colours to what you see around you." },
+    { "Screen orientation", IT_CHOICE, FS_SCR_FLIP, flip_choices, 4, "Auto follows the hinge. Set one if the screen shows the wrong way round." },
     { "PLAY shows prints only", IT_TOGGLE, FS_PLAYLOCK, 0, 0, "Canon's playback would show frames the darkroom hasn't developed." },
     { "Re-apply film settings", IT_ACTION, FA_REAPPLY, 0, 0, "After changing picture style, white balance or ISO by hand." },
     { "Canon menu", IT_ACTION, FA_CANON_MENU, 0, 0, "Leave and open the camera's own menu (format card, RAW...)." },
@@ -345,16 +347,39 @@ static const struct item screen_items[] =
     { "Reset", IT_ACTION, ACT_SCR_RESET, 0, 0, "Back to the colours as designed." },
 };
 
-static const struct { const char *title; const char *sub; const struct item *items; int n; } pages[] =
+#define NITEMS(a) ((int) (sizeof(a) / sizeof((a)[0])))
+
+static struct { const char *title; const char *sub; const struct item *items; int n; } pages[] =
 {
     { "Viewfinder", "What you see in LiveView while you shoot", finder_items, 4 },
     { "Lens", "Aperture for manual lenses", lens_items, 4 },
-    { "System", "Film mode, screen colour, start up and the Canon menu", system_items, 10 },
+    { "System", "Film mode, screen colour, start up and the Canon menu", system_items, NITEMS(system_items) },
     { "Screen colour", "Live: the whole film OS changes as you go", screen_items, 5 },
 };
 
 static int page, page_sel, page_top;
-static struct spring page_hl, page_scroll, knob[8];
+#define P_KNOBS   12            /* one per row: more rows than any page has */
+static struct spring page_hl, page_scroll, knob[P_KNOBS];
+
+/* The System page without what this camera can't do (the port answers -1
+ * for it: screen orientation on a fixed screen), worked out once. */
+static struct item system_here[NITEMS(system_items)];
+
+static void pages_fit()
+{
+    static int done = 0;
+    if (done) return;
+    done = 1;
+    int n = 0;
+    for (int i = 0; i < NITEMS(system_items); i++)
+    {
+        const struct item *it = &system_items[i];
+        if (it->kind == IT_CHOICE && fos_port_get(it->setting) < 0) continue;
+        system_here[n++] = *it;
+    }
+    pages[PAGE_SYSTEM].items = system_here;
+    pages[PAGE_SYSTEM].n = n;
+}
 static int help_fade;           /* ms since the selection changed */
 
 #define P_LIST_Y  118
@@ -418,6 +443,7 @@ static float knob_target(const struct item *it)
 
 void page_enter(int arg)
 {
+    pages_fit();
     /* from home: a page; between pages: page | row << 4 */
     if (ui_from() == SCR_HOME || ui_from() == SCR_PAGE)
     {
@@ -427,7 +453,7 @@ void page_enter(int arg)
     page_top = page_sel >= P_ROWS ? page_sel - P_ROWS + 1 : 0;
     page_hl.x = page_sel; page_hl.v = 0;
     page_scroll.x = page_top; page_scroll.v = 0;
-    for (int i = 0; i < pages[page].n && i < 8; i++)
+    for (int i = 0; i < pages[page].n && i < P_KNOBS; i++)
     {
         knob[i].x = knob_target(&pages[page].items[i]);
         knob[i].v = 0;
@@ -536,7 +562,7 @@ int page_update(int dt)
     int dirty = 0;
     if (spring_step(&page_hl, page_sel, dt, 3.6f, 0.82f)) dirty |= D_LIST;
     if (spring_step(&page_scroll, page_top, dt, 3.0f, 0.95f)) dirty |= D_LIST;
-    for (int i = 0; i < pages[page].n && i < 8; i++)
+    for (int i = 0; i < pages[page].n && i < P_KNOBS; i++)
         if (spring_step(&knob[i], knob_target(&pages[page].items[i]), dt, 4.0f, 0.75f))
             dirty |= D_LIST | (page == 0 ? D_PREV : 0);     /* the viewfinder preview follows the switches */
     if (help_fade < 400) { help_fade += dt; dirty |= D_HELP; }

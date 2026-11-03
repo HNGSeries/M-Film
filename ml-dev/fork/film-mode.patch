@@ -723,10 +723,10 @@ index 000000000..9ad612889
 +
 diff --git a/src/filmroll.c b/src/filmroll.c
 new file mode 100644
-index 000000000..b58b88130
+index 000000000..7d265d8b8
 --- /dev/null
 +++ b/src/filmroll.c
-@@ -0,0 +1,1556 @@
+@@ -0,0 +1,1611 @@
 +/* filmroll: a Canon camera as a film camera (built into this ML fork).
 + * Made on the EOS M; 100D, 650D, 700D and others build from the same code.
 + *
@@ -817,6 +817,7 @@ index 000000000..b58b88130
 +static CONFIG_INT("filmroll.scr_sat",   scr_sat,          0);   /* -6..6 */
 +static CONFIG_INT("filmroll.scr_warm",  scr_warm,         0);
 +static CONFIG_INT("filmroll.scr_bright", scr_bright,      0);
++static CONFIG_INT("filmroll.scr_flip",  scr_flip,         0);   /* 0 Canon's hinge, 1 normal, 2 upside down, 3 mirrored */
 +
 +/* roll state, kept across power cycles */
 +static CONFIG_INT("filmroll.loaded",    roll_loaded,      0);
@@ -1587,6 +1588,54 @@ index 000000000..b58b88130
 +    }
 +}
 +
++/* Screen orientation on the swivel screens (60D, 600D, 650D, 700D, 70D, #49).
++ * Canon turns the whole screen, its own and ours, by the hinge's switch. A
++ * broken switch leaves it the wrong way round, and Canon's menu has nothing
++ * to set it by hand; ML's Display menu does it once, until the switch says
++ * otherwise. With an orientation set here, Canon's NormalDisplay /
++ * ReverseDisplay / MirrorDisplay put it back whenever the camera changes it
++ * (Canon's 0 normal, 1 reverse, 2 mirror, as in ML's display_orientation_toggle).
++ * Back on Auto, the screen goes back to the way Canon had it. */
++#if defined(CONFIG_VARIANGLE_DISPLAY) && defined(DISPLAY_ORIENTATION)
++#define CAN_FLIP 1
++extern void NormalDisplay();
++extern void ReverseDisplay();
++extern void MirrorDisplay();
++
++static void flip_to(int o)
++{
++    if (o == 0) NormalDisplay();
++    else if (o == 1) ReverseDisplay();
++    else MirrorDisplay();
++}
++
++static void flip_step(int now_please)
++{
++    static int canon_had = -1, last = 0, times = 0;
++    if (!DISPLAY_IS_ON) return;
++    int o = DISPLAY_ORIENTATION;
++    if (o < 0 || o > 2) return;
++    if (!scr_flip)
++    {
++        /* back to Auto: the way Canon had it before we turned it */
++        if (canon_had >= 0 && o != canon_had) flip_to(canon_had);
++        canon_had = -1;
++        return;
++    }
++    int want = COERCE(scr_flip - 1, 0, 2);
++    if (o == want) return;
++    int now = get_ms_clock();
++    if (!now_please && last && now - last < 300) return;   /* give Canon's change time to land */
++    last = now ? now : 1;
++    if (canon_had < 0) canon_had = o;
++    if (times++ < 20) dbg("screen: Canon had orientation %d, set %d", o, want);
++    flip_to(want);
++}
++#else
++#define CAN_FLIP 0
++static void flip_step(int now_please) { (void) now_please; }
++#endif
++
 +static int *setting_var(int s)
 +{
 +    switch (s)
@@ -1609,6 +1658,7 @@ index 000000000..b58b88130
 +        case FS_SCR_SAT:    return &scr_sat;
 +        case FS_SCR_WARM:   return &scr_warm;
 +        case FS_SCR_BRIGHT: return &scr_bright;
++        case FS_SCR_FLIP:   return &scr_flip;
 +    }
 +    return 0;
 +}
@@ -1617,6 +1667,7 @@ index 000000000..b58b88130
 +{
 +    int *v = setting_var(s);
 +    if (s == FS_FSTOP) return current_fstop();
++    if (s == FS_SCR_FLIP && !CAN_FLIP) return -1;
 +    return v ? *v : 0;
 +}
 +
@@ -1625,6 +1676,7 @@ index 000000000..b58b88130
 +    int *v = setting_var(s);
 +    if (v) *v = value;
 +    hud_dirty = 1;
++    if (s == FS_SCR_FLIP) flip_step(1);
 +    /* screen colour: the whole film OS changes at once */
 +    if (s == FS_SCR_STD || s == FS_SCR_SAT || s == FS_SCR_WARM || s == FS_SCR_BRIGHT)
 +    {
@@ -2260,7 +2312,10 @@ index 000000000..b58b88130
 +        }
 +        else if (end_due && !ROLL_FINISHED) end_due = 0;
 +        if (k % 2 == 0)
++        {
 +            hud_step();                     /* every 100 ms */
++            flip_step(0);
++        }
 +#if !FOS_LV_ONLY
 +        else if (plate_overdrawn())
 +            hud_step();                     /* Canon drew over the plate: at once */
@@ -2313,10 +2368,10 @@ index 000000000..c465a6cd1
 +#endif
 diff --git a/src/fos.h b/src/fos.h
 new file mode 100644
-index 000000000..89552b20a
+index 000000000..f294ab5d9
 --- /dev/null
 +++ b/src/fos.h
-@@ -0,0 +1,240 @@
+@@ -0,0 +1,242 @@
 +/* fos: the film OS - the EOS M's own user interface on top of Magic Lantern.
 + *
 + * Everything the user sees (film shelf, home, settings, roll status,
@@ -2427,6 +2482,8 @@ index 000000000..89552b20a
 +    FS_FILM, FS_EXP,
 +    FS_SCR_STD,         /* screen colour: 0 Canon's conversion, 1 Rec.709 */
 +    FS_SCR_SAT, FS_SCR_WARM, FS_SCR_BRIGHT,     /* -FOS_SCR_STEPS..FOS_SCR_STEPS */
++    FS_SCR_FLIP,        /* swivel screens: 0 as Canon's hinge says, 1 normal, 2 upside down, 3 mirrored;
++                           the port answers -1 on a camera that can't, and the item isn't shown */
 +    FS_COUNT
 +};
 +#define FOS_SCR_STEPS 6
@@ -14131,10 +14188,10 @@ index 000000000..595b475b0
 +void prints_draw() { nd_draw(); }
 diff --git a/src/fos_pages.c b/src/fos_pages.c
 new file mode 100644
-index 000000000..e5b45de23
+index 000000000..b8436dd81
 --- /dev/null
 +++ b/src/fos_pages.c
-@@ -0,0 +1,1103 @@
+@@ -0,0 +1,1129 @@
 +/* fos_pages: home, the settings pages and the roll in the camera.
 + *
 + * Home is the film OS's main menu: the roll you are shooting on the left
@@ -14423,7 +14480,7 @@ index 000000000..e5b45de23
 +
 +#define PAGE_SYSTEM  2
 +#define PAGE_SCREEN  3
-+#define SYS_SCREEN_ROW 2                /* where Screen colour sits in System */
++#define SYS_SCREEN_ROW 3                /* where Screen colour sits in System */
 +#define ACT_SCR_RESET 100               /* handled here, not by the port */
 +
 +struct item
@@ -14440,6 +14497,7 @@ index 000000000..e5b45de23
 +static const char *const apkey_choices[] = { "Dial in Av", "Up / Down", "Menu only" };
 +static const char *const start_choices[] = { "Off", "When no film", "Always" };
 +static const char *const mode_choices[] = { "Basic", "Realistic" };
++static const char *const flip_choices[] = { "Auto", "Normal", "Upside down", "Mirrored" };
 +
 +static const struct item finder_items[] =
 +{
@@ -14463,6 +14521,7 @@ index 000000000..e5b45de23
 +    { "Start screen", IT_CHOICE, FS_STARTUP, start_choices, 3, "The film shelf when the camera turns on." },
 +    { "Boot animation", IT_TOGGLE, FS_BOOTANIM, 0, 0, "The aperture opening on the name at power on." },
 +    { "Screen colour", IT_PAGE, PAGE_SCREEN, 0, 0, "Match these colours to what you see around you." },
++    { "Screen orientation", IT_CHOICE, FS_SCR_FLIP, flip_choices, 4, "Auto follows the hinge. Set one if the screen shows the wrong way round." },
 +    { "PLAY shows prints only", IT_TOGGLE, FS_PLAYLOCK, 0, 0, "Canon's playback would show frames the darkroom hasn't developed." },
 +    { "Re-apply film settings", IT_ACTION, FA_REAPPLY, 0, 0, "After changing picture style, white balance or ISO by hand." },
 +    { "Canon menu", IT_ACTION, FA_CANON_MENU, 0, 0, "Leave and open the camera's own menu (format card, RAW...)." },
@@ -14482,16 +14541,39 @@ index 000000000..e5b45de23
 +    { "Reset", IT_ACTION, ACT_SCR_RESET, 0, 0, "Back to the colours as designed." },
 +};
 +
-+static const struct { const char *title; const char *sub; const struct item *items; int n; } pages[] =
++#define NITEMS(a) ((int) (sizeof(a) / sizeof((a)[0])))
++
++static struct { const char *title; const char *sub; const struct item *items; int n; } pages[] =
 +{
 +    { "Viewfinder", "What you see in LiveView while you shoot", finder_items, 4 },
 +    { "Lens", "Aperture for manual lenses", lens_items, 4 },
-+    { "System", "Film mode, screen colour, start up and the Canon menu", system_items, 10 },
++    { "System", "Film mode, screen colour, start up and the Canon menu", system_items, NITEMS(system_items) },
 +    { "Screen colour", "Live: the whole film OS changes as you go", screen_items, 5 },
 +};
 +
 +static int page, page_sel, page_top;
-+static struct spring page_hl, page_scroll, knob[8];
++#define P_KNOBS   12            /* one per row: more rows than any page has */
++static struct spring page_hl, page_scroll, knob[P_KNOBS];
++
++/* The System page without what this camera can't do (the port answers -1
++ * for it: screen orientation on a fixed screen), worked out once. */
++static struct item system_here[NITEMS(system_items)];
++
++static void pages_fit()
++{
++    static int done = 0;
++    if (done) return;
++    done = 1;
++    int n = 0;
++    for (int i = 0; i < NITEMS(system_items); i++)
++    {
++        const struct item *it = &system_items[i];
++        if (it->kind == IT_CHOICE && fos_port_get(it->setting) < 0) continue;
++        system_here[n++] = *it;
++    }
++    pages[PAGE_SYSTEM].items = system_here;
++    pages[PAGE_SYSTEM].n = n;
++}
 +static int help_fade;           /* ms since the selection changed */
 +
 +#define P_LIST_Y  118
@@ -14555,6 +14637,7 @@ index 000000000..e5b45de23
 +
 +void page_enter(int arg)
 +{
++    pages_fit();
 +    /* from home: a page; between pages: page | row << 4 */
 +    if (ui_from() == SCR_HOME || ui_from() == SCR_PAGE)
 +    {
@@ -14564,7 +14647,7 @@ index 000000000..e5b45de23
 +    page_top = page_sel >= P_ROWS ? page_sel - P_ROWS + 1 : 0;
 +    page_hl.x = page_sel; page_hl.v = 0;
 +    page_scroll.x = page_top; page_scroll.v = 0;
-+    for (int i = 0; i < pages[page].n && i < 8; i++)
++    for (int i = 0; i < pages[page].n && i < P_KNOBS; i++)
 +    {
 +        knob[i].x = knob_target(&pages[page].items[i]);
 +        knob[i].v = 0;
@@ -14673,7 +14756,7 @@ index 000000000..e5b45de23
 +    int dirty = 0;
 +    if (spring_step(&page_hl, page_sel, dt, 3.6f, 0.82f)) dirty |= D_LIST;
 +    if (spring_step(&page_scroll, page_top, dt, 3.0f, 0.95f)) dirty |= D_LIST;
-+    for (int i = 0; i < pages[page].n && i < 8; i++)
++    for (int i = 0; i < pages[page].n && i < P_KNOBS; i++)
 +        if (spring_step(&knob[i], knob_target(&pages[page].items[i]), dt, 4.0f, 0.75f))
 +            dirty |= D_LIST | (page == 0 ? D_PREV : 0);     /* the viewfinder preview follows the switches */
 +    if (help_fade < 400) { help_fade += dt; dirty |= D_HELP; }

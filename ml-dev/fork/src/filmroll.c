@@ -88,6 +88,7 @@ static CONFIG_INT("filmroll.scr_std",   scr_std,          0);   /* screen colour
 static CONFIG_INT("filmroll.scr_sat",   scr_sat,          0);   /* -6..6 */
 static CONFIG_INT("filmroll.scr_warm",  scr_warm,         0);
 static CONFIG_INT("filmroll.scr_bright", scr_bright,      0);
+static CONFIG_INT("filmroll.scr_flip",  scr_flip,         0);   /* 0 Canon's hinge, 1 normal, 2 upside down, 3 mirrored */
 
 /* roll state, kept across power cycles */
 static CONFIG_INT("filmroll.loaded",    roll_loaded,      0);
@@ -858,6 +859,54 @@ void fos_port_roll(struct fos_roll *r)
     }
 }
 
+/* Screen orientation on the swivel screens (60D, 600D, 650D, 700D, 70D, #49).
+ * Canon turns the whole screen, its own and ours, by the hinge's switch. A
+ * broken switch leaves it the wrong way round, and Canon's menu has nothing
+ * to set it by hand; ML's Display menu does it once, until the switch says
+ * otherwise. With an orientation set here, Canon's NormalDisplay /
+ * ReverseDisplay / MirrorDisplay put it back whenever the camera changes it
+ * (Canon's 0 normal, 1 reverse, 2 mirror, as in ML's display_orientation_toggle).
+ * Back on Auto, the screen goes back to the way Canon had it. */
+#if defined(CONFIG_VARIANGLE_DISPLAY) && defined(DISPLAY_ORIENTATION)
+#define CAN_FLIP 1
+extern void NormalDisplay();
+extern void ReverseDisplay();
+extern void MirrorDisplay();
+
+static void flip_to(int o)
+{
+    if (o == 0) NormalDisplay();
+    else if (o == 1) ReverseDisplay();
+    else MirrorDisplay();
+}
+
+static void flip_step(int now_please)
+{
+    static int canon_had = -1, last = 0, times = 0;
+    if (!DISPLAY_IS_ON) return;
+    int o = DISPLAY_ORIENTATION;
+    if (o < 0 || o > 2) return;
+    if (!scr_flip)
+    {
+        /* back to Auto: the way Canon had it before we turned it */
+        if (canon_had >= 0 && o != canon_had) flip_to(canon_had);
+        canon_had = -1;
+        return;
+    }
+    int want = COERCE(scr_flip - 1, 0, 2);
+    if (o == want) return;
+    int now = get_ms_clock();
+    if (!now_please && last && now - last < 300) return;   /* give Canon's change time to land */
+    last = now ? now : 1;
+    if (canon_had < 0) canon_had = o;
+    if (times++ < 20) dbg("screen: Canon had orientation %d, set %d", o, want);
+    flip_to(want);
+}
+#else
+#define CAN_FLIP 0
+static void flip_step(int now_please) { (void) now_please; }
+#endif
+
 static int *setting_var(int s)
 {
     switch (s)
@@ -880,6 +929,7 @@ static int *setting_var(int s)
         case FS_SCR_SAT:    return &scr_sat;
         case FS_SCR_WARM:   return &scr_warm;
         case FS_SCR_BRIGHT: return &scr_bright;
+        case FS_SCR_FLIP:   return &scr_flip;
     }
     return 0;
 }
@@ -888,6 +938,7 @@ int fos_port_get(int s)
 {
     int *v = setting_var(s);
     if (s == FS_FSTOP) return current_fstop();
+    if (s == FS_SCR_FLIP && !CAN_FLIP) return -1;
     return v ? *v : 0;
 }
 
@@ -896,6 +947,7 @@ void fos_port_set(int s, int value)
     int *v = setting_var(s);
     if (v) *v = value;
     hud_dirty = 1;
+    if (s == FS_SCR_FLIP) flip_step(1);
     /* screen colour: the whole film OS changes at once */
     if (s == FS_SCR_STD || s == FS_SCR_SAT || s == FS_SCR_WARM || s == FS_SCR_BRIGHT)
     {
@@ -1531,7 +1583,10 @@ static void filmroll_task()
         }
         else if (end_due && !ROLL_FINISHED) end_due = 0;
         if (k % 2 == 0)
+        {
             hud_step();                     /* every 100 ms */
+            flip_step(0);
+        }
 #if !FOS_LV_ONLY
         else if (plate_overdrawn())
             hud_step();                     /* Canon drew over the plate: at once */

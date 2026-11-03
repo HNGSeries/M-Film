@@ -38,7 +38,7 @@ static int settings[FS_COUNT] = {
     [FS_HUD] = 1, [FS_LEDS] = 1, [FS_FOCUS] = 1, [FS_WIND] = 1,
     [FS_APKEYS] = 0, [FS_LENS_WIDE] = 6, [FS_FSTOP] = 10,
     [FS_STARTUP] = 2, [FS_PLAYLOCK] = 1, [FS_BOOTANIM] = 1, [FS_DEBUG] = 0, [FS_MODE] = 0,
-    [FS_FILM] = 0, [FS_EXP] = 0,
+    [FS_FILM] = 0, [FS_EXP] = 0, [FS_SCR_FLIP] = 0,
 };
 static struct fos_roll roll = { 1, 12, 1, 36, 14, 0, "2026-10-21 18:02", 3,
     { { 14, "21:47", "2" }, { 13, "21:40", "2" }, { 12, "21:33", "2.8" } } };
@@ -135,7 +135,12 @@ void *fos_port_alloc(int size) { return malloc(size); }
 void fos_port_free(void *p) { free(p); }
 
 void fos_port_roll(struct fos_roll *r) { *r = roll; }
-int  fos_port_get(int s) { return s >= 0 && s < FS_COUNT ? settings[s] : 0; }
+int  fos_port_get(int s)
+{
+    /* the screen orientation is only on swivel screens: not on the EOS M, unless FOS_SWIVEL=1 */
+    if (s == FS_SCR_FLIP && !getenv("FOS_SWIVEL")) return -1;
+    return s >= 0 && s < FS_COUNT ? settings[s] : 0;
+}
 void fos_port_set(int s, int v)
 {
     if (s >= 0 && s < FS_COUNT) settings[s] = v;
