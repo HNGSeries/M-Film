@@ -226,14 +226,27 @@ int ui_keycap(int x, int base, const char *key)
     return w;
 }
 
+static int keycap_w(const char *key)
+{
+    return !strcmp(key, "<>") || !strcmp(key, "^v") ? 34 : fos_text_w(&fos_font_xs, key, 16) + 14;
+}
+
 void ui_hints(const struct hint *h, int n)
 {
     int base = HINTS_Y + 23;
+    /* the gap between hints closes up so the row fits the screen: with a
+     * roll in progress the shelf's six ran off the right edge (#43) */
+    int need = 0;
+    for (int i = 0; i < n; i++)
+        need += keycap_w(h[i].key) + 8 + fos_text_w(&fos_font_sm, h[i].label, 0);
+    int gap = 22, room = FOS_W - 48 - need;
+    if (n > 1 && room < gap * (n - 1)) gap = room / (n - 1);
+    if (gap < 8) gap = 8;
     int x = 24;
     for (int i = 0; i < n; i++)
     {
         x += ui_keycap(x, base, h[i].key) + 8;
-        x += fos_text(cv, &fos_font_sm, x, base - 1, h[i].label, C_TEXT3, OPAQUE, 0) + 22;
+        x += fos_text(cv, &fos_font_sm, x, base - 1, h[i].label, C_TEXT3, OPAQUE, 0) + gap;
     }
 }
 

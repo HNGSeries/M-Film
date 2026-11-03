@@ -1,29 +1,26 @@
 diff --git a/platform/100D.101/Makefile b/platform/100D.101/Makefile
-index 05832de0d..6aeb6422b 100644
+index 05832de0d..9e706a32e 100644
 --- a/platform/100D.101/Makefile
 +++ b/platform/100D.101/Makefile
 @@ -15,6 +15,7 @@ PLATFORM_ARCH = armv5te
  RESTARTSTART = 0x44C100
  ML_BOOT_OBJ = boot-d45-am.o
  ML_SRC_EXTRA_OBJS = $(BUILD_DIR)/reloc.o
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmhook.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/100D.101/features.h b/platform/100D.101/features.h
-index 18fa340fe..cb0f612f5 100644
+index 18fa340fe..0a9fb2e00 100644
 --- a/platform/100D.101/features.h
 +++ b/platform/100D.101/features.h
-@@ -12,3 +12,9 @@
+@@ -12,3 +12,6 @@
  /* Not working */
  #undef FEATURE_TRAP_FOCUS
  #undef FEATURE_MAGIC_ZOOM_FULL_SCREEN // https://bitbucket.org/hudson/magic-lantern/issues/2842
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
-+
-+/* film-mode fork: the film OS is a module (build_fork.sh --module) */
-+#define FEATURE_FILMOS_MODULE
 diff --git a/platform/100D.101/modules.included b/platform/100D.101/modules.included
 index 8428d3c4b..a3be71e80 100644
 --- a/platform/100D.101/modules.included
@@ -37,31 +34,28 @@ index 8428d3c4b..a3be71e80 100644
  mlv_play
  mlv_snd
 diff --git a/platform/1100D.105/Makefile b/platform/1100D.105/Makefile
-index 474a5bd7b..8063406cb 100644
+index 474a5bd7b..b28492c1b 100644
 --- a/platform/1100D.105/Makefile
 +++ b/platform/1100D.105/Makefile
 @@ -21,6 +21,7 @@ RESTARTSTART = 0xC80100
  ML_BOOT_OBJ = boot-d45-am.o
  
  FIRMWARE_ID_1100D = 0x80000288
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmhook.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/1100D.105/features.h b/platform/1100D.105/features.h
-index 81cc3db68..0c2e07e6b 100644
+index 81cc3db68..21ccd11c0 100644
 --- a/platform/1100D.105/features.h
 +++ b/platform/1100D.105/features.h
-@@ -32,3 +32,9 @@
+@@ -32,3 +32,6 @@
  #undef FEATURE_FLEXINFO
  #undef FEATURE_SHOW_FREE_MEMORY
  #undef CONFIG_TSKMON
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
-+
-+/* film-mode fork: the film OS is a module (build_fork.sh --module) */
-+#define FEATURE_FILMOS_MODULE
 diff --git a/platform/1100D.105/modules.included b/platform/1100D.105/modules.included
 index 70260051d..eb4ce352c 100644
 --- a/platform/1100D.105/modules.included
@@ -144,31 +138,28 @@ index 9412f9301..6c9da4f53 100644
  mlv_play
  pic_view
 diff --git a/platform/550D.109/Makefile b/platform/550D.109/Makefile
-index d7b8d6f03..b7479c3a7 100644
+index d7b8d6f03..47d22dfd0 100644
 --- a/platform/550D.109/Makefile
 +++ b/platform/550D.109/Makefile
 @@ -22,6 +22,7 @@ ML_BOOT_OBJ = boot-d45-am.o
  ML_PICSTYLE_AUTO = n
  
  CONFIG_LVAPP_HACK_RELOC = y
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmhook.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/550D.109/features.h b/platform/550D.109/features.h
-index fd2485377..bfd9a86c8 100644
+index fd2485377..104598425 100644
 --- a/platform/550D.109/features.h
 +++ b/platform/550D.109/features.h
-@@ -12,3 +12,9 @@
+@@ -12,3 +12,6 @@
  #undef FEATURE_LV_BUTTON_RATE_UPDOWN // Canon uses up/down in play mode
  
  #undef FEATURE_BULB_TIMER_SHOW_PREVIOUS_PIC // screen remains black
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
-+
-+/* film-mode fork: the film OS is a module (build_fork.sh --module) */
-+#define FEATURE_FILMOS_MODULE
 diff --git a/platform/550D.109/modules.included b/platform/550D.109/modules.included
 index edc1dfbba..b8ec816ba 100644
 --- a/platform/550D.109/modules.included
@@ -416,28 +407,31 @@ index 8428d3c4b..a3be71e80 100644
  mlv_play
  mlv_snd
 diff --git a/platform/6D.116/Makefile b/platform/6D.116/Makefile
-index 8ba969fae..dbe466cd3 100644
+index 8ba969fae..28964e2e9 100644
 --- a/platform/6D.116/Makefile
 +++ b/platform/6D.116/Makefile
 @@ -19,6 +19,7 @@ ML_BITRATE_OBJ = bitrate-5d3.o
  ML_SOUND_CODEC_OBJ = ak4646.o
  
  ML_SRC_EXTRA_OBJS = $(BUILD_DIR)/afma.o $(BUILD_DIR)/reloc.o $(BUILD_DIR)/gps.o
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmhook.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/6D.116/features.h b/platform/6D.116/features.h
-index c9d1fb870..415989d7d 100644
+index c9d1fb870..7136da36f 100644
 --- a/platform/6D.116/features.h
 +++ b/platform/6D.116/features.h
-@@ -21,3 +21,6 @@
+@@ -21,3 +21,9 @@
  #define FEATURE_GPS_TWEAKS
  
  #define FEATURE_AUDIO_REMOTE_SHOT
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
++
++/* film-mode fork: the film OS is a module (build_fork.sh --module) */
++#define FEATURE_FILMOS_MODULE
 diff --git a/platform/6D.116/modules.included b/platform/6D.116/modules.included
 index eddc7617e..6bfdee970 100644
 --- a/platform/6D.116/modules.included
@@ -451,14 +445,14 @@ index eddc7617e..6bfdee970 100644
  mlv_play
  mlv_snd
 diff --git a/platform/700D.115/Makefile b/platform/700D.115/Makefile
-index af9eb604f..0db8c8efa 100644
+index af9eb604f..373803523 100644
 --- a/platform/700D.115/Makefile
 +++ b/platform/700D.115/Makefile
 @@ -15,6 +15,7 @@ PLATFORM_ARCH = armv5te
  #
  MAIN_FIRMWARE_ADDR = 0xFF0C0000
  RESTARTSTART = 0x7EC00
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
@@ -486,31 +480,28 @@ index 8428d3c4b..a3be71e80 100644
  mlv_play
  mlv_snd
 diff --git a/platform/70D.112/Makefile b/platform/70D.112/Makefile
-index 508e2c952..e2ec59b3e 100644
+index 508e2c952..46950f467 100644
 --- a/platform/70D.112/Makefile
 +++ b/platform/70D.112/Makefile
 @@ -20,6 +20,7 @@ ML_BITRATE_OBJ = bitrate-5d3.o
  # default 0x44C000 - 0xD3C000, patched to 0x4E0000 - 0xD3C000 (592K for us).
  RESTARTSTART = 0x44C100
  ML_BOOT_OBJ = boot-d45-am.o
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmhook.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/70D.112/features.h b/platform/70D.112/features.h
-index 5095eea7d..e3daf04a3 100644
+index 5095eea7d..7db47a65b 100644
 --- a/platform/70D.112/features.h
 +++ b/platform/70D.112/features.h
-@@ -33,3 +33,9 @@
+@@ -33,3 +33,6 @@
  /* Audio Features */
  #define FEATURE_AUDIO_METERS
  #define FEATURE_AUDIO_REMOTE_SHOT
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
-+
-+/* film-mode fork: the film OS is a module (build_fork.sh --module) */
-+#define FEATURE_FILMOS_MODULE
 diff --git a/platform/70D.112/modules.included b/platform/70D.112/modules.included
 index eddc7617e..6bfdee970 100644
 --- a/platform/70D.112/modules.included
@@ -523,16 +514,51 @@ index eddc7617e..6bfdee970 100644
  mlv_lite
  mlv_play
  mlv_snd
+diff --git a/platform/7D.203/Makefile b/platform/7D.203/Makefile
+index 01a525ba4..eb4f9e8e0 100644
+--- a/platform/7D.203/Makefile
++++ b/platform/7D.203/Makefile
+@@ -1,6 +1,7 @@
+ #Makefile for 7D
+ 
+ MODEL=7D
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
+ 
+ include ../Makefile
+ 
+diff --git a/platform/7D.203/features.h b/platform/7D.203/features.h
+index 2b37c0834..01b8ecc0b 100644
+--- a/platform/7D.203/features.h
++++ b/platform/7D.203/features.h
+@@ -19,3 +19,6 @@
+ #define FEATURE_AUDIO_REMOTE_SHOT
+ 
+ #undef FEATURE_VIGNETTING_CORRECTION // requires master code
++
++/* film camera mode (src/filmroll.c) */
++#define FEATURE_FILMROLL
+diff --git a/platform/7D.203/modules.included b/platform/7D.203/modules.included
+index eddc7617e..6bfdee970 100644
+--- a/platform/7D.203/modules.included
++++ b/platform/7D.203/modules.included
+@@ -11,7 +11,6 @@ edmac
+ ettr
+ file_man
+ img_name
+-lua
+ mlv_lite
+ mlv_play
+ mlv_snd
 diff --git a/platform/EOSM.202/Makefile b/platform/EOSM.202/Makefile
-index 7e11d12a2..be468805c 100644
+index 7e11d12a2..cc4932423 100644
 --- a/platform/EOSM.202/Makefile
 +++ b/platform/EOSM.202/Makefile
-@@ -18,6 +18,7 @@ PLATFORM_ARCH = armv5te
- RESTARTSTART = 0x9E1E0
+@@ -19,5 +19,7 @@ RESTARTSTART = 0x9E1E0
  
  ML_AF_PATTERNS_OBJ = n
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
  
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/EOSM.202/features.h b/platform/EOSM.202/features.h
@@ -577,10 +603,10 @@ index 2201e76c7..01865665a 100755
      addr_AllocMem_end[1] = MOV_R0_0x4E0000_INSTR;
 diff --git a/src/filmhook.c b/src/filmhook.c
 new file mode 100644
-index 000000000..3c74011d1
+index 000000000..9ad612889
 --- /dev/null
 +++ b/src/filmhook.c
-@@ -0,0 +1,33 @@
+@@ -0,0 +1,71 @@
 +/* The film OS as a module (build_fork.sh --module): all that stays in
 + * autoexec.bin. The film OS itself (filmroll.c, fos_*.c) is ML/modules/filmos.mo,
 + * loaded after boot into Canon's memory, so it doesn't count against what the
@@ -593,6 +619,9 @@ index 000000000..3c74011d1
 +
 +#include <dryos.h>
 +#include <module.h>
++#include <fio-ml.h>
++#include <notify_box.h>
++#include <tasks.h>
 +#include "filmroll.h"
 +
 +/* defined in the module (filmroll.c); 0 until it is loaded */
@@ -614,12 +643,47 @@ index 000000000..3c74011d1
 +{
 +    return filmos_overlays();
 +}
++
++/* Without the module the camera would just show Magic Lantern's own menu,
++ * and nothing says why (#46). Once ML has had time to load its modules, say
++ * so on the screen, and in ML/FILMROLL.LOG. */
++extern char *module_lockfile;           /* module.c */
++
++static void filmhook_note(const char *why)
++{
++    NotifyBox(15000, "M-Film didn't start: %s", why);
++    FILE *f = FIO_CreateFileOrAppend("ML/FILMROLL.LOG");
++    if (f)
++    {
++        char line[160];
++        snprintf(line, sizeof(line), "filmhook: the film OS module isn't loaded: %s\n", why);
++        FIO_WriteFile(f, line, strlen(line));
++        FIO_CloseFile(f);
++    }
++}
++
++static void filmhook_task()
++{
++    for (int i = 0; i < 30 && filmos_menu_open == (void *) ret_0; i++)
++        msleep(500);                    /* ML loads modules a few seconds after start-up */
++    if (filmos_menu_open != (void *) ret_0) return;
++    uint32_t size;
++    if (module_get_number("filmos") < 0)
++        filmhook_note("ML/modules/filmos.mo isn't on the card. Copy everything in the zip again.");
++    else if (FIO_GetFileSize(module_lockfile, &size) == 0)
++        filmhook_note("Magic Lantern skipped its modules: the camera wasn't switched off cleanly last time. Switch off with the switch, then on.");
++    else
++        filmhook_note("its module didn't load. Magic Lantern's Modules tab (MENU) says why: please send us that line.");
++}
++
++TASK_CREATE("filmhook_task", filmhook_task, 0, 0x1f, 0x1000);
++
 diff --git a/src/filmroll.c b/src/filmroll.c
 new file mode 100644
-index 000000000..7812c702a
+index 000000000..b58b88130
 --- /dev/null
 +++ b/src/filmroll.c
-@@ -0,0 +1,1498 @@
+@@ -0,0 +1,1556 @@
 +/* filmroll: a Canon camera as a film camera (built into this ML fork).
 + * Made on the EOS M; 100D, 650D, 700D and others build from the same code.
 + *
@@ -737,6 +801,7 @@ index 000000000..7812c702a
 +static int nrecent = 0;
 +static char loaded_at[20];
 +static int recent_valid = 0;
++static int last_shot_ms = -100000;      /* when poll_frames last saw a new frame */
 +
 +/* ---------------------------------------------------------------- debug log */
 +
@@ -788,6 +853,11 @@ index 000000000..7812c702a
 +
 +static void log_append(const char *text)
 +{
++    /* At start-up, filmroll_init runs before the settings are loaded (it logs
++     * "roll 0 loaded 0"), so the path wasn't set, and frames shot after a
++     * restart before any film OS page was opened had nowhere to go (#17). */
++    if (!log_path[0] && roll_loaded)
++        update_log_path();
 +    FILE *f = FIO_CreateFileOrAppend(log_path);
 +    if (!f)
 +    {
@@ -1063,6 +1133,7 @@ index 000000000..7812c702a
 +        write_header(" - continued from the previous DCIM folder");
 +    }
 +
++    last_shot_ms = get_ms_clock();
 +    dbg("frames: file %d -> %d, logging %d", prev, now, count);
 +    for (int i = 1; i <= count; i++)
 +        record_frame((prev + i - 1) % 9999 + 1);
@@ -1696,6 +1767,39 @@ index 000000000..7812c702a
 +        fos_hud_clear(vram, BMPPITCH, &hud_pal);
 +}
 +
++#if !FOS_LV_ONLY
++/* The top plate's watchdog. On some DSLRs (the 50D and 500D, #43 #44) Canon
++ * keeps drawing its settings screen straight onto the one we draw on, even
++ * with its buffer held, so the two flickered. A sum of the screen, taken
++ * after the plate is drawn and checked every 50 ms, tells when Canon has
++ * drawn over it: the plate is then drawn again at once. */
++static volatile int plate_on_screen = 0;
++static uint32_t plate_sum = 0;
++
++static uint32_t screen_sum()
++{
++    uint8_t *vram = bmp_vram();
++    if (!vram) return 0;
++    uint32_t a = 0, b = 0;
++    for (int y = 0; y < 480; y++)
++    {
++        const uint32_t *row = (const uint32_t *) (vram + y * BMPPITCH);
++        for (int x = 0; x < 720 / 4; x++) { a += row[x]; b += a; }
++    }
++    return a ^ (b << 1);
++}
++
++static int plate_overdrawn()
++{
++    if (!plate_on_screen) return 0;
++    if (screen_sum() == plate_sum) return 0;
++    static int times = 0;
++    if (++times % 50 == 1) dbg("hud: Canon drew over the plate (%d times)", times);
++    hud_dirty = 1;
++    return 1;
++}
++#endif
++
 +/* one HUD refresh; called from the main loop */
 +static void hud_step()
 +{
@@ -1745,7 +1849,11 @@ index 000000000..7812c702a
 +    {
 +        int now = get_ms_clock();
 +        if (!gone_since) gone_since = now ? now : 1;
-+        if (ui_running || now - gone_since > 700)
++        /* and while a frame is being taken and saved (job_state), or just was:
++         * the screen comes back to ours by itself, so Canon's needn't show for
++         * the second or so in between (#17) */
++        int shooting = lens_info.job_state || get_halfshutter_pressed() || now - last_shot_ms < 2500;
++        if (ui_running || (now - gone_since > 700 && !shooting) || now - gone_since > 4000)
 +        {
 +            canon_held = 0;
 +            gone_since = 0;
@@ -1763,6 +1871,9 @@ index 000000000..7812c702a
 +        if (vram && display_idle() && !ui_running) fos_hud_plate_clear(vram, BMPPITCH, &hud_pal);
 +#endif
 +        plate_drawn = 0;
++#if !FOS_LV_ONLY
++        plate_on_screen = 0;
++#endif
 +        last_sig = -1;
 +    }
 +
@@ -1778,6 +1889,9 @@ index 000000000..7812c702a
 +        return;
 +    }
 +    drawn = 1;
++#if !FOS_LV_ONLY
++    plate_overdrawn();
++#endif
 +
 +    int now = get_ms_clock();
 +    int lit = !leds_on_half || get_halfshutter_pressed() || now < leds_until;
@@ -1795,6 +1909,10 @@ index 000000000..7812c702a
 +        last_draw = now;
 +        hud_draw(lit, blink, plate);
 +        plate_drawn = plate;
++#if !FOS_LV_ONLY
++        plate_on_screen = plate;
++        if (plate) plate_sum = screen_sum();
++#endif
 +    }
 +}
 +
@@ -2100,6 +2218,10 @@ index 000000000..7812c702a
 +        else if (end_due && !ROLL_FINISHED) end_due = 0;
 +        if (k % 2 == 0)
 +            hud_step();                     /* every 100 ms */
++#if !FOS_LV_ONLY
++        else if (plate_overdrawn())
++            hud_step();                     /* Canon drew over the plate: at once */
++#endif
 +
 +        int now = get_ms_clock();
 +        if (now - last_alive > 60000)
@@ -2394,10 +2516,10 @@ index 000000000..89552b20a
 +#endif
 diff --git a/src/fos_dark.c b/src/fos_dark.c
 new file mode 100644
-index 000000000..6d753e3da
+index 000000000..eabb19f9c
 --- /dev/null
 +++ b/src/fos_dark.c
-@@ -0,0 +1,1332 @@
+@@ -0,0 +1,1345 @@
 +/* fos_dark: the darkroom.
 + *
 + * Rolls that have been shot and rewound wait here to be developed. The
@@ -2799,6 +2921,11 @@ index 000000000..6d753e3da
 +static int ghost_final;                 /* read once more when the RAW is through */
 +static int pending_frame;               /* a print waiting for the tray, 0 = none */
 +static char pending_path[64];
++/* the next one, finished while the tray still held the last: on a fast
++ * camera (50D, #43) it was skipped, and the tray showed the frame after it
++ * half developed instead */
++static int queued_frame;
++static char queued_path[64];
 +static int tray_dirty = 1, line_dirty = 1, panel_dirty = 1;
 +static int last_doing = -1;
 +static char last_error[72];             /* why the last frame that failed did */
@@ -2983,6 +3110,11 @@ index 000000000..6d753e3da
 +            pending_frame = cur_frame;
 +            fos_lab_print_path(pending_path, sizeof(pending_path), cur_roll, cur_frame);
 +        }
++        else
++        {
++            queued_frame = cur_frame;
++            fos_lab_print_path(queued_path, sizeof(queued_path), cur_roll, cur_frame);
++        }
 +        int x0, w;
 +        fos_dev_picture(dev, &x0, &w);
 +        hang(fos_dev_thumb(dev), x0, w);
@@ -3035,6 +3167,7 @@ index 000000000..6d753e3da
 +    dv_t = 0;
 +    tray = TRAY_LATENT; tray_t = 0;
 +    pending_frame = 0;
++    queued_frame = 0;
 +    ndry = 0; dry_t = 100000;
 +    ghost = fos_port_alloc(GHOST_W * GHOST_H);
 +    img = fos_port_alloc(IMG_W * IMG_H);
@@ -3146,8 +3279,10 @@ index 000000000..6d753e3da
 +            tray_dirty = 1;
 +            if (tray_t > LIFT_MS)
 +            {
-+                pending_frame = 0;
-+                tray = finished ? TRAY_EMPTY : TRAY_IN;
++                pending_frame = queued_frame;
++                if (queued_frame) memcpy(pending_path, queued_path, sizeof(pending_path));
++                queued_frame = 0;
++                tray = finished && !pending_frame ? TRAY_EMPTY : TRAY_IN;
 +                tray_t = 0;
 +                ghost_t = 100000;
 +            }
@@ -16053,10 +16188,10 @@ index 000000000..f6292051c
 +}
 diff --git a/src/fos_ui.c b/src/fos_ui.c
 new file mode 100644
-index 000000000..2f85cf742
+index 000000000..8ba213a44
 --- /dev/null
 +++ b/src/fos_ui.c
-@@ -0,0 +1,923 @@
+@@ -0,0 +1,936 @@
 +/* fos_ui: the loop, navigation, transitions and shared widgets of the
 + * film OS. The screens themselves are in fos_shelf.c and fos_pages.c.
 + *
@@ -16285,14 +16420,27 @@ index 000000000..2f85cf742
 +    return w;
 +}
 +
++static int keycap_w(const char *key)
++{
++    return !strcmp(key, "<>") || !strcmp(key, "^v") ? 34 : fos_text_w(&fos_font_xs, key, 16) + 14;
++}
++
 +void ui_hints(const struct hint *h, int n)
 +{
 +    int base = HINTS_Y + 23;
++    /* the gap between hints closes up so the row fits the screen: with a
++     * roll in progress the shelf's six ran off the right edge (#43) */
++    int need = 0;
++    for (int i = 0; i < n; i++)
++        need += keycap_w(h[i].key) + 8 + fos_text_w(&fos_font_sm, h[i].label, 0);
++    int gap = 22, room = FOS_W - 48 - need;
++    if (n > 1 && room < gap * (n - 1)) gap = room / (n - 1);
++    if (gap < 8) gap = 8;
 +    int x = 24;
 +    for (int i = 0; i < n; i++)
 +    {
 +        x += ui_keycap(x, base, h[i].key) + 8;
-+        x += fos_text(cv, &fos_font_sm, x, base - 1, h[i].label, C_TEXT3, OPAQUE, 0) + 22;
++        x += fos_text(cv, &fos_font_sm, x, base - 1, h[i].label, C_TEXT3, OPAQUE, 0) + gap;
 +    }
 +}
 +
@@ -17164,7 +17312,7 @@ index 992e8f692..13f631291 100644
      if (handle_flexinfo_keys(event) == 0) return 0;
  
 diff --git a/src/menu.c b/src/menu.c
-index a83f43e1b..a139f9128 100755
+index a83f43e1b..57405de9d 100755
 --- a/src/menu.c
 +++ b/src/menu.c
 @@ -39,6 +39,7 @@
@@ -17175,18 +17323,13 @@ index a83f43e1b..a139f9128 100755
  
  #define CONFIG_MENU_ICONS
  //~ #define CONFIG_MENU_DIM_HACKS
-@@ -5648,6 +5649,15 @@ static void close_canon_menu()
+@@ -5648,6 +5649,10 @@ static void close_canon_menu()
  
  static void menu_open() 
  { 
 +#ifdef FEATURE_FILMROLL
-+#ifdef FEATURE_FILMOS_MODULE
-+    if (filmroll_menu_requested())      /* 0: the module isn't loaded, ML's menu opens */
-+        return;
-+#else
 +    filmroll_menu_requested();
 +    return;
-+#endif
 +#endif
      if (menu_shown)
          return;

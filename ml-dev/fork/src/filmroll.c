@@ -115,6 +115,7 @@ static struct { int no; char time[6]; char fstop[6]; } recent[FOS_RECENT];
 static int nrecent = 0;
 static char loaded_at[20];
 static int recent_valid = 0;
+static int last_shot_ms = -100000;      /* when poll_frames last saw a new frame */
 
 /* ---------------------------------------------------------------- debug log */
 
@@ -166,6 +167,11 @@ static void update_log_path()
 
 static void log_append(const char *text)
 {
+    /* At start-up, filmroll_init runs before the settings are loaded (it logs
+     * "roll 0 loaded 0"), so the path wasn't set, and frames shot after a
+     * restart before any film OS page was opened had nowhere to go (#17). */
+    if (!log_path[0] && roll_loaded)
+        update_log_path();
     FILE *f = FIO_CreateFileOrAppend(log_path);
     if (!f)
     {
@@ -441,6 +447,7 @@ static void poll_frames()
         write_header(" - continued from the previous DCIM folder");
     }
 
+    last_shot_ms = get_ms_clock();
     dbg("frames: file %d -> %d, logging %d", prev, now, count);
     for (int i = 1; i <= count; i++)
         record_frame((prev + i - 1) % 9999 + 1);
@@ -1074,6 +1081,39 @@ static void hud_clear()
         fos_hud_clear(vram, BMPPITCH, &hud_pal);
 }
 
+#if !FOS_LV_ONLY
+/* The top plate's watchdog. On some DSLRs (the 50D and 500D, #43 #44) Canon
+ * keeps drawing its settings screen straight onto the one we draw on, even
+ * with its buffer held, so the two flickered. A sum of the screen, taken
+ * after the plate is drawn and checked every 50 ms, tells when Canon has
+ * drawn over it: the plate is then drawn again at once. */
+static volatile int plate_on_screen = 0;
+static uint32_t plate_sum = 0;
+
+static uint32_t screen_sum()
+{
+    uint8_t *vram = bmp_vram();
+    if (!vram) return 0;
+    uint32_t a = 0, b = 0;
+    for (int y = 0; y < 480; y++)
+    {
+        const uint32_t *row = (const uint32_t *) (vram + y * BMPPITCH);
+        for (int x = 0; x < 720 / 4; x++) { a += row[x]; b += a; }
+    }
+    return a ^ (b << 1);
+}
+
+static int plate_overdrawn()
+{
+    if (!plate_on_screen) return 0;
+    if (screen_sum() == plate_sum) return 0;
+    static int times = 0;
+    if (++times % 50 == 1) dbg("hud: Canon drew over the plate (%d times)", times);
+    hud_dirty = 1;
+    return 1;
+}
+#endif
+
 /* one HUD refresh; called from the main loop */
 static void hud_step()
 {
@@ -1123,7 +1163,11 @@ static void hud_step()
     {
         int now = get_ms_clock();
         if (!gone_since) gone_since = now ? now : 1;
-        if (ui_running || now - gone_since > 700)
+        /* and while a frame is being taken and saved (job_state), or just was:
+         * the screen comes back to ours by itself, so Canon's needn't show for
+         * the second or so in between (#17) */
+        int shooting = lens_info.job_state || get_halfshutter_pressed() || now - last_shot_ms < 2500;
+        if (ui_running || (now - gone_since > 700 && !shooting) || now - gone_since > 4000)
         {
             canon_held = 0;
             gone_since = 0;
@@ -1141,6 +1185,9 @@ static void hud_step()
         if (vram && display_idle() && !ui_running) fos_hud_plate_clear(vram, BMPPITCH, &hud_pal);
 #endif
         plate_drawn = 0;
+#if !FOS_LV_ONLY
+        plate_on_screen = 0;
+#endif
         last_sig = -1;
     }
 
@@ -1156,6 +1203,9 @@ static void hud_step()
         return;
     }
     drawn = 1;
+#if !FOS_LV_ONLY
+    plate_overdrawn();
+#endif
 
     int now = get_ms_clock();
     int lit = !leds_on_half || get_halfshutter_pressed() || now < leds_until;
@@ -1173,6 +1223,10 @@ static void hud_step()
         last_draw = now;
         hud_draw(lit, blink, plate);
         plate_drawn = plate;
+#if !FOS_LV_ONLY
+        plate_on_screen = plate;
+        if (plate) plate_sum = screen_sum();
+#endif
     }
 }
 
@@ -1478,6 +1532,10 @@ static void filmroll_task()
         else if (end_due && !ROLL_FINISHED) end_due = 0;
         if (k % 2 == 0)
             hud_step();                     /* every 100 ms */
+#if !FOS_LV_ONLY
+        else if (plate_overdrawn())
+            hud_step();                     /* Canon drew over the plate: at once */
+#endif
 
         int now = get_ms_clock();
         if (now - last_alive > 60000)
