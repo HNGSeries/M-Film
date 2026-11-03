@@ -1,10 +1,9 @@
 # Testing M-Film on your camera
 
-M-Film runs on the **Canon EOS M**. The same code now **builds** for 8 more cameras (650D, 700D, 6D,
-5D Mark III on two firmwares, 60D, 500D, 50D, 5D Mark II), but few have been tried yet. The 100D, 70D,
-550D, 600D and 1100D wait until Magic Lantern's boot memory is raised for them
-([MEMORY.md](ml-dev/MEMORY.md)). If you have one of the 8, you can be the first: it takes about
-20 minutes, and you can always go back.
+M-Film runs on the **Canon EOS M** and the **6D**. The same code now **builds** for 13 more cameras
+(100D, 650D, 700D, 70D, 5D Mark III on two firmwares, 550D, 600D, 60D, 1100D, 500D, 50D, 5D Mark II),
+but few have been tried yet. If you have one, you can be the first: it takes about 20 minutes, and you
+can always go back.
 
 > **Is it safe?** Magic Lantern runs from the card and changes nothing permanent in the camera.
 > The worst that usually happens is that the camera doesn't start with the card in: take the
@@ -19,24 +18,32 @@ From the [latest release](../../releases/latest) (or the newest run under *Actio
 <!-- cameras:start -->
 | Camera | Canon firmware it needs | File |
 |---|---|---|
-| Canon EOS M | 2.0.2 | `M-Film-camera-EOSM.202.zip` |
+| Canon EOS M | 2.0.2 | `M-Film-camera-EOSM.202.zip` · `M-Film-camera-EOSM.202-module.zip` |
 | Canon EOS 100D / Rebel SL1 / Kiss X7 | 1.0.1 | `M-Film-camera-100D.101.zip` |
-| Canon EOS 650D / Rebel T4i / Kiss X6i | 1.0.4 | `M-Film-camera-650D.104.zip` |
-| Canon EOS 700D / Rebel T5i / Kiss X7i | 1.1.5 | `M-Film-camera-700D.115.zip` |
-| Canon EOS 6D | 1.1.6 | `M-Film-camera-6D.116.zip` |
+| Canon EOS 650D / Rebel T4i / Kiss X6i | 1.0.4 | `M-Film-camera-650D.104.zip` · `M-Film-camera-650D.104-module.zip` |
+| Canon EOS 700D / Rebel T5i / Kiss X7i | 1.1.5 | `M-Film-camera-700D.115.zip` · `M-Film-camera-700D.115-module.zip` |
+| Canon EOS 6D | 1.1.6 | `M-Film-camera-6D.116.zip` · `M-Film-camera-6D.116-module.zip` |
 | Canon EOS 70D | 1.1.2 | `M-Film-camera-70D.112.zip` |
-| Canon EOS 5D Mark III (firmware 1.1.3) | 1.1.3 | `M-Film-camera-5D3.113.zip` |
-| Canon EOS 5D Mark III (firmware 1.2.3) | 1.2.3 | `M-Film-camera-5D3.123.zip` |
+| Canon EOS 5D Mark III (firmware 1.1.3) | 1.1.3 | `M-Film-camera-5D3.113.zip` · `M-Film-camera-5D3.113-module.zip` |
+| Canon EOS 5D Mark III (firmware 1.2.3) | 1.2.3 | `M-Film-camera-5D3.123.zip` · `M-Film-camera-5D3.123-module.zip` |
 | Canon EOS 550D / Rebel T2i / Kiss X4 | 1.0.9 | `M-Film-camera-550D.109.zip` |
 | Canon EOS 600D / Rebel T3i / Kiss X5 | 1.0.2 | `M-Film-camera-600D.102.zip` |
-| Canon EOS 60D | 1.1.1 | `M-Film-camera-60D.111.zip` |
+| Canon EOS 60D | 1.1.1 | `M-Film-camera-60D.111.zip` · `M-Film-camera-60D.111-module.zip` |
 | Canon EOS 1100D / Rebel T3 / Kiss X50 | 1.0.5 | `M-Film-camera-1100D.105.zip` |
-| Canon EOS 500D / Rebel T1i / Kiss X3 | 1.1.1 | `M-Film-camera-500D.111.zip` |
-| Canon EOS 50D | 1.0.9 | `M-Film-camera-50D.109.zip` |
-| Canon EOS 5D Mark II | 2.1.2 | `M-Film-camera-5D2.212.zip` |
+| Canon EOS 500D / Rebel T1i / Kiss X3 | 1.1.1 | `M-Film-camera-500D.111.zip` · `M-Film-camera-500D.111-module.zip` |
+| Canon EOS 50D | 1.0.9 | `M-Film-camera-50D.109.zip` · `M-Film-camera-50D.109-module.zip` |
+| Canon EOS 5D Mark II | 2.1.2 | `M-Film-camera-5D2.212.zip` · `M-Film-camera-5D2.212-module.zip` |
 <!-- cameras:end -->
 
 The firmware must match exactly (MENU → last settings tab → *Firmware ver.*).
+
+**Two files for most cameras (since 0.1.4).** `M-Film-camera-<camera>.zip` has the film OS built into
+Magic Lantern, as before. `M-Film-camera-<camera>-module.zip` has it as a module that loads after the
+camera has started, which takes about 180 KB less of the memory a camera can spare at power on
+([MEMORY.md](ml-dev/MEMORY.md)). It's new and untried: please test it too, especially if the first one
+hangs at power on (5D Mark II, 650D, 700D). The 100D, 70D, 550D, 600D and 1100D only fit this way, so
+their one zip is the module one. If the film shelf doesn't appear and you see Magic Lantern's own menu
+instead, the module didn't load: its line in the *Modules* tab says why. Tell us what it says.
 
 ## 2. Install
 

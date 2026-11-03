@@ -95,9 +95,8 @@ Boot size with `--module`, full film OS with the darkroom (2026-11, gcc 13.2):
 | 1100D | 672,000 | 493,056 | 524,032 | ✅ fits |
 
 The five fixed-reservation cameras are built this way (`testing:module` in `cameras.txt`), with nothing
-of Magic Lantern left out. The others keep the built-in film OS for their releases; CI also builds the
-module for the EOS M, 6D, 650D, 700D and 5D Mark II as `test-…-module` artifacts, so a tester can try it
-where the built-in one is known to start.
+of Magic Lantern left out. The others keep the built-in film OS in their main zip; since 0.1.4 each release also has
+`M-Film-camera-<camera>-module.zip` (CI job `camera-module`), so testers can try the module on every camera.
 
 What only a camera can tell:
 - **Canon's memory after boot.** The module and the loader's work while linking it (it reads the file and

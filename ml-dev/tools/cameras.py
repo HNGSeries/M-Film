@@ -74,6 +74,8 @@ def main():
         for c in cams:
             if c["status"] in ("working", "issues", "testing", "nodark", "memory", "planned"):
                 dl = f"`M-Film-camera-{c['plat']}.zip`" if c["status"] in ("working", "issues", "testing", "nodark") else ""
+                if dl and not c["module"]:
+                    dl += f" (to test: `-module.zip`)" if not th else f" (ทดสอบ: `-module.zip`)"
                 rows.append(f"| {c['name']} | {c['fw']} | {status[c['status']]} | {issue_links(c['note_th' if th else 'note'])} | {dl} |")
         # the ones Magic Lantern isn't ready on: one line, grouped by why
         why = {}
@@ -101,7 +103,8 @@ def main():
 
     built = [c for c in cams if c["status"] in ("working", "issues", "testing", "nodark")]
     rows = ["| Camera | Canon firmware it needs | File |", "|---|---|---|"]
-    rows += [f"| {c['name']} | {c['fw']} | `M-Film-camera-{c['plat']}.zip` |" for c in built]
+    rows += [f"| {c['name']} | {c['fw']} | `M-Film-camera-{c['plat']}.zip`"
+             + ("" if c["module"] else f" · `M-Film-camera-{c['plat']}-module.zip`") + " |" for c in built]
     replace(ROOT / "TESTING.md", "<!-- cameras:start -->", "<!-- cameras:end -->", "\n".join(rows))
 
     wf = ROOT / ".github" / "workflows" / "camera.yml"
@@ -110,6 +113,8 @@ def main():
                   lambda m: m.group(1) + "[" + ", ".join(c["plat"] for c in built) + "]  # from ml-dev/cameras.txt", text, count=1)
     text = re.sub(r"(      NODARK: \")[^\"]*(\")",
                   lambda m: m.group(1) + " ".join(c["plat"] for c in cams if c["status"] == "nodark") + m.group(2), text, count=1)
+    text = re.sub(r"(        platform: )\[[^\]]*\]( *# from ml-dev/cameras.txt: built, and not \":module\")",
+                  lambda m: m.group(1) + "[" + ", ".join(c["plat"] for c in built if not c["module"]) + "]" + m.group(2), text, count=1)
     text = re.sub(r"(      MODULE: \")[^\"]*(\")",
                   lambda m: m.group(1) + " ".join(c["plat"] for c in built if c["module"]) + m.group(2), text, count=1)
     wf.write_text(text, encoding="utf-8")

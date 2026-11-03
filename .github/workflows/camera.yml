@@ -76,21 +76,52 @@ jobs:
           path: M-Film-camera-${{ matrix.platform }}.zip
           if-no-files-found: error
 
-  # builds for testers, not for releases: cameras where the full one may not fit (see the issue that
-  # asked for it). Their artifacts are named test-..., which the release leaves out.
+  # the film OS as a module (build_fork.sh --module) for every camera whose zip above has it built in:
+  # released next to it as M-Film-camera-<camera>-module.zip, for testers to try (ml-dev/MEMORY.md)
+  camera-module:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [EOSM.202, 650D.104, 700D.115, 6D.116, 5D3.113, 5D3.123, 60D.111, 500D.111, 50D.109, 5D2.212]  # from ml-dev/cameras.txt: built, and not ":module"
+    runs-on: ubuntu-24.04
+    name: camera ${{ matrix.platform }} (film OS as a module)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"   # ML's module build still imports distutils (gone in 3.12)
+      - name: Toolchain and Magic Lantern (the commit the fork is made against)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gcc-arm-none-eabi binutils-arm-none-eabi zip
+          python -m pip install -q numpy scipy pillow segno docutils
+          git clone -q --filter=blob:none https://github.com/reticulatedpines/magiclantern_simplified.git "$HOME/ml/magiclantern_simplified"
+          git -C "$HOME/ml/magiclantern_simplified" checkout -q ed3e7c0dfacfdeaf3349dee73edf9e3621217462
+          arm-none-eabi-gcc --version | head -1
+      - name: Build
+        run: bash ml-dev/build_fork.sh ${{ matrix.platform }} --module
+      - name: Zip
+        run: |
+          p=${{ matrix.platform }}
+          d=ml-dev/out/fork-$p-module
+          cp ml-dev/CAMERA-README.txt "$d/M-FILM-README.txt"
+          cp LICENSE "$d/LICENSE.txt"
+          cp THIRD_PARTY.md "$d/THIRD_PARTY.txt"
+          (cd "$d" && zip -qr "$GITHUB_WORKSPACE/M-Film-camera-$p-module.zip" .)
+          ls -la M-Film-camera-$p-module.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M-Film-camera-${{ matrix.platform }}-module
+          path: M-Film-camera-${{ matrix.platform }}-module.zip
+          if-no-files-found: error
+
+  # builds for testers, not for releases. Their artifacts are named test-..., which the release leaves out.
   camera-test:
     strategy:
       fail-fast: false
       matrix:
-        # the 6D without the darkroom; and the film OS as a module (--module) on cameras released with
-        # it built in, so a tester can try the module where the built-in one is known to start
         include:
           - { platform: 6D.116,   flags: --no-darkroom, suffix: -nodark }
-          - { platform: EOSM.202, flags: --module,      suffix: -module }
-          - { platform: 6D.116,   flags: --module,      suffix: -module }
-          - { platform: 650D.104, flags: --module,      suffix: -module }
-          - { platform: 700D.115, flags: --module,      suffix: -module }
-          - { platform: 5D2.212,  flags: --module,      suffix: -module }
     runs-on: ubuntu-24.04
     name: camera ${{ matrix.platform }}${{ matrix.suffix }} (for testing)
     steps:
@@ -126,7 +157,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    needs: [camera]
+    needs: [camera, camera-module]
     if: ${{ startsWith(github.ref, 'refs/tags/v') || inputs.tag != '' }}
     runs-on: ubuntu-latest
     steps:
