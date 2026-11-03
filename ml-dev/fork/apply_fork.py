@@ -107,10 +107,13 @@ edit("src/boot-d45-am.c",
      "    #elif defined(CONFIG_100D) || defined(CONFIG_70D)\n",
      "film-mode fork: R0 0x44C000 -> 0x520000")
 
-LEAN = {"5D2.212"}
+LEAN = {"5D2.212", "650D.104", "700D.115"}     # 650D, 700D: their no-darkroom builds, with room to spare
+# features a camera's Magic Lantern doesn't build without (650D, 700D: fps-engio.c's evfstate timers)
+LEAN_KEEP = {"650D.104": ("FPS_OVERRIDE", "FPS_RAMPING"), "700D.115": ("FPS_OVERRIDE", "FPS_RAMPING")}
 LEAN_FEATURES = ["ZEBRA", "ZEBRA_FAST", "FOCUS_PEAK", "GHOST_IMAGE", "SPOTMETER", "FALSE_COLOR", "WAVEFORM",
                  "RAW_SPOTMETER", "RAW_ZEBRAS", "HDR_VIDEO", "FPS_OVERRIDE", "FPS_RAMPING", "MOVIE_LOGGING",
-                 "GRADUAL_EXPOSURE", "TRAP_FOCUS", "FOLLOW_FOCUS", "RACK_FOCUS", "AUDIO_METERS", "HDR_BRACKETING"]
+                 "GRADUAL_EXPOSURE", "TRAP_FOCUS", "FOLLOW_FOCUS", "RACK_FOCUS", "AUDIO_METERS", "HDR_BRACKETING",
+                 "FOCUS_PEAK_DISP_FILTER"]   # (on the 650D and 700D: needs FOCUS_PEAK)
 
 
 def film_os_objects():
@@ -146,7 +149,8 @@ def platform(name):
     if name in LEAN:
         p = root / f"platform/{name}/features.h"
         if "film-mode fork: lean" not in p.read_text():
-            undef = "".join(f"#undef FEATURE_{f}\n" for f in LEAN_FEATURES)
+            keep = LEAN_KEEP.get(name, ())
+            undef = "".join(f"#undef FEATURE_{f}\n" for f in LEAN_FEATURES if f not in keep)
             p.write_text(p.read_text().rstrip("\n") + "\n\n/* film-mode fork: lean, to fit at boot */\n" + undef)
             print(f"  platform/{name}/features.h: lean")
     # our objects. Rewritten every time (older versions of this fork
