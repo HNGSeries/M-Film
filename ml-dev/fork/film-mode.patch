@@ -1,26 +1,29 @@
 diff --git a/platform/100D.101/Makefile b/platform/100D.101/Makefile
-index 05832de0d..9e706a32e 100644
+index 05832de0d..6aeb6422b 100644
 --- a/platform/100D.101/Makefile
 +++ b/platform/100D.101/Makefile
 @@ -15,6 +15,7 @@ PLATFORM_ARCH = armv5te
  RESTARTSTART = 0x44C100
  ML_BOOT_OBJ = boot-d45-am.o
  ML_SRC_EXTRA_OBJS = $(BUILD_DIR)/reloc.o
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmhook.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/100D.101/features.h b/platform/100D.101/features.h
-index 18fa340fe..0a9fb2e00 100644
+index 18fa340fe..cb0f612f5 100644
 --- a/platform/100D.101/features.h
 +++ b/platform/100D.101/features.h
-@@ -12,3 +12,6 @@
+@@ -12,3 +12,9 @@
  /* Not working */
  #undef FEATURE_TRAP_FOCUS
  #undef FEATURE_MAGIC_ZOOM_FULL_SCREEN // https://bitbucket.org/hudson/magic-lantern/issues/2842
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
++
++/* film-mode fork: the film OS is a module (build_fork.sh --module) */
++#define FEATURE_FILMOS_MODULE
 diff --git a/platform/100D.101/modules.included b/platform/100D.101/modules.included
 index 8428d3c4b..a3be71e80 100644
 --- a/platform/100D.101/modules.included
@@ -384,16 +387,36 @@ index 9e9650596..452e67a8d 100644
  include  ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/650D.104/features.h b/platform/650D.104/features.h
-index 0c94cb713..cbe511db9 100644
+index 0c94cb713..abaa2d836 100644
 --- a/platform/650D.104/features.h
 +++ b/platform/650D.104/features.h
-@@ -29,3 +29,6 @@
+@@ -29,3 +29,26 @@
  #define FEATURE_FOCUS_PEAK_DISP_FILTER
  
  #define FEATURE_CROP_MODE_HACK
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
++
++/* film-mode fork: lean, to fit at boot */
++#undef FEATURE_ZEBRA
++#undef FEATURE_ZEBRA_FAST
++#undef FEATURE_FOCUS_PEAK
++#undef FEATURE_GHOST_IMAGE
++#undef FEATURE_SPOTMETER
++#undef FEATURE_FALSE_COLOR
++#undef FEATURE_WAVEFORM
++#undef FEATURE_RAW_SPOTMETER
++#undef FEATURE_RAW_ZEBRAS
++#undef FEATURE_HDR_VIDEO
++#undef FEATURE_MOVIE_LOGGING
++#undef FEATURE_GRADUAL_EXPOSURE
++#undef FEATURE_TRAP_FOCUS
++#undef FEATURE_FOLLOW_FOCUS
++#undef FEATURE_RACK_FOCUS
++#undef FEATURE_AUDIO_METERS
++#undef FEATURE_HDR_BRACKETING
++#undef FEATURE_FOCUS_PEAK_DISP_FILTER
 diff --git a/platform/650D.104/modules.included b/platform/650D.104/modules.included
 index 8428d3c4b..a3be71e80 100644
 --- a/platform/650D.104/modules.included
@@ -445,28 +468,48 @@ index eddc7617e..6bfdee970 100644
  mlv_play
  mlv_snd
 diff --git a/platform/700D.115/Makefile b/platform/700D.115/Makefile
-index af9eb604f..373803523 100644
+index af9eb604f..0db8c8efa 100644
 --- a/platform/700D.115/Makefile
 +++ b/platform/700D.115/Makefile
 @@ -15,6 +15,7 @@ PLATFORM_ARCH = armv5te
  #
  MAIN_FIRMWARE_ADDR = 0xFF0C0000
  RESTARTSTART = 0x7EC00
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/700D.115/features.h b/platform/700D.115/features.h
-index 42be326e4..9eee68b47 100644
+index 42be326e4..73db5f8d4 100644
 --- a/platform/700D.115/features.h
 +++ b/platform/700D.115/features.h
-@@ -23,3 +23,6 @@
+@@ -23,3 +23,26 @@
  #define FEATURE_FOCUS_PEAK_DISP_FILTER
  #define FEATURE_CROP_MODE_HACK
  #define FEATURE_EYEFI_TRICKS
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
++
++/* film-mode fork: lean, to fit at boot */
++#undef FEATURE_ZEBRA
++#undef FEATURE_ZEBRA_FAST
++#undef FEATURE_FOCUS_PEAK
++#undef FEATURE_GHOST_IMAGE
++#undef FEATURE_SPOTMETER
++#undef FEATURE_FALSE_COLOR
++#undef FEATURE_WAVEFORM
++#undef FEATURE_RAW_SPOTMETER
++#undef FEATURE_RAW_ZEBRAS
++#undef FEATURE_HDR_VIDEO
++#undef FEATURE_MOVIE_LOGGING
++#undef FEATURE_GRADUAL_EXPOSURE
++#undef FEATURE_TRAP_FOCUS
++#undef FEATURE_FOLLOW_FOCUS
++#undef FEATURE_RACK_FOCUS
++#undef FEATURE_AUDIO_METERS
++#undef FEATURE_HDR_BRACKETING
++#undef FEATURE_FOCUS_PEAK_DISP_FILTER
 diff --git a/platform/700D.115/modules.included b/platform/700D.115/modules.included
 index 8428d3c4b..a3be71e80 100644
 --- a/platform/700D.115/modules.included
