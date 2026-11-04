@@ -66,8 +66,8 @@ Every RAW is kept, so nothing is lost: you can develop the same roll again with 
 
 The camera's darkroom makes small prints, sized for the camera's screen, so it can develop a frame in the
 camera's little memory. For full-size photos, develop the same roll on your computer with
-**[Darkrooms](#develop-on-your-computer-darkrooms)** (coming soon). Your RAWs stay on the card, so you can
-develop the rolls you've already shot again once it's out.
+**[Darkrooms](#develop-on-your-computer-darkrooms)**. Your RAWs stay on the card, so you can
+develop the rolls you've already shot again, at full size.
 
 | | Horizontal frame | Vertical frame |
 |---|---|---|
@@ -225,19 +225,18 @@ roll you shot with its film, and develops them at full resolution.
 
 | | Free | Darkrooms Full |
 |---|---|---|
-| Rolls a day | 1 | as many as you like |
+| Rolls a day | 1, of up to 36 frames (the same roll again that day doesn't count) | as many as you like |
 | Every film, full size, EXIF, contact sheets | ✓ | ✓ |
 | Many rolls at once on every core | | ✓ |
-| Price | free | **US$5.99 once** (checkout shows your currency), updates included |
+| Price | free, with a Google account | **US$2.99 a month** or **US$14.99 once** (checkout shows your currency), updates included |
 
-The camera's own darkroom stays free and unlimited. Buy Darkrooms Full in the program
-(*Free · … left today* at the top → *Get Darkrooms Full*); after you pay, the page shows your licence key.
-It works on one computer at a time (release it in Darkrooms to move it to another).
+The camera's own darkroom stays free and unlimited. Darkrooms goes with your **Google account**: no key to type in or keep.
+Click the badge at the top right → *Sign in with Google*, then *Get it monthly* or *Get it for life*. After you pay,
+Darkrooms switches to Full by itself within a few seconds. One account works on **two computers** at a time
+(sign in on the other one with the same Google account). Cancel the monthly plan any time in the program
+(*Manage the subscription*): it stays on until the end of the month paid for.
 
 ### Download
-
-> **Coming soon.** Darkrooms comes out together with Darkrooms Full very soon; until then the files below
-> aren't in the releases. The camera's own darkroom develops your rolls in the meantime.
 
 | Your computer | Get | Open it |
 |---|---|---|
