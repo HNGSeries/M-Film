@@ -78,6 +78,12 @@ rm -rf "$OUT" && mkdir -p "$OUT"
 if [ -n "$MODULE" ]; then
     # the film OS as ML/modules/filmos.mo, built for this camera only (fork/module/Makefile)
     MOD="$SRC/modules/filmos"
+    # every setting filmroll.c keeps must be in the module's list too, or the module forgets it at power off
+    UNSAVED=$(comm -23 <(grep -o 'CONFIG_INT("filmroll\.[a-z_]*", *[a-z_]*' "$HERE/fork/src/filmroll.c" | sed 's/.*, *//' | sort) \
+                       <(grep -o 'MODULE_CONFIG([a-z_]*)' "$HERE/fork/src/filmos_mod.h" | sed 's/MODULE_CONFIG(\(.*\))/\1/' | sort))
+    if [ -n "$UNSAVED" ]; then
+        echo "settings in filmroll.c missing from MODULE_CONFIGS in fork/src/filmos_mod.h:"; echo "$UNSAVED"; exit 1
+    fi
     rm -rf "$MOD" && mkdir -p "$MOD"
     cp "$HERE"/fork/module/{Makefile,README.rst} "$HERE"/fork/src/filmroll.{c,h} "$HERE"/fork/src/filmos_mod.h \
        "$HERE"/filmos/fos*.{c,h} "$SRC"/src/fos_version.h "$MOD/"

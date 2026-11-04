@@ -70,6 +70,22 @@ Go through these and note what happens (a photo of the screen helps a lot):
 Then [open an issue](../../issues/new/choose) with: your camera and firmware, what worked, what didn't,
 and the file **`ML/FILMROLL.LOG`** from the card attached.
 
+### If *Firmware ver.* says "Memory card containing firmware is required to update"
+
+The camera found no update file it accepts on the card:
+- The Canon firmware isn't exactly the one in the table: `ML-SETUP.FIR` only works on that version.
+- `ML-SETUP.FIR` isn't at the top of the card. Unzipping on a Mac often makes a folder
+  (`M-Film-camera-EOSM.202/`). The card's top level should show `autoexec.bin`, `ML-SETUP.FIR` and `ML`.
+- On a Mac, hidden `._` files next to them can trip the camera. With the card in the reader, run
+  `dot_clean -m /Volumes/EOS_DIGITAL` in *Terminal* (your card's name in place of `EOS_DIGITAL`),
+  then eject the card before taking it out.
+
+### If you turned on Magic Lantern's console
+
+The MENU button opens M-Film, so Magic Lantern's menu (where the console is switched off) can't be
+reached while M-Film runs. On a computer, open `ML/SETTINGS/magic.cfg` on the card and change
+`module.console = 1` to `module.console = 0`.
+
 ### If it doesn't start
 
 Battery out, card out. Then please tell us, because it most likely means the program is too big for

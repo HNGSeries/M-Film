@@ -24,6 +24,7 @@ MODULE_CONFIGS_START()
     MODULE_CONFIG(scr_sat)
     MODULE_CONFIG(scr_warm)
     MODULE_CONFIG(scr_bright)
+    MODULE_CONFIG(scr_flip)
     MODULE_CONFIG(roll_loaded)
     MODULE_CONFIG(roll_number)
     MODULE_CONFIG(roll_film)
@@ -35,7 +36,7 @@ MODULE_CONFIGS_START()
 MODULE_CONFIGS_END()
 
 /* A camera that ran the built-in film OS kept these settings in Magic
- * Lantern's own magiclantern.cfg. The first time the module starts (no
+ * Lantern's own magic.cfg (config.c). The first time the module starts (no
  * FILMOS.CFG yet) it takes them from there, so a roll in the camera carries
  * on where it was. */
 static void config_from_core()
@@ -44,7 +45,7 @@ static void config_from_core()
     snprintf(path, sizeof(path), "%sfilmos.cfg", get_config_dir());
     if ((int) FIO_GetFileSize_direct(path) >= 0)
         return;
-    snprintf(path, sizeof(path), "%smagiclantern.cfg", get_config_dir());
+    snprintf(path, sizeof(path), "%smagic.cfg", get_config_dir());
     int size = 0;
     char *buf = (char *) read_entire_file(path, &size);
     if (!buf)
@@ -75,7 +76,7 @@ static void config_from_core()
         line = end + 1;
     }
     fio_free(buf);
-    dbg("init: %d settings taken from magiclantern.cfg (first start as a module)", taken);
+    dbg("init: %d settings taken from magic.cfg (first start as a module)", taken);
 }
 
 /* errno for the maths library linked into the module (fork/module/Makefile) */

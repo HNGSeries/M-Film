@@ -343,28 +343,31 @@ index edc1dfbba..b8ec816ba 100644
  mlv_play
  mlv_snd
 diff --git a/platform/60D.111/Makefile b/platform/60D.111/Makefile
-index aea8e0b83..523e03ca7 100644
+index aea8e0b83..5eda09999 100644
 --- a/platform/60D.111/Makefile
 +++ b/platform/60D.111/Makefile
 @@ -24,6 +24,7 @@ ML_BOOT_OBJ = boot-d45-ch.o
  ML_PICSTYLE_AUTO = n
  
  CONFIG_LVAPP_HACK_RELOC = y
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmhook.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/60D.111/features.h b/platform/60D.111/features.h
-index b2c8b03e8..ae383506f 100644
+index b2c8b03e8..66dca1353 100644
 --- a/platform/60D.111/features.h
 +++ b/platform/60D.111/features.h
-@@ -10,3 +10,6 @@
+@@ -10,3 +10,9 @@
  #undef FLEXINFO_DEVELOPER_MENU
  
  #undef FEATURE_WIND_FILTER // problems with external mic
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
++
++/* film-mode fork: the film OS is a module (build_fork.sh --module) */
++#define FEATURE_FILMOS_MODULE
 diff --git a/platform/60D.111/modules.included b/platform/60D.111/modules.included
 index edc1dfbba..b8ec816ba 100644
 --- a/platform/60D.111/modules.included
@@ -649,10 +652,10 @@ index 2201e76c7..01865665a 100755
      addr_AllocMem_end[1] = MOV_R0_0x4E0000_INSTR;
 diff --git a/src/filmhook.c b/src/filmhook.c
 new file mode 100644
-index 000000000..9ad612889
+index 000000000..808a82ba0
 --- /dev/null
 +++ b/src/filmhook.c
-@@ -0,0 +1,71 @@
+@@ -0,0 +1,78 @@
 +/* The film OS as a module (build_fork.sh --module): all that stays in
 + * autoexec.bin. The film OS itself (filmroll.c, fos_*.c) is ML/modules/filmos.mo,
 + * loaded after boot into Canon's memory, so it doesn't count against what the
@@ -692,8 +695,13 @@ index 000000000..9ad612889
 +
 +/* Without the module the camera would just show Magic Lantern's own menu,
 + * and nothing says why (#46). Once ML has had time to load its modules, say
-+ * so on the screen, and in ML/FILMROLL.LOG. */
-+extern char *module_lockfile;           /* module.c */
++ * so on the screen, and in ML/FILMROLL.LOG. ML's module task (module.c):
++ * with "Disable all modules" on, it only lists the modules; after a power
++ * off that wasn't clean (LOADING.LCK left on the card) it skips them, and
++ * the list stays empty; otherwise it writes LOADING.LCK, which stays until
++ * a clean shutdown, and loads them. So the lock file can't tell these apart,
++ * the list can. ML's notify box holds 99 characters. */
++extern int module_autoload_disabled;    /* module.c */
 +
 +static void filmhook_note(const char *why)
 +{
@@ -714,22 +722,24 @@ index 000000000..9ad612889
 +        msleep(500);                    /* ML loads modules a few seconds after start-up */
 +    if (filmos_menu_open != (void *) ret_0) return;
 +    uint32_t size;
-+    if (module_get_number("filmos") < 0)
-+        filmhook_note("ML/modules/filmos.mo isn't on the card. Copy everything in the zip again.");
-+    else if (FIO_GetFileSize(module_lockfile, &size) == 0)
-+        filmhook_note("Magic Lantern skipped its modules: the camera wasn't switched off cleanly last time. Switch off with the switch, then on.");
++    if (module_autoload_disabled)
++        filmhook_note("'Disable all modules' is on: MENU > Debug > Modules debug.");
++    else if (FIO_GetFileSize(MODULE_PATH "FILMOS.MO", &size) != 0)
++        filmhook_note("ML/modules/filmos.mo isn't on the card. Copy the zip again.");
++    else if (module_get_number("filmos") < 0)
++        filmhook_note("ML skipped its modules (battery pulled?). Switch off, then on.");
 +    else
-+        filmhook_note("its module didn't load. Magic Lantern's Modules tab (MENU) says why: please send us that line.");
++        filmhook_note("its module didn't load. MENU > Modules says why.");
 +}
 +
 +TASK_CREATE("filmhook_task", filmhook_task, 0, 0x1f, 0x1000);
 +
 diff --git a/src/filmroll.c b/src/filmroll.c
 new file mode 100644
-index 000000000..bd294ee00
+index 000000000..6f7eac8e0
 --- /dev/null
 +++ b/src/filmroll.c
-@@ -0,0 +1,1660 @@
+@@ -0,0 +1,1687 @@
 +/* filmroll: a Canon camera as a film camera (built into this ML fork).
 + * Made on the EOS M; 100D, 650D, 700D and others build from the same code.
 + *
@@ -849,6 +859,7 @@ index 000000000..bd294ee00
 +static char loaded_at[20];
 +static int recent_valid = 0;
 +static int last_shot_ms = -100000;      /* when poll_frames last saw a new frame */
++static volatile int last_key_ms = 0;    /* when a button other than the shutter was last pressed (handle_filmroll_keys) */
 +
 +/* ---------------------------------------------------------------- debug log */
 +
@@ -1415,47 +1426,70 @@ index 000000000..bd294ee00
 +    return 0;
 +}
 +
-+/* Canon drawing over the film OS. On some DSLRs (the 60D's exposure scale,
-+ * #25 #49; the 550D's battery icon, #50) Canon keeps drawing its own screen
-+ * straight onto the one we show, with its buffer held or not. Each row we
-+ * put on the screen leaves a sum of what it holds; every 50 ms half the
-+ * rows are read back, and a row that no longer matches means Canon drew
-+ * there: the film OS then paints the whole screen again at once. The same
-+ * as the top plate's check (plate_overdrawn), for every film OS screen. */
-+static uint32_t ui_row_sum[FOS_H];
++/* Canon drawing over our screen. On some DSLRs Canon keeps drawing its own
++ * screen straight onto the one we show, with its buffer held or not: over
++ * the top plate on the 50D and 500D (#43 #44), over the film OS on the 60D
++ * (its exposure scale, #25 #49) and the 550D (its battery icon, #50). Each
++ * row we put on the screen leaves a sum of what it holds (the film OS's rows
++ * as they're presented, the plate's after it is drawn: the two never show at
++ * once, so they share it). Every 50 ms half the rows are read back; a row
++ * that no longer matches means Canon drew there, and the screen is painted
++ * again at once. If it never matches for 2 s (Canon drawing all the time,
++ * or a camera that doesn't read back what we wrote), the check rests for
++ * 5 s, then 10, up to a minute, so it can't keep painting without end. */
++static uint16_t shown_sum[FOS_H];        /* 16 bits a row: 1 KB less at boot, and a 1 in 65,536 miss */
 +
-+static uint32_t row_sum(const uint8_t *row)
++static uint16_t row_sum(const uint8_t *row)
 +{
 +    const uint32_t *w = (const uint32_t *) row;
 +    uint32_t a = 0, b = 0;
 +    for (int x = 0; x < FOS_W / 4; x += 2) { a += w[x]; b += a; }   /* every other 4 pixels */
-+    return a ^ (b << 1);
++    uint32_t h = a ^ (b << 1);
++    return (uint16_t) (h ^ (h >> 16));
++}
++
++struct overdraw_check { const char *what; int half, in_a_row, rest, resting_until, times; };
++
++/* 1 if Canon has drawn over vram since its rows' sums were taken */
++static int overdrawn(struct overdraw_check *o, const uint8_t *vram)
++{
++    int now = get_ms_clock();
++    if (o->resting_until && now - o->resting_until < 0) return 0;
++    o->resting_until = 0;
++    o->half ^= 1;
++    int y = o->half;
++    for (; y < FOS_H; y += 2)
++        if (row_sum(vram + y * BMPPITCH) != shown_sum[y])
++            break;
++    if (y >= FOS_H)
++    {
++        o->in_a_row = 0;
++        o->rest = 0;
++        return 0;
++    }
++    if (++o->in_a_row > 40)
++    {
++        o->in_a_row = 0;
++        o->rest = o->rest ? MIN(o->rest * 2, 60000) : 5000;
++        o->resting_until = (now + o->rest) ? now + o->rest : 1;
++        dbg("%s: drawn over for 2 s on end (row %d), not checking for %d s", o->what, y, o->rest / 1000);
++        return 0;
++    }
++    if (o->times++ % 50 == 0) dbg("%s: Canon drew over it (%d times, row %d)", o->what, o->times, y);
++    return 1;
 +}
 +
 +static void ui_overdrawn_check()
 +{
-+    static int last = 0, half = 0, times = 0, in_a_row = 0, off = 0;
++    static struct overdraw_check check = { .what = "film os" };
++    static int last = 0;
 +    int now = get_ms_clock();
-+    if (off || now - last < 50) return;
++    if (now - last < 50) return;
 +    last = now;
 +    uint8_t *vram = bmp_vram_real();
 +    if (!vram || !DISPLAY_IS_ON) return;
-+    half ^= 1;
-+    int y = half;
-+    for (; y < FOS_H; y += 2)
-+        if (row_sum(vram + y * BMPPITCH) != ui_row_sum[y])
-+            break;
-+    if (y >= FOS_H) { in_a_row = 0; return; }
-+    /* never matching even after painting it again (2 s of checks): this
-+     * camera doesn't read back what we wrote, so stop checking */
-+    if (++in_a_row > 40)
-+    {
-+        off = 1;
-+        dbg("film os: the screen never reads back as drawn (row %d), not checking it", y);
-+        return;
-+    }
-+    if (times++ % 50 == 0) dbg("film os: Canon drew over the screen (%d times, row %d)", times, y);
-+    fos_ui_overdrawn();
++    if (overdrawn(&check, vram))
++        fos_ui_overdrawn();
 +}
 +
 +void fos_port_present(const uint8_t *rows, int pitch, int y0, int y1)
@@ -1468,7 +1502,7 @@ index 000000000..bd294ee00
 +    for (int y = y0; y < y1; y++)
 +    {
 +        memcpy(vram + y * BMPPITCH, rows + (y - y0) * pitch, FOS_W);
-+        ui_row_sum[y] = row_sum(vram + y * BMPPITCH);
++        shown_sum[y] = row_sum(vram + y * BMPPITCH);
 +    }
 +}
 +
@@ -1647,7 +1681,7 @@ index 000000000..bd294ee00
 + * otherwise. With an orientation set here, Canon's NormalDisplay /
 + * ReverseDisplay / MirrorDisplay put it back whenever the camera changes it
 + * (Canon's 0 normal, 1 reverse, 2 mirror, as in ML's display_orientation_toggle).
-+ * Back on Auto, the screen goes back to the way Canon had it. */
++ * Back on Auto, the screen goes back to the way Canon last turned it. */
 +#if defined(CONFIG_VARIANGLE_DISPLAY) && defined(DISPLAY_ORIENTATION)
 +#define CAN_FLIP 1
 +extern void NormalDisplay();
@@ -1663,15 +1697,15 @@ index 000000000..bd294ee00
 +
 +static void flip_step(int now_please)
 +{
-+    static int canon_had = -1, last = 0, times = 0;
++    static int canon_had = -1, we_set = -1, last = 0, times = 0;
 +    if (!DISPLAY_IS_ON) return;
 +    int o = DISPLAY_ORIENTATION;
 +    if (o < 0 || o > 2) return;
 +    if (!scr_flip)
 +    {
-+        /* back to Auto: the way Canon had it before we turned it */
++        /* back to Auto: the way Canon last turned it */
 +        if (canon_had >= 0 && o != canon_had) flip_to(canon_had);
-+        canon_had = -1;
++        canon_had = we_set = -1;
 +        return;
 +    }
 +    int want = COERCE(scr_flip - 1, 0, 2);
@@ -1679,8 +1713,11 @@ index 000000000..bd294ee00
 +    int now = get_ms_clock();
 +    if (!now_please && last && now - last < 300) return;   /* give Canon's change time to land */
 +    last = now ? now : 1;
-+    if (canon_had < 0) canon_had = o;
-+    if (times++ < 20) dbg("screen: Canon had orientation %d, set %d", o, want);
++    /* not the way we last set it: Canon turned it, and that is the hinge's
++     * latest word (the first time, its word from before). Auto goes back to that */
++    if (o != we_set) canon_had = o;
++    if (times++ < 20) dbg("screen: orientation %d (Canon's %d), set %d", o, canon_had, want);
++    we_set = want;
 +    flip_to(want);
 +}
 +#else
@@ -1915,33 +1952,24 @@ index 000000000..bd294ee00
 +}
 +
 +#if !FOS_LV_ONLY
-+/* The top plate's watchdog. On some DSLRs (the 50D and 500D, #43 #44) Canon
-+ * keeps drawing its settings screen straight onto the one we draw on, even
-+ * with its buffer held, so the two flickered. A sum of the screen, taken
-+ * after the plate is drawn and checked every 50 ms, tells when Canon has
-+ * drawn over it: the plate is then drawn again at once. */
++/* The top plate's watchdog (Canon drawing over our screen, above): checked
++ * every 50 ms while the plate is up, from hud_step and the main loop. */
 +static volatile int plate_on_screen = 0;
-+static uint32_t plate_sum = 0;
 +
-+static uint32_t screen_sum()
++static void plate_sums()
 +{
 +    uint8_t *vram = bmp_vram();
-+    if (!vram) return 0;
-+    uint32_t a = 0, b = 0;
-+    for (int y = 0; y < 480; y++)
-+    {
-+        const uint32_t *row = (const uint32_t *) (vram + y * BMPPITCH);
-+        for (int x = 0; x < 720 / 4; x++) { a += row[x]; b += a; }
-+    }
-+    return a ^ (b << 1);
++    if (!vram) return;
++    for (int y = 0; y < FOS_H; y++)
++        shown_sum[y] = row_sum(vram + y * BMPPITCH);
 +}
 +
 +static int plate_overdrawn()
 +{
-+    if (!plate_on_screen) return 0;
-+    if (screen_sum() == plate_sum) return 0;
-+    static int times = 0;
-+    if (++times % 50 == 1) dbg("hud: Canon drew over the plate (%d times)", times);
++    static struct overdraw_check check = { .what = "hud: the plate" };
++    if (!plate_on_screen || hud_dirty) return 0;    /* not up, or about to be drawn anyway */
++    uint8_t *vram = bmp_vram();
++    if (!vram || !overdrawn(&check, vram)) return 0;
 +    hud_dirty = 1;
 +    return 1;
 +}
@@ -2000,12 +2028,15 @@ index 000000000..bd294ee00
 +         * the screen comes back to ours by itself, so Canon's needn't show for
 +         * the second or so in between (#17) */
 +        int shooting = lens_info.job_state || get_halfshutter_pressed() || now - last_shot_ms < 2500;
-+        if (ui_running || (now - gone_since > 700 && !shooting) || now - gone_since > 4000)
++        /* a button (Q, MENU, INFO, the dial...) pressed as ours went, or since: that's
++         * Canon's screen being asked for, not a blink, so it gets it at once */
++        int asked = last_key_ms && last_key_ms - gone_since > -200;
++        if (ui_running || asked || (now - gone_since > 700 && !shooting) || now - gone_since > 4000)
 +        {
 +            canon_held = 0;
 +            gone_since = 0;
 +            if (!ui_running) canon_gui_enable_front_buffer(1);
-+            dbg("hud: Canon's screen given back%s", ui_running ? " (to the film OS)" : "");
++            dbg("hud: Canon's screen given back%s", ui_running ? " (to the film OS)" : asked ? " (a button)" : "");
 +        }
 +    }
 +#endif
@@ -2058,7 +2089,7 @@ index 000000000..bd294ee00
 +        plate_drawn = plate;
 +#if !FOS_LV_ONLY
 +        plate_on_screen = plate;
-+        if (plate) plate_sum = screen_sum();
++        if (plate) plate_sums();
 +#endif
 +    }
 +}
@@ -2196,6 +2227,12 @@ index 000000000..bd294ee00
 +int handle_filmroll_keys(struct event *event)
 +{
 +    int key = module_translate_key(event->param, MODULE_KEY_PORTABLE);
++    if (key && key != MODULE_KEY_PRESS_HALFSHUTTER && key != MODULE_KEY_UNPRESS_HALFSHUTTER &&
++        key != MODULE_KEY_PRESS_FULLSHUTTER && key != MODULE_KEY_UNPRESS_FULLSHUTTER)
++    {
++        int now = get_ms_clock();
++        last_key_ms = now ? now : 1;
++    }
 +    if (ui_running)
 +    {
 +#ifdef BGMT_UNPRESS_LEFT
@@ -17497,7 +17534,7 @@ index 992e8f692..13f631291 100644
      if (handle_flexinfo_keys(event) == 0) return 0;
  
 diff --git a/src/menu.c b/src/menu.c
-index a83f43e1b..57405de9d 100755
+index a83f43e1b..a139f9128 100755
 --- a/src/menu.c
 +++ b/src/menu.c
 @@ -39,6 +39,7 @@
@@ -17508,13 +17545,18 @@ index a83f43e1b..57405de9d 100755
  
  #define CONFIG_MENU_ICONS
  //~ #define CONFIG_MENU_DIM_HACKS
-@@ -5648,6 +5649,10 @@ static void close_canon_menu()
+@@ -5648,6 +5649,15 @@ static void close_canon_menu()
  
  static void menu_open() 
  { 
 +#ifdef FEATURE_FILMROLL
++#ifdef FEATURE_FILMOS_MODULE
++    if (filmroll_menu_requested())      /* 0: the module isn't loaded, ML's menu opens */
++        return;
++#else
 +    filmroll_menu_requested();
 +    return;
++#endif
 +#endif
      if (menu_shown)
          return;

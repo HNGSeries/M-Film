@@ -61,8 +61,32 @@ edit("src/zebra.c",
      '#include "zebra.h"\n#include "filmroll.h"\n',
      '#include "filmroll.h"')
 
+def upgrade(rel, older, new):
+    """an earlier form of an edit on a checkout patched before it changed: the new one in its place"""
+    p = root / rel
+    text = p.read_text()
+    if older in text:
+        p.write_text(text.replace(older, new, 1))
+        print(f"  {rel}: updated")
+
+
 # the Magic Lantern menu never opens: whatever asks for it (buttons,
-# modules, scripts) gets the film OS home instead
+# modules, scripts) gets the film OS home instead; in a module build, only
+# while the module is loaded (if it isn't, ML's menu shows its Modules tab)
+upgrade("src/menu.c",
+        "static void menu_open() \n{ \n#ifdef FEATURE_FILMROLL\n"
+        "    filmroll_menu_requested();\n"
+        "    return;\n"
+        "#endif\n",
+        "static void menu_open() \n{ \n#ifdef FEATURE_FILMROLL\n"
+        "#ifdef FEATURE_FILMOS_MODULE\n"
+        "    if (filmroll_menu_requested())      /* 0: the module isn't loaded, ML's menu opens */\n"
+        "        return;\n"
+        "#else\n"
+        "    filmroll_menu_requested();\n"
+        "    return;\n"
+        "#endif\n"
+        "#endif\n")
 edit("src/menu.c",
      "static void menu_open() \n{ \n    if (menu_shown)\n        return;\n",
      "static void menu_open() \n{ \n#ifdef FEATURE_FILMROLL\n"

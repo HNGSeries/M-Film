@@ -117,6 +117,7 @@ static int nrecent = 0;
 static char loaded_at[20];
 static int recent_valid = 0;
 static int last_shot_ms = -100000;      /* when poll_frames last saw a new frame */
+static volatile int last_key_ms = 0;    /* when a button other than the shutter was last pressed (handle_filmroll_keys) */
 
 /* ---------------------------------------------------------------- debug log */
 
@@ -683,47 +684,70 @@ int fos_port_abort()
     return 0;
 }
 
-/* Canon drawing over the film OS. On some DSLRs (the 60D's exposure scale,
- * #25 #49; the 550D's battery icon, #50) Canon keeps drawing its own screen
- * straight onto the one we show, with its buffer held or not. Each row we
- * put on the screen leaves a sum of what it holds; every 50 ms half the
- * rows are read back, and a row that no longer matches means Canon drew
- * there: the film OS then paints the whole screen again at once. The same
- * as the top plate's check (plate_overdrawn), for every film OS screen. */
-static uint32_t ui_row_sum[FOS_H];
+/* Canon drawing over our screen. On some DSLRs Canon keeps drawing its own
+ * screen straight onto the one we show, with its buffer held or not: over
+ * the top plate on the 50D and 500D (#43 #44), over the film OS on the 60D
+ * (its exposure scale, #25 #49) and the 550D (its battery icon, #50). Each
+ * row we put on the screen leaves a sum of what it holds (the film OS's rows
+ * as they're presented, the plate's after it is drawn: the two never show at
+ * once, so they share it). Every 50 ms half the rows are read back; a row
+ * that no longer matches means Canon drew there, and the screen is painted
+ * again at once. If it never matches for 2 s (Canon drawing all the time,
+ * or a camera that doesn't read back what we wrote), the check rests for
+ * 5 s, then 10, up to a minute, so it can't keep painting without end. */
+static uint16_t shown_sum[FOS_H];        /* 16 bits a row: 1 KB less at boot, and a 1 in 65,536 miss */
 
-static uint32_t row_sum(const uint8_t *row)
+static uint16_t row_sum(const uint8_t *row)
 {
     const uint32_t *w = (const uint32_t *) row;
     uint32_t a = 0, b = 0;
     for (int x = 0; x < FOS_W / 4; x += 2) { a += w[x]; b += a; }   /* every other 4 pixels */
-    return a ^ (b << 1);
+    uint32_t h = a ^ (b << 1);
+    return (uint16_t) (h ^ (h >> 16));
+}
+
+struct overdraw_check { const char *what; int half, in_a_row, rest, resting_until, times; };
+
+/* 1 if Canon has drawn over vram since its rows' sums were taken */
+static int overdrawn(struct overdraw_check *o, const uint8_t *vram)
+{
+    int now = get_ms_clock();
+    if (o->resting_until && now - o->resting_until < 0) return 0;
+    o->resting_until = 0;
+    o->half ^= 1;
+    int y = o->half;
+    for (; y < FOS_H; y += 2)
+        if (row_sum(vram + y * BMPPITCH) != shown_sum[y])
+            break;
+    if (y >= FOS_H)
+    {
+        o->in_a_row = 0;
+        o->rest = 0;
+        return 0;
+    }
+    if (++o->in_a_row > 40)
+    {
+        o->in_a_row = 0;
+        o->rest = o->rest ? MIN(o->rest * 2, 60000) : 5000;
+        o->resting_until = (now + o->rest) ? now + o->rest : 1;
+        dbg("%s: drawn over for 2 s on end (row %d), not checking for %d s", o->what, y, o->rest / 1000);
+        return 0;
+    }
+    if (o->times++ % 50 == 0) dbg("%s: Canon drew over it (%d times, row %d)", o->what, o->times, y);
+    return 1;
 }
 
 static void ui_overdrawn_check()
 {
-    static int last = 0, half = 0, times = 0, in_a_row = 0, off = 0;
+    static struct overdraw_check check = { .what = "film os" };
+    static int last = 0;
     int now = get_ms_clock();
-    if (off || now - last < 50) return;
+    if (now - last < 50) return;
     last = now;
     uint8_t *vram = bmp_vram_real();
     if (!vram || !DISPLAY_IS_ON) return;
-    half ^= 1;
-    int y = half;
-    for (; y < FOS_H; y += 2)
-        if (row_sum(vram + y * BMPPITCH) != ui_row_sum[y])
-            break;
-    if (y >= FOS_H) { in_a_row = 0; return; }
-    /* never matching even after painting it again (2 s of checks): this
-     * camera doesn't read back what we wrote, so stop checking */
-    if (++in_a_row > 40)
-    {
-        off = 1;
-        dbg("film os: the screen never reads back as drawn (row %d), not checking it", y);
-        return;
-    }
-    if (times++ % 50 == 0) dbg("film os: Canon drew over the screen (%d times, row %d)", times, y);
-    fos_ui_overdrawn();
+    if (overdrawn(&check, vram))
+        fos_ui_overdrawn();
 }
 
 void fos_port_present(const uint8_t *rows, int pitch, int y0, int y1)
@@ -736,7 +760,7 @@ void fos_port_present(const uint8_t *rows, int pitch, int y0, int y1)
     for (int y = y0; y < y1; y++)
     {
         memcpy(vram + y * BMPPITCH, rows + (y - y0) * pitch, FOS_W);
-        ui_row_sum[y] = row_sum(vram + y * BMPPITCH);
+        shown_sum[y] = row_sum(vram + y * BMPPITCH);
     }
 }
 
@@ -915,7 +939,7 @@ void fos_port_roll(struct fos_roll *r)
  * otherwise. With an orientation set here, Canon's NormalDisplay /
  * ReverseDisplay / MirrorDisplay put it back whenever the camera changes it
  * (Canon's 0 normal, 1 reverse, 2 mirror, as in ML's display_orientation_toggle).
- * Back on Auto, the screen goes back to the way Canon had it. */
+ * Back on Auto, the screen goes back to the way Canon last turned it. */
 #if defined(CONFIG_VARIANGLE_DISPLAY) && defined(DISPLAY_ORIENTATION)
 #define CAN_FLIP 1
 extern void NormalDisplay();
@@ -931,15 +955,15 @@ static void flip_to(int o)
 
 static void flip_step(int now_please)
 {
-    static int canon_had = -1, last = 0, times = 0;
+    static int canon_had = -1, we_set = -1, last = 0, times = 0;
     if (!DISPLAY_IS_ON) return;
     int o = DISPLAY_ORIENTATION;
     if (o < 0 || o > 2) return;
     if (!scr_flip)
     {
-        /* back to Auto: the way Canon had it before we turned it */
+        /* back to Auto: the way Canon last turned it */
         if (canon_had >= 0 && o != canon_had) flip_to(canon_had);
-        canon_had = -1;
+        canon_had = we_set = -1;
         return;
     }
     int want = COERCE(scr_flip - 1, 0, 2);
@@ -947,8 +971,11 @@ static void flip_step(int now_please)
     int now = get_ms_clock();
     if (!now_please && last && now - last < 300) return;   /* give Canon's change time to land */
     last = now ? now : 1;
-    if (canon_had < 0) canon_had = o;
-    if (times++ < 20) dbg("screen: Canon had orientation %d, set %d", o, want);
+    /* not the way we last set it: Canon turned it, and that is the hinge's
+     * latest word (the first time, its word from before). Auto goes back to that */
+    if (o != we_set) canon_had = o;
+    if (times++ < 20) dbg("screen: orientation %d (Canon's %d), set %d", o, canon_had, want);
+    we_set = want;
     flip_to(want);
 }
 #else
@@ -1183,33 +1210,24 @@ static void hud_clear()
 }
 
 #if !FOS_LV_ONLY
-/* The top plate's watchdog. On some DSLRs (the 50D and 500D, #43 #44) Canon
- * keeps drawing its settings screen straight onto the one we draw on, even
- * with its buffer held, so the two flickered. A sum of the screen, taken
- * after the plate is drawn and checked every 50 ms, tells when Canon has
- * drawn over it: the plate is then drawn again at once. */
+/* The top plate's watchdog (Canon drawing over our screen, above): checked
+ * every 50 ms while the plate is up, from hud_step and the main loop. */
 static volatile int plate_on_screen = 0;
-static uint32_t plate_sum = 0;
 
-static uint32_t screen_sum()
+static void plate_sums()
 {
     uint8_t *vram = bmp_vram();
-    if (!vram) return 0;
-    uint32_t a = 0, b = 0;
-    for (int y = 0; y < 480; y++)
-    {
-        const uint32_t *row = (const uint32_t *) (vram + y * BMPPITCH);
-        for (int x = 0; x < 720 / 4; x++) { a += row[x]; b += a; }
-    }
-    return a ^ (b << 1);
+    if (!vram) return;
+    for (int y = 0; y < FOS_H; y++)
+        shown_sum[y] = row_sum(vram + y * BMPPITCH);
 }
 
 static int plate_overdrawn()
 {
-    if (!plate_on_screen) return 0;
-    if (screen_sum() == plate_sum) return 0;
-    static int times = 0;
-    if (++times % 50 == 1) dbg("hud: Canon drew over the plate (%d times)", times);
+    static struct overdraw_check check = { .what = "hud: the plate" };
+    if (!plate_on_screen || hud_dirty) return 0;    /* not up, or about to be drawn anyway */
+    uint8_t *vram = bmp_vram();
+    if (!vram || !overdrawn(&check, vram)) return 0;
     hud_dirty = 1;
     return 1;
 }
@@ -1268,12 +1286,15 @@ static void hud_step()
          * the screen comes back to ours by itself, so Canon's needn't show for
          * the second or so in between (#17) */
         int shooting = lens_info.job_state || get_halfshutter_pressed() || now - last_shot_ms < 2500;
-        if (ui_running || (now - gone_since > 700 && !shooting) || now - gone_since > 4000)
+        /* a button (Q, MENU, INFO, the dial...) pressed as ours went, or since: that's
+         * Canon's screen being asked for, not a blink, so it gets it at once */
+        int asked = last_key_ms && last_key_ms - gone_since > -200;
+        if (ui_running || asked || (now - gone_since > 700 && !shooting) || now - gone_since > 4000)
         {
             canon_held = 0;
             gone_since = 0;
             if (!ui_running) canon_gui_enable_front_buffer(1);
-            dbg("hud: Canon's screen given back%s", ui_running ? " (to the film OS)" : "");
+            dbg("hud: Canon's screen given back%s", ui_running ? " (to the film OS)" : asked ? " (a button)" : "");
         }
     }
 #endif
@@ -1326,7 +1347,7 @@ static void hud_step()
         plate_drawn = plate;
 #if !FOS_LV_ONLY
         plate_on_screen = plate;
-        if (plate) plate_sum = screen_sum();
+        if (plate) plate_sums();
 #endif
     }
 }
@@ -1464,6 +1485,12 @@ static unsigned int lv_key(unsigned int key)
 int handle_filmroll_keys(struct event *event)
 {
     int key = module_translate_key(event->param, MODULE_KEY_PORTABLE);
+    if (key && key != MODULE_KEY_PRESS_HALFSHUTTER && key != MODULE_KEY_UNPRESS_HALFSHUTTER &&
+        key != MODULE_KEY_PRESS_FULLSHUTTER && key != MODULE_KEY_UNPRESS_FULLSHUTTER)
+    {
+        int now = get_ms_clock();
+        last_key_ms = now ? now : 1;
+    }
     if (ui_running)
     {
 #ifdef BGMT_UNPRESS_LEFT
