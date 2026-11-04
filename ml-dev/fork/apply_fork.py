@@ -61,8 +61,32 @@ edit("src/zebra.c",
      '#include "zebra.h"\n#include "filmroll.h"\n',
      '#include "filmroll.h"')
 
+def upgrade(rel, older, new):
+    """an earlier form of an edit on a checkout patched before it changed: the new one in its place"""
+    p = root / rel
+    text = p.read_text()
+    if older in text:
+        p.write_text(text.replace(older, new, 1))
+        print(f"  {rel}: updated")
+
+
 # the Magic Lantern menu never opens: whatever asks for it (buttons,
-# modules, scripts) gets the film OS home instead
+# modules, scripts) gets the film OS home instead; in a module build, only
+# while the module is loaded (if it isn't, ML's menu shows its Modules tab)
+upgrade("src/menu.c",
+        "static void menu_open() \n{ \n#ifdef FEATURE_FILMROLL\n"
+        "    filmroll_menu_requested();\n"
+        "    return;\n"
+        "#endif\n",
+        "static void menu_open() \n{ \n#ifdef FEATURE_FILMROLL\n"
+        "#ifdef FEATURE_FILMOS_MODULE\n"
+        "    if (filmroll_menu_requested())      /* 0: the module isn't loaded, ML's menu opens */\n"
+        "        return;\n"
+        "#else\n"
+        "    filmroll_menu_requested();\n"
+        "    return;\n"
+        "#endif\n"
+        "#endif\n")
 edit("src/menu.c",
      "static void menu_open() \n{ \n    if (menu_shown)\n        return;\n",
      "static void menu_open() \n{ \n#ifdef FEATURE_FILMROLL\n"
@@ -107,10 +131,13 @@ edit("src/boot-d45-am.c",
      "    #elif defined(CONFIG_100D) || defined(CONFIG_70D)\n",
      "film-mode fork: R0 0x44C000 -> 0x520000")
 
-LEAN = {"5D2.212"}
+LEAN = {"5D2.212", "650D.104", "700D.115"}     # 650D, 700D: their no-darkroom builds, with room to spare
+# features a camera's Magic Lantern doesn't build without (650D, 700D: fps-engio.c's evfstate timers)
+LEAN_KEEP = {"650D.104": ("FPS_OVERRIDE", "FPS_RAMPING"), "700D.115": ("FPS_OVERRIDE", "FPS_RAMPING")}
 LEAN_FEATURES = ["ZEBRA", "ZEBRA_FAST", "FOCUS_PEAK", "GHOST_IMAGE", "SPOTMETER", "FALSE_COLOR", "WAVEFORM",
                  "RAW_SPOTMETER", "RAW_ZEBRAS", "HDR_VIDEO", "FPS_OVERRIDE", "FPS_RAMPING", "MOVIE_LOGGING",
-                 "GRADUAL_EXPOSURE", "TRAP_FOCUS", "FOLLOW_FOCUS", "RACK_FOCUS", "AUDIO_METERS", "HDR_BRACKETING"]
+                 "GRADUAL_EXPOSURE", "TRAP_FOCUS", "FOLLOW_FOCUS", "RACK_FOCUS", "AUDIO_METERS", "HDR_BRACKETING",
+                 "FOCUS_PEAK_DISP_FILTER"]   # (on the 650D and 700D: needs FOCUS_PEAK)
 
 
 def film_os_objects():
@@ -146,7 +173,8 @@ def platform(name):
     if name in LEAN:
         p = root / f"platform/{name}/features.h"
         if "film-mode fork: lean" not in p.read_text():
-            undef = "".join(f"#undef FEATURE_{f}\n" for f in LEAN_FEATURES)
+            keep = LEAN_KEEP.get(name, ())
+            undef = "".join(f"#undef FEATURE_{f}\n" for f in LEAN_FEATURES if f not in keep)
             p.write_text(p.read_text().rstrip("\n") + "\n\n/* film-mode fork: lean, to fit at boot */\n" + undef)
             print(f"  platform/{name}/features.h: lean")
     # our objects. Rewritten every time (older versions of this fork

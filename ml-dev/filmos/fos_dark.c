@@ -399,6 +399,11 @@ static int ghost_t;                     /* ms since the latent image was read */
 static int ghost_final;                 /* read once more when the RAW is through */
 static int pending_frame;               /* a print waiting for the tray, 0 = none */
 static char pending_path[64];
+/* the next one, finished while the tray still held the last: on a fast
+ * camera (50D, #43) it was skipped, and the tray showed the frame after it
+ * half developed instead */
+static int queued_frame;
+static char queued_path[64];
 static int tray_dirty = 1, line_dirty = 1, panel_dirty = 1;
 static int last_doing = -1;
 static char last_error[72];             /* why the last frame that failed did */
@@ -583,6 +588,11 @@ static void frame_finished(int ok)
             pending_frame = cur_frame;
             fos_lab_print_path(pending_path, sizeof(pending_path), cur_roll, cur_frame);
         }
+        else
+        {
+            queued_frame = cur_frame;
+            fos_lab_print_path(queued_path, sizeof(queued_path), cur_roll, cur_frame);
+        }
         int x0, w;
         fos_dev_picture(dev, &x0, &w);
         hang(fos_dev_thumb(dev), x0, w);
@@ -635,6 +645,7 @@ void develop_enter(int arg)
     dv_t = 0;
     tray = TRAY_LATENT; tray_t = 0;
     pending_frame = 0;
+    queued_frame = 0;
     ndry = 0; dry_t = 100000;
     ghost = fos_port_alloc(GHOST_W * GHOST_H);
     img = fos_port_alloc(IMG_W * IMG_H);
@@ -746,8 +757,10 @@ int develop_update(int dt)
             tray_dirty = 1;
             if (tray_t > LIFT_MS)
             {
-                pending_frame = 0;
-                tray = finished ? TRAY_EMPTY : TRAY_IN;
+                pending_frame = queued_frame;
+                if (queued_frame) memcpy(pending_path, queued_path, sizeof(pending_path));
+                queued_frame = 0;
+                tray = finished && !pending_frame ? TRAY_EMPTY : TRAY_IN;
                 tray_t = 0;
                 ghost_t = 100000;
             }

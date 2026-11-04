@@ -106,7 +106,7 @@ What only a camera can tell:
   were no film OS, so MENU opens Magic Lantern's own menu (Modules tab: why it didn't load). After a crash
   while loading modules, Magic Lantern skips them at the next start and says so.
 - **Settings.** The module keeps them in `ML/SETTINGS/filmos.cfg`. The first time it starts it takes the
-  `filmroll.*` ones from `magiclantern.cfg`, so a camera moving from the built-in film OS keeps its roll.
+  `filmroll.*` ones from `magic.cfg`, so a camera moving from the built-in film OS keeps its roll.
 
 How the module is checked when it's built (`build_fork.sh`): every name it needs must be exported by that
 camera's autoexec.bin (`*.sym`), it must not define a name autoexec.bin has (only its entry points stay

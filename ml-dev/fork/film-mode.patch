@@ -37,31 +37,28 @@ index 8428d3c4b..a3be71e80 100644
  mlv_play
  mlv_snd
 diff --git a/platform/1100D.105/Makefile b/platform/1100D.105/Makefile
-index 474a5bd7b..8063406cb 100644
+index 474a5bd7b..b28492c1b 100644
 --- a/platform/1100D.105/Makefile
 +++ b/platform/1100D.105/Makefile
 @@ -21,6 +21,7 @@ RESTARTSTART = 0xC80100
  ML_BOOT_OBJ = boot-d45-am.o
  
  FIRMWARE_ID_1100D = 0x80000288
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmhook.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/1100D.105/features.h b/platform/1100D.105/features.h
-index 81cc3db68..0c2e07e6b 100644
+index 81cc3db68..21ccd11c0 100644
 --- a/platform/1100D.105/features.h
 +++ b/platform/1100D.105/features.h
-@@ -32,3 +32,9 @@
+@@ -32,3 +32,6 @@
  #undef FEATURE_FLEXINFO
  #undef FEATURE_SHOW_FREE_MEMORY
  #undef CONFIG_TSKMON
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
-+
-+/* film-mode fork: the film OS is a module (build_fork.sh --module) */
-+#define FEATURE_FILMOS_MODULE
 diff --git a/platform/1100D.105/modules.included b/platform/1100D.105/modules.included
 index 70260051d..eb4ce352c 100644
 --- a/platform/1100D.105/modules.included
@@ -346,28 +343,31 @@ index edc1dfbba..b8ec816ba 100644
  mlv_play
  mlv_snd
 diff --git a/platform/60D.111/Makefile b/platform/60D.111/Makefile
-index aea8e0b83..523e03ca7 100644
+index aea8e0b83..5eda09999 100644
 --- a/platform/60D.111/Makefile
 +++ b/platform/60D.111/Makefile
 @@ -24,6 +24,7 @@ ML_BOOT_OBJ = boot-d45-ch.o
  ML_PICSTYLE_AUTO = n
  
  CONFIG_LVAPP_HACK_RELOC = y
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmhook.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/60D.111/features.h b/platform/60D.111/features.h
-index b2c8b03e8..ae383506f 100644
+index b2c8b03e8..66dca1353 100644
 --- a/platform/60D.111/features.h
 +++ b/platform/60D.111/features.h
-@@ -10,3 +10,6 @@
+@@ -10,3 +10,9 @@
  #undef FLEXINFO_DEVELOPER_MENU
  
  #undef FEATURE_WIND_FILTER // problems with external mic
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
++
++/* film-mode fork: the film OS is a module (build_fork.sh --module) */
++#define FEATURE_FILMOS_MODULE
 diff --git a/platform/60D.111/modules.included b/platform/60D.111/modules.included
 index edc1dfbba..b8ec816ba 100644
 --- a/platform/60D.111/modules.included
@@ -393,16 +393,36 @@ index 9e9650596..452e67a8d 100644
  include  ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/650D.104/features.h b/platform/650D.104/features.h
-index 0c94cb713..cbe511db9 100644
+index 0c94cb713..abaa2d836 100644
 --- a/platform/650D.104/features.h
 +++ b/platform/650D.104/features.h
-@@ -29,3 +29,6 @@
+@@ -29,3 +29,26 @@
  #define FEATURE_FOCUS_PEAK_DISP_FILTER
  
  #define FEATURE_CROP_MODE_HACK
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
++
++/* film-mode fork: lean, to fit at boot */
++#undef FEATURE_ZEBRA
++#undef FEATURE_ZEBRA_FAST
++#undef FEATURE_FOCUS_PEAK
++#undef FEATURE_GHOST_IMAGE
++#undef FEATURE_SPOTMETER
++#undef FEATURE_FALSE_COLOR
++#undef FEATURE_WAVEFORM
++#undef FEATURE_RAW_SPOTMETER
++#undef FEATURE_RAW_ZEBRAS
++#undef FEATURE_HDR_VIDEO
++#undef FEATURE_MOVIE_LOGGING
++#undef FEATURE_GRADUAL_EXPOSURE
++#undef FEATURE_TRAP_FOCUS
++#undef FEATURE_FOLLOW_FOCUS
++#undef FEATURE_RACK_FOCUS
++#undef FEATURE_AUDIO_METERS
++#undef FEATURE_HDR_BRACKETING
++#undef FEATURE_FOCUS_PEAK_DISP_FILTER
 diff --git a/platform/650D.104/modules.included b/platform/650D.104/modules.included
 index 8428d3c4b..a3be71e80 100644
 --- a/platform/650D.104/modules.included
@@ -416,28 +436,31 @@ index 8428d3c4b..a3be71e80 100644
  mlv_play
  mlv_snd
 diff --git a/platform/6D.116/Makefile b/platform/6D.116/Makefile
-index 8ba969fae..dbe466cd3 100644
+index 8ba969fae..28964e2e9 100644
 --- a/platform/6D.116/Makefile
 +++ b/platform/6D.116/Makefile
 @@ -19,6 +19,7 @@ ML_BITRATE_OBJ = bitrate-5d3.o
  ML_SOUND_CODEC_OBJ = ak4646.o
  
  ML_SRC_EXTRA_OBJS = $(BUILD_DIR)/afma.o $(BUILD_DIR)/reloc.o $(BUILD_DIR)/gps.o
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmhook.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/6D.116/features.h b/platform/6D.116/features.h
-index c9d1fb870..415989d7d 100644
+index c9d1fb870..7136da36f 100644
 --- a/platform/6D.116/features.h
 +++ b/platform/6D.116/features.h
-@@ -21,3 +21,6 @@
+@@ -21,3 +21,9 @@
  #define FEATURE_GPS_TWEAKS
  
  #define FEATURE_AUDIO_REMOTE_SHOT
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
++
++/* film-mode fork: the film OS is a module (build_fork.sh --module) */
++#define FEATURE_FILMOS_MODULE
 diff --git a/platform/6D.116/modules.included b/platform/6D.116/modules.included
 index eddc7617e..6bfdee970 100644
 --- a/platform/6D.116/modules.included
@@ -463,16 +486,36 @@ index af9eb604f..0db8c8efa 100644
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/700D.115/features.h b/platform/700D.115/features.h
-index 42be326e4..9eee68b47 100644
+index 42be326e4..73db5f8d4 100644
 --- a/platform/700D.115/features.h
 +++ b/platform/700D.115/features.h
-@@ -23,3 +23,6 @@
+@@ -23,3 +23,26 @@
  #define FEATURE_FOCUS_PEAK_DISP_FILTER
  #define FEATURE_CROP_MODE_HACK
  #define FEATURE_EYEFI_TRICKS
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
++
++/* film-mode fork: lean, to fit at boot */
++#undef FEATURE_ZEBRA
++#undef FEATURE_ZEBRA_FAST
++#undef FEATURE_FOCUS_PEAK
++#undef FEATURE_GHOST_IMAGE
++#undef FEATURE_SPOTMETER
++#undef FEATURE_FALSE_COLOR
++#undef FEATURE_WAVEFORM
++#undef FEATURE_RAW_SPOTMETER
++#undef FEATURE_RAW_ZEBRAS
++#undef FEATURE_HDR_VIDEO
++#undef FEATURE_MOVIE_LOGGING
++#undef FEATURE_GRADUAL_EXPOSURE
++#undef FEATURE_TRAP_FOCUS
++#undef FEATURE_FOLLOW_FOCUS
++#undef FEATURE_RACK_FOCUS
++#undef FEATURE_AUDIO_METERS
++#undef FEATURE_HDR_BRACKETING
++#undef FEATURE_FOCUS_PEAK_DISP_FILTER
 diff --git a/platform/700D.115/modules.included b/platform/700D.115/modules.included
 index 8428d3c4b..a3be71e80 100644
 --- a/platform/700D.115/modules.included
@@ -486,31 +529,28 @@ index 8428d3c4b..a3be71e80 100644
  mlv_play
  mlv_snd
 diff --git a/platform/70D.112/Makefile b/platform/70D.112/Makefile
-index 508e2c952..e2ec59b3e 100644
+index 508e2c952..46950f467 100644
 --- a/platform/70D.112/Makefile
 +++ b/platform/70D.112/Makefile
 @@ -20,6 +20,7 @@ ML_BITRATE_OBJ = bitrate-5d3.o
  # default 0x44C000 - 0xD3C000, patched to 0x4E0000 - 0xD3C000 (592K for us).
  RESTARTSTART = 0x44C100
  ML_BOOT_OBJ = boot-d45-am.o
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmhook.o
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_nodark.o
  
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/70D.112/features.h b/platform/70D.112/features.h
-index 5095eea7d..e3daf04a3 100644
+index 5095eea7d..7db47a65b 100644
 --- a/platform/70D.112/features.h
 +++ b/platform/70D.112/features.h
-@@ -33,3 +33,9 @@
+@@ -33,3 +33,6 @@
  /* Audio Features */
  #define FEATURE_AUDIO_METERS
  #define FEATURE_AUDIO_REMOTE_SHOT
 +
 +/* film camera mode (src/filmroll.c) */
 +#define FEATURE_FILMROLL
-+
-+/* film-mode fork: the film OS is a module (build_fork.sh --module) */
-+#define FEATURE_FILMOS_MODULE
 diff --git a/platform/70D.112/modules.included b/platform/70D.112/modules.included
 index eddc7617e..6bfdee970 100644
 --- a/platform/70D.112/modules.included
@@ -523,16 +563,51 @@ index eddc7617e..6bfdee970 100644
  mlv_lite
  mlv_play
  mlv_snd
+diff --git a/platform/7D.203/Makefile b/platform/7D.203/Makefile
+index 01a525ba4..eb4f9e8e0 100644
+--- a/platform/7D.203/Makefile
++++ b/platform/7D.203/Makefile
+@@ -1,6 +1,7 @@
+ #Makefile for 7D
+ 
+ MODEL=7D
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
+ 
+ include ../Makefile
+ 
+diff --git a/platform/7D.203/features.h b/platform/7D.203/features.h
+index 2b37c0834..01b8ecc0b 100644
+--- a/platform/7D.203/features.h
++++ b/platform/7D.203/features.h
+@@ -19,3 +19,6 @@
+ #define FEATURE_AUDIO_REMOTE_SHOT
+ 
+ #undef FEATURE_VIGNETTING_CORRECTION // requires master code
++
++/* film camera mode (src/filmroll.c) */
++#define FEATURE_FILMROLL
+diff --git a/platform/7D.203/modules.included b/platform/7D.203/modules.included
+index eddc7617e..6bfdee970 100644
+--- a/platform/7D.203/modules.included
++++ b/platform/7D.203/modules.included
+@@ -11,7 +11,6 @@ edmac
+ ettr
+ file_man
+ img_name
+-lua
+ mlv_lite
+ mlv_play
+ mlv_snd
 diff --git a/platform/EOSM.202/Makefile b/platform/EOSM.202/Makefile
-index 7e11d12a2..be468805c 100644
+index 7e11d12a2..cc4932423 100644
 --- a/platform/EOSM.202/Makefile
 +++ b/platform/EOSM.202/Makefile
-@@ -18,6 +18,7 @@ PLATFORM_ARCH = armv5te
- RESTARTSTART = 0x9E1E0
+@@ -19,5 +19,7 @@ RESTARTSTART = 0x9E1E0
  
  ML_AF_PATTERNS_OBJ = n
-+ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
  
++ML_SRC_EXTRA_OBJS += $(BUILD_DIR)/filmroll.o $(BUILD_DIR)/fos_gfx.o $(BUILD_DIR)/fos_film.o $(BUILD_DIR)/fos_ui.o $(BUILD_DIR)/fos_shelf.o $(BUILD_DIR)/fos_pages.o $(BUILD_DIR)/fos_hud.o $(BUILD_DIR)/fos_print.o $(BUILD_DIR)/fos_dark.o $(BUILD_DIR)/fos_dev.o $(BUILD_DIR)/fos_lab.o $(BUILD_DIR)/fos_looks.o $(BUILD_DIR)/fos_jpeg.o
++
  include ../Makefile
  .DEFAULT_GOAL := $(BUILD_DIR)/cam_complete
 diff --git a/platform/EOSM.202/features.h b/platform/EOSM.202/features.h
@@ -577,10 +652,10 @@ index 2201e76c7..01865665a 100755
      addr_AllocMem_end[1] = MOV_R0_0x4E0000_INSTR;
 diff --git a/src/filmhook.c b/src/filmhook.c
 new file mode 100644
-index 000000000..3c74011d1
+index 000000000..808a82ba0
 --- /dev/null
 +++ b/src/filmhook.c
-@@ -0,0 +1,33 @@
+@@ -0,0 +1,78 @@
 +/* The film OS as a module (build_fork.sh --module): all that stays in
 + * autoexec.bin. The film OS itself (filmroll.c, fos_*.c) is ML/modules/filmos.mo,
 + * loaded after boot into Canon's memory, so it doesn't count against what the
@@ -593,6 +668,9 @@ index 000000000..3c74011d1
 +
 +#include <dryos.h>
 +#include <module.h>
++#include <fio-ml.h>
++#include <notify_box.h>
++#include <tasks.h>
 +#include "filmroll.h"
 +
 +/* defined in the module (filmroll.c); 0 until it is loaded */
@@ -614,12 +692,54 @@ index 000000000..3c74011d1
 +{
 +    return filmos_overlays();
 +}
++
++/* Without the module the camera would just show Magic Lantern's own menu,
++ * and nothing says why (#46). Once ML has had time to load its modules, say
++ * so on the screen, and in ML/FILMROLL.LOG. ML's module task (module.c):
++ * with "Disable all modules" on, it only lists the modules; after a power
++ * off that wasn't clean (LOADING.LCK left on the card) it skips them, and
++ * the list stays empty; otherwise it writes LOADING.LCK, which stays until
++ * a clean shutdown, and loads them. So the lock file can't tell these apart,
++ * the list can. ML's notify box holds 99 characters. */
++extern int module_autoload_disabled;    /* module.c */
++
++static void filmhook_note(const char *why)
++{
++    NotifyBox(15000, "M-Film didn't start: %s", why);
++    FILE *f = FIO_CreateFileOrAppend("ML/FILMROLL.LOG");
++    if (f)
++    {
++        char line[160];
++        snprintf(line, sizeof(line), "filmhook: the film OS module isn't loaded: %s\n", why);
++        FIO_WriteFile(f, line, strlen(line));
++        FIO_CloseFile(f);
++    }
++}
++
++static void filmhook_task()
++{
++    for (int i = 0; i < 30 && filmos_menu_open == (void *) ret_0; i++)
++        msleep(500);                    /* ML loads modules a few seconds after start-up */
++    if (filmos_menu_open != (void *) ret_0) return;
++    uint32_t size;
++    if (module_autoload_disabled)
++        filmhook_note("'Disable all modules' is on: MENU > Debug > Modules debug.");
++    else if (FIO_GetFileSize(MODULE_PATH "FILMOS.MO", &size) != 0)
++        filmhook_note("ML/modules/filmos.mo isn't on the card. Copy the zip again.");
++    else if (module_get_number("filmos") < 0)
++        filmhook_note("ML skipped its modules (battery pulled?). Switch off, then on.");
++    else
++        filmhook_note("its module didn't load. MENU > Modules says why.");
++}
++
++TASK_CREATE("filmhook_task", filmhook_task, 0, 0x1f, 0x1000);
++
 diff --git a/src/filmroll.c b/src/filmroll.c
 new file mode 100644
-index 000000000..7812c702a
+index 000000000..6f7eac8e0
 --- /dev/null
 +++ b/src/filmroll.c
-@@ -0,0 +1,1498 @@
+@@ -0,0 +1,1687 @@
 +/* filmroll: a Canon camera as a film camera (built into this ML fork).
 + * Made on the EOS M; 100D, 650D, 700D and others build from the same code.
 + *
@@ -710,6 +830,7 @@ index 000000000..7812c702a
 +static CONFIG_INT("filmroll.scr_sat",   scr_sat,          0);   /* -6..6 */
 +static CONFIG_INT("filmroll.scr_warm",  scr_warm,         0);
 +static CONFIG_INT("filmroll.scr_bright", scr_bright,      0);
++static CONFIG_INT("filmroll.scr_flip",  scr_flip,         0);   /* 0 Canon's hinge, 1 normal, 2 upside down, 3 mirrored */
 +
 +/* roll state, kept across power cycles */
 +static CONFIG_INT("filmroll.loaded",    roll_loaded,      0);
@@ -737,6 +858,8 @@ index 000000000..7812c702a
 +static int nrecent = 0;
 +static char loaded_at[20];
 +static int recent_valid = 0;
++static int last_shot_ms = -100000;      /* when poll_frames last saw a new frame */
++static volatile int last_key_ms = 0;    /* when a button other than the shutter was last pressed (handle_filmroll_keys) */
 +
 +/* ---------------------------------------------------------------- debug log */
 +
@@ -788,6 +911,11 @@ index 000000000..7812c702a
 +
 +static void log_append(const char *text)
 +{
++    /* At start-up, filmroll_init runs before the settings are loaded (it logs
++     * "roll 0 loaded 0"), so the path wasn't set, and frames shot after a
++     * restart before any film OS page was opened had nowhere to go (#17). */
++    if (!log_path[0] && roll_loaded)
++        update_log_path();
 +    FILE *f = FIO_CreateFileOrAppend(log_path);
 +    if (!f)
 +    {
@@ -1063,6 +1191,7 @@ index 000000000..7812c702a
 +        write_header(" - continued from the previous DCIM folder");
 +    }
 +
++    last_shot_ms = get_ms_clock();
 +    dbg("frames: file %d -> %d, logging %d", prev, now, count);
 +    for (int i = 1; i <= count; i++)
 +        record_frame((prev + i - 1) % 9999 + 1);
@@ -1235,6 +1364,8 @@ index 000000000..7812c702a
 +    return get_ms_clock();
 +}
 +
++static void ui_overdrawn_check();
++
 +void fos_port_sleep(int ms)
 +{
 +    msleep(ms);
@@ -1260,6 +1391,7 @@ index 000000000..7812c702a
 +        palette_ours();
 +        ui_last_palette = now;
 +    }
++    ui_overdrawn_check();
 +}
 +
 +int fos_port_key()
@@ -1294,6 +1426,72 @@ index 000000000..7812c702a
 +    return 0;
 +}
 +
++/* Canon drawing over our screen. On some DSLRs Canon keeps drawing its own
++ * screen straight onto the one we show, with its buffer held or not: over
++ * the top plate on the 50D and 500D (#43 #44), over the film OS on the 60D
++ * (its exposure scale, #25 #49) and the 550D (its battery icon, #50). Each
++ * row we put on the screen leaves a sum of what it holds (the film OS's rows
++ * as they're presented, the plate's after it is drawn: the two never show at
++ * once, so they share it). Every 50 ms half the rows are read back; a row
++ * that no longer matches means Canon drew there, and the screen is painted
++ * again at once. If it never matches for 2 s (Canon drawing all the time,
++ * or a camera that doesn't read back what we wrote), the check rests for
++ * 5 s, then 10, up to a minute, so it can't keep painting without end. */
++static uint16_t shown_sum[FOS_H];        /* 16 bits a row: 1 KB less at boot, and a 1 in 65,536 miss */
++
++static uint16_t row_sum(const uint8_t *row)
++{
++    const uint32_t *w = (const uint32_t *) row;
++    uint32_t a = 0, b = 0;
++    for (int x = 0; x < FOS_W / 4; x += 2) { a += w[x]; b += a; }   /* every other 4 pixels */
++    uint32_t h = a ^ (b << 1);
++    return (uint16_t) (h ^ (h >> 16));
++}
++
++struct overdraw_check { const char *what; int half, in_a_row, rest, resting_until, times; };
++
++/* 1 if Canon has drawn over vram since its rows' sums were taken */
++static int overdrawn(struct overdraw_check *o, const uint8_t *vram)
++{
++    int now = get_ms_clock();
++    if (o->resting_until && now - o->resting_until < 0) return 0;
++    o->resting_until = 0;
++    o->half ^= 1;
++    int y = o->half;
++    for (; y < FOS_H; y += 2)
++        if (row_sum(vram + y * BMPPITCH) != shown_sum[y])
++            break;
++    if (y >= FOS_H)
++    {
++        o->in_a_row = 0;
++        o->rest = 0;
++        return 0;
++    }
++    if (++o->in_a_row > 40)
++    {
++        o->in_a_row = 0;
++        o->rest = o->rest ? MIN(o->rest * 2, 60000) : 5000;
++        o->resting_until = (now + o->rest) ? now + o->rest : 1;
++        dbg("%s: drawn over for 2 s on end (row %d), not checking for %d s", o->what, y, o->rest / 1000);
++        return 0;
++    }
++    if (o->times++ % 50 == 0) dbg("%s: Canon drew over it (%d times, row %d)", o->what, o->times, y);
++    return 1;
++}
++
++static void ui_overdrawn_check()
++{
++    static struct overdraw_check check = { .what = "film os" };
++    static int last = 0;
++    int now = get_ms_clock();
++    if (now - last < 50) return;
++    last = now;
++    uint8_t *vram = bmp_vram_real();
++    if (!vram || !DISPLAY_IS_ON) return;
++    if (overdrawn(&check, vram))
++        fos_ui_overdrawn();
++}
++
 +void fos_port_present(const uint8_t *rows, int pitch, int y0, int y1)
 +{
 +    uint8_t *vram = bmp_vram_real();
@@ -1302,7 +1500,10 @@ index 000000000..7812c702a
 +    y0 = COERCE(y0, 0, FOS_H);
 +    y1 = COERCE(y1, y0, FOS_H);
 +    for (int y = y0; y < y1; y++)
++    {
 +        memcpy(vram + y * BMPPITCH, rows + (y - y0) * pitch, FOS_W);
++        shown_sum[y] = row_sum(vram + y * BMPPITCH);
++    }
 +}
 +
 +void fos_port_palette()
@@ -1473,6 +1674,57 @@ index 000000000..7812c702a
 +    }
 +}
 +
++/* Screen orientation on the swivel screens (60D, 600D, 650D, 700D, 70D, #49).
++ * Canon turns the whole screen, its own and ours, by the hinge's switch. A
++ * broken switch leaves it the wrong way round, and Canon's menu has nothing
++ * to set it by hand; ML's Display menu does it once, until the switch says
++ * otherwise. With an orientation set here, Canon's NormalDisplay /
++ * ReverseDisplay / MirrorDisplay put it back whenever the camera changes it
++ * (Canon's 0 normal, 1 reverse, 2 mirror, as in ML's display_orientation_toggle).
++ * Back on Auto, the screen goes back to the way Canon last turned it. */
++#if defined(CONFIG_VARIANGLE_DISPLAY) && defined(DISPLAY_ORIENTATION)
++#define CAN_FLIP 1
++extern void NormalDisplay();
++extern void ReverseDisplay();
++extern void MirrorDisplay();
++
++static void flip_to(int o)
++{
++    if (o == 0) NormalDisplay();
++    else if (o == 1) ReverseDisplay();
++    else MirrorDisplay();
++}
++
++static void flip_step(int now_please)
++{
++    static int canon_had = -1, we_set = -1, last = 0, times = 0;
++    if (!DISPLAY_IS_ON) return;
++    int o = DISPLAY_ORIENTATION;
++    if (o < 0 || o > 2) return;
++    if (!scr_flip)
++    {
++        /* back to Auto: the way Canon last turned it */
++        if (canon_had >= 0 && o != canon_had) flip_to(canon_had);
++        canon_had = we_set = -1;
++        return;
++    }
++    int want = COERCE(scr_flip - 1, 0, 2);
++    if (o == want) return;
++    int now = get_ms_clock();
++    if (!now_please && last && now - last < 300) return;   /* give Canon's change time to land */
++    last = now ? now : 1;
++    /* not the way we last set it: Canon turned it, and that is the hinge's
++     * latest word (the first time, its word from before). Auto goes back to that */
++    if (o != we_set) canon_had = o;
++    if (times++ < 20) dbg("screen: orientation %d (Canon's %d), set %d", o, canon_had, want);
++    we_set = want;
++    flip_to(want);
++}
++#else
++#define CAN_FLIP 0
++static void flip_step(int now_please) { (void) now_please; }
++#endif
++
 +static int *setting_var(int s)
 +{
 +    switch (s)
@@ -1495,6 +1747,7 @@ index 000000000..7812c702a
 +        case FS_SCR_SAT:    return &scr_sat;
 +        case FS_SCR_WARM:   return &scr_warm;
 +        case FS_SCR_BRIGHT: return &scr_bright;
++        case FS_SCR_FLIP:   return &scr_flip;
 +    }
 +    return 0;
 +}
@@ -1503,6 +1756,7 @@ index 000000000..7812c702a
 +{
 +    int *v = setting_var(s);
 +    if (s == FS_FSTOP) return current_fstop();
++    if (s == FS_SCR_FLIP && !CAN_FLIP) return -1;
 +    return v ? *v : 0;
 +}
 +
@@ -1511,6 +1765,7 @@ index 000000000..7812c702a
 +    int *v = setting_var(s);
 +    if (v) *v = value;
 +    hud_dirty = 1;
++    if (s == FS_SCR_FLIP) flip_step(1);
 +    /* screen colour: the whole film OS changes at once */
 +    if (s == FS_SCR_STD || s == FS_SCR_SAT || s == FS_SCR_WARM || s == FS_SCR_BRIGHT)
 +    {
@@ -1696,6 +1951,30 @@ index 000000000..7812c702a
 +        fos_hud_clear(vram, BMPPITCH, &hud_pal);
 +}
 +
++#if !FOS_LV_ONLY
++/* The top plate's watchdog (Canon drawing over our screen, above): checked
++ * every 50 ms while the plate is up, from hud_step and the main loop. */
++static volatile int plate_on_screen = 0;
++
++static void plate_sums()
++{
++    uint8_t *vram = bmp_vram();
++    if (!vram) return;
++    for (int y = 0; y < FOS_H; y++)
++        shown_sum[y] = row_sum(vram + y * BMPPITCH);
++}
++
++static int plate_overdrawn()
++{
++    static struct overdraw_check check = { .what = "hud: the plate" };
++    if (!plate_on_screen || hud_dirty) return 0;    /* not up, or about to be drawn anyway */
++    uint8_t *vram = bmp_vram();
++    if (!vram || !overdrawn(&check, vram)) return 0;
++    hud_dirty = 1;
++    return 1;
++}
++#endif
++
 +/* one HUD refresh; called from the main loop */
 +static void hud_step()
 +{
@@ -1745,12 +2024,19 @@ index 000000000..7812c702a
 +    {
 +        int now = get_ms_clock();
 +        if (!gone_since) gone_since = now ? now : 1;
-+        if (ui_running || now - gone_since > 700)
++        /* and while a frame is being taken and saved (job_state), or just was:
++         * the screen comes back to ours by itself, so Canon's needn't show for
++         * the second or so in between (#17) */
++        int shooting = lens_info.job_state || get_halfshutter_pressed() || now - last_shot_ms < 2500;
++        /* a button (Q, MENU, INFO, the dial...) pressed as ours went, or since: that's
++         * Canon's screen being asked for, not a blink, so it gets it at once */
++        int asked = last_key_ms && last_key_ms - gone_since > -200;
++        if (ui_running || asked || (now - gone_since > 700 && !shooting) || now - gone_since > 4000)
 +        {
 +            canon_held = 0;
 +            gone_since = 0;
 +            if (!ui_running) canon_gui_enable_front_buffer(1);
-+            dbg("hud: Canon's screen given back%s", ui_running ? " (to the film OS)" : "");
++            dbg("hud: Canon's screen given back%s", ui_running ? " (to the film OS)" : asked ? " (a button)" : "");
 +        }
 +    }
 +#endif
@@ -1763,6 +2049,9 @@ index 000000000..7812c702a
 +        if (vram && display_idle() && !ui_running) fos_hud_plate_clear(vram, BMPPITCH, &hud_pal);
 +#endif
 +        plate_drawn = 0;
++#if !FOS_LV_ONLY
++        plate_on_screen = 0;
++#endif
 +        last_sig = -1;
 +    }
 +
@@ -1778,6 +2067,9 @@ index 000000000..7812c702a
 +        return;
 +    }
 +    drawn = 1;
++#if !FOS_LV_ONLY
++    plate_overdrawn();
++#endif
 +
 +    int now = get_ms_clock();
 +    int lit = !leds_on_half || get_halfshutter_pressed() || now < leds_until;
@@ -1795,6 +2087,10 @@ index 000000000..7812c702a
 +        last_draw = now;
 +        hud_draw(lit, blink, plate);
 +        plate_drawn = plate;
++#if !FOS_LV_ONLY
++        plate_on_screen = plate;
++        if (plate) plate_sums();
++#endif
 +    }
 +}
 +
@@ -1931,6 +2227,12 @@ index 000000000..7812c702a
 +int handle_filmroll_keys(struct event *event)
 +{
 +    int key = module_translate_key(event->param, MODULE_KEY_PORTABLE);
++    if (key && key != MODULE_KEY_PRESS_HALFSHUTTER && key != MODULE_KEY_UNPRESS_HALFSHUTTER &&
++        key != MODULE_KEY_PRESS_FULLSHUTTER && key != MODULE_KEY_UNPRESS_FULLSHUTTER)
++    {
++        int now = get_ms_clock();
++        last_key_ms = now ? now : 1;
++    }
 +    if (ui_running)
 +    {
 +#ifdef BGMT_UNPRESS_LEFT
@@ -2099,7 +2401,14 @@ index 000000000..7812c702a
 +        }
 +        else if (end_due && !ROLL_FINISHED) end_due = 0;
 +        if (k % 2 == 0)
++        {
 +            hud_step();                     /* every 100 ms */
++            flip_step(0);
++        }
++#if !FOS_LV_ONLY
++        else if (plate_overdrawn())
++            hud_step();                     /* Canon drew over the plate: at once */
++#endif
 +
 +        int now = get_ms_clock();
 +        if (now - last_alive > 60000)
@@ -2148,10 +2457,10 @@ index 000000000..c465a6cd1
 +#endif
 diff --git a/src/fos.h b/src/fos.h
 new file mode 100644
-index 000000000..89552b20a
+index 000000000..1df742bc0
 --- /dev/null
 +++ b/src/fos.h
-@@ -0,0 +1,240 @@
+@@ -0,0 +1,243 @@
 +/* fos: the film OS - the EOS M's own user interface on top of Magic Lantern.
 + *
 + * Everything the user sees (film shelf, home, settings, roll status,
@@ -2262,6 +2571,8 @@ index 000000000..89552b20a
 +    FS_FILM, FS_EXP,
 +    FS_SCR_STD,         /* screen colour: 0 Canon's conversion, 1 Rec.709 */
 +    FS_SCR_SAT, FS_SCR_WARM, FS_SCR_BRIGHT,     /* -FOS_SCR_STEPS..FOS_SCR_STEPS */
++    FS_SCR_FLIP,        /* swivel screens: 0 as Canon's hinge says, 1 normal, 2 upside down, 3 mirrored;
++                           the port answers -1 on a camera that can't, and the item isn't shown */
 +    FS_COUNT
 +};
 +#define FOS_SCR_STEPS 6
@@ -2372,6 +2683,7 @@ index 000000000..89552b20a
 +
 +void fos_ui_init();
 +void fos_ui_run(int screen);
++void fos_ui_overdrawn();            /* the port saw something else draw on the screen: paint it all again */
 +
 +/* canister art, fos_film.c; quality 2 = everything, 1 = no texture
 + * filtering, 0 = no reflections either (the UI lowers it on a slow camera) */
@@ -2394,10 +2706,10 @@ index 000000000..89552b20a
 +#endif
 diff --git a/src/fos_dark.c b/src/fos_dark.c
 new file mode 100644
-index 000000000..6d753e3da
+index 000000000..eabb19f9c
 --- /dev/null
 +++ b/src/fos_dark.c
-@@ -0,0 +1,1332 @@
+@@ -0,0 +1,1345 @@
 +/* fos_dark: the darkroom.
 + *
 + * Rolls that have been shot and rewound wait here to be developed. The
@@ -2799,6 +3111,11 @@ index 000000000..6d753e3da
 +static int ghost_final;                 /* read once more when the RAW is through */
 +static int pending_frame;               /* a print waiting for the tray, 0 = none */
 +static char pending_path[64];
++/* the next one, finished while the tray still held the last: on a fast
++ * camera (50D, #43) it was skipped, and the tray showed the frame after it
++ * half developed instead */
++static int queued_frame;
++static char queued_path[64];
 +static int tray_dirty = 1, line_dirty = 1, panel_dirty = 1;
 +static int last_doing = -1;
 +static char last_error[72];             /* why the last frame that failed did */
@@ -2983,6 +3300,11 @@ index 000000000..6d753e3da
 +            pending_frame = cur_frame;
 +            fos_lab_print_path(pending_path, sizeof(pending_path), cur_roll, cur_frame);
 +        }
++        else
++        {
++            queued_frame = cur_frame;
++            fos_lab_print_path(queued_path, sizeof(queued_path), cur_roll, cur_frame);
++        }
 +        int x0, w;
 +        fos_dev_picture(dev, &x0, &w);
 +        hang(fos_dev_thumb(dev), x0, w);
@@ -3035,6 +3357,7 @@ index 000000000..6d753e3da
 +    dv_t = 0;
 +    tray = TRAY_LATENT; tray_t = 0;
 +    pending_frame = 0;
++    queued_frame = 0;
 +    ndry = 0; dry_t = 100000;
 +    ghost = fos_port_alloc(GHOST_W * GHOST_H);
 +    img = fos_port_alloc(IMG_W * IMG_H);
@@ -3146,8 +3469,10 @@ index 000000000..6d753e3da
 +            tray_dirty = 1;
 +            if (tray_t > LIFT_MS)
 +            {
-+                pending_frame = 0;
-+                tray = finished ? TRAY_EMPTY : TRAY_IN;
++                pending_frame = queued_frame;
++                if (queued_frame) memcpy(pending_path, queued_path, sizeof(pending_path));
++                queued_frame = 0;
++                tray = finished && !pending_frame ? TRAY_EMPTY : TRAY_IN;
 +                tray_t = 0;
 +                ghost_t = 100000;
 +            }
@@ -13953,10 +14278,10 @@ index 000000000..595b475b0
 +void prints_draw() { nd_draw(); }
 diff --git a/src/fos_pages.c b/src/fos_pages.c
 new file mode 100644
-index 000000000..e5b45de23
+index 000000000..b8436dd81
 --- /dev/null
 +++ b/src/fos_pages.c
-@@ -0,0 +1,1103 @@
+@@ -0,0 +1,1129 @@
 +/* fos_pages: home, the settings pages and the roll in the camera.
 + *
 + * Home is the film OS's main menu: the roll you are shooting on the left
@@ -14245,7 +14570,7 @@ index 000000000..e5b45de23
 +
 +#define PAGE_SYSTEM  2
 +#define PAGE_SCREEN  3
-+#define SYS_SCREEN_ROW 2                /* where Screen colour sits in System */
++#define SYS_SCREEN_ROW 3                /* where Screen colour sits in System */
 +#define ACT_SCR_RESET 100               /* handled here, not by the port */
 +
 +struct item
@@ -14262,6 +14587,7 @@ index 000000000..e5b45de23
 +static const char *const apkey_choices[] = { "Dial in Av", "Up / Down", "Menu only" };
 +static const char *const start_choices[] = { "Off", "When no film", "Always" };
 +static const char *const mode_choices[] = { "Basic", "Realistic" };
++static const char *const flip_choices[] = { "Auto", "Normal", "Upside down", "Mirrored" };
 +
 +static const struct item finder_items[] =
 +{
@@ -14285,6 +14611,7 @@ index 000000000..e5b45de23
 +    { "Start screen", IT_CHOICE, FS_STARTUP, start_choices, 3, "The film shelf when the camera turns on." },
 +    { "Boot animation", IT_TOGGLE, FS_BOOTANIM, 0, 0, "The aperture opening on the name at power on." },
 +    { "Screen colour", IT_PAGE, PAGE_SCREEN, 0, 0, "Match these colours to what you see around you." },
++    { "Screen orientation", IT_CHOICE, FS_SCR_FLIP, flip_choices, 4, "Auto follows the hinge. Set one if the screen shows the wrong way round." },
 +    { "PLAY shows prints only", IT_TOGGLE, FS_PLAYLOCK, 0, 0, "Canon's playback would show frames the darkroom hasn't developed." },
 +    { "Re-apply film settings", IT_ACTION, FA_REAPPLY, 0, 0, "After changing picture style, white balance or ISO by hand." },
 +    { "Canon menu", IT_ACTION, FA_CANON_MENU, 0, 0, "Leave and open the camera's own menu (format card, RAW...)." },
@@ -14304,16 +14631,39 @@ index 000000000..e5b45de23
 +    { "Reset", IT_ACTION, ACT_SCR_RESET, 0, 0, "Back to the colours as designed." },
 +};
 +
-+static const struct { const char *title; const char *sub; const struct item *items; int n; } pages[] =
++#define NITEMS(a) ((int) (sizeof(a) / sizeof((a)[0])))
++
++static struct { const char *title; const char *sub; const struct item *items; int n; } pages[] =
 +{
 +    { "Viewfinder", "What you see in LiveView while you shoot", finder_items, 4 },
 +    { "Lens", "Aperture for manual lenses", lens_items, 4 },
-+    { "System", "Film mode, screen colour, start up and the Canon menu", system_items, 10 },
++    { "System", "Film mode, screen colour, start up and the Canon menu", system_items, NITEMS(system_items) },
 +    { "Screen colour", "Live: the whole film OS changes as you go", screen_items, 5 },
 +};
 +
 +static int page, page_sel, page_top;
-+static struct spring page_hl, page_scroll, knob[8];
++#define P_KNOBS   12            /* one per row: more rows than any page has */
++static struct spring page_hl, page_scroll, knob[P_KNOBS];
++
++/* The System page without what this camera can't do (the port answers -1
++ * for it: screen orientation on a fixed screen), worked out once. */
++static struct item system_here[NITEMS(system_items)];
++
++static void pages_fit()
++{
++    static int done = 0;
++    if (done) return;
++    done = 1;
++    int n = 0;
++    for (int i = 0; i < NITEMS(system_items); i++)
++    {
++        const struct item *it = &system_items[i];
++        if (it->kind == IT_CHOICE && fos_port_get(it->setting) < 0) continue;
++        system_here[n++] = *it;
++    }
++    pages[PAGE_SYSTEM].items = system_here;
++    pages[PAGE_SYSTEM].n = n;
++}
 +static int help_fade;           /* ms since the selection changed */
 +
 +#define P_LIST_Y  118
@@ -14377,6 +14727,7 @@ index 000000000..e5b45de23
 +
 +void page_enter(int arg)
 +{
++    pages_fit();
 +    /* from home: a page; between pages: page | row << 4 */
 +    if (ui_from() == SCR_HOME || ui_from() == SCR_PAGE)
 +    {
@@ -14386,7 +14737,7 @@ index 000000000..e5b45de23
 +    page_top = page_sel >= P_ROWS ? page_sel - P_ROWS + 1 : 0;
 +    page_hl.x = page_sel; page_hl.v = 0;
 +    page_scroll.x = page_top; page_scroll.v = 0;
-+    for (int i = 0; i < pages[page].n && i < 8; i++)
++    for (int i = 0; i < pages[page].n && i < P_KNOBS; i++)
 +    {
 +        knob[i].x = knob_target(&pages[page].items[i]);
 +        knob[i].v = 0;
@@ -14495,7 +14846,7 @@ index 000000000..e5b45de23
 +    int dirty = 0;
 +    if (spring_step(&page_hl, page_sel, dt, 3.6f, 0.82f)) dirty |= D_LIST;
 +    if (spring_step(&page_scroll, page_top, dt, 3.0f, 0.95f)) dirty |= D_LIST;
-+    for (int i = 0; i < pages[page].n && i < 8; i++)
++    for (int i = 0; i < pages[page].n && i < P_KNOBS; i++)
 +        if (spring_step(&knob[i], knob_target(&pages[page].items[i]), dt, 4.0f, 0.75f))
 +            dirty |= D_LIST | (page == 0 ? D_PREV : 0);     /* the viewfinder preview follows the switches */
 +    if (help_fade < 400) { help_fade += dt; dirty |= D_HELP; }
@@ -16053,10 +16404,10 @@ index 000000000..f6292051c
 +}
 diff --git a/src/fos_ui.c b/src/fos_ui.c
 new file mode 100644
-index 000000000..2f85cf742
+index 000000000..03cf98f4c
 --- /dev/null
 +++ b/src/fos_ui.c
-@@ -0,0 +1,923 @@
+@@ -0,0 +1,942 @@
 +/* fos_ui: the loop, navigation, transitions and shared widgets of the
 + * film OS. The screens themselves are in fos_shelf.c and fos_pages.c.
 + *
@@ -16152,6 +16503,12 @@ index 000000000..2f85cf742
 +void ui_damage_all()
 +{
 +    ui_damage(0, FOS_H);
++}
++
++void fos_ui_overdrawn()
++{
++    ui_clobbered = 1;
++    ui_damage_all();
 +}
 +
 +/* ---------------------------------------------------------------- widgets */
@@ -16285,14 +16642,27 @@ index 000000000..2f85cf742
 +    return w;
 +}
 +
++static int keycap_w(const char *key)
++{
++    return !strcmp(key, "<>") || !strcmp(key, "^v") ? 34 : fos_text_w(&fos_font_xs, key, 16) + 14;
++}
++
 +void ui_hints(const struct hint *h, int n)
 +{
 +    int base = HINTS_Y + 23;
++    /* the gap between hints closes up so the row fits the screen: with a
++     * roll in progress the shelf's six ran off the right edge (#43) */
++    int need = 0;
++    for (int i = 0; i < n; i++)
++        need += keycap_w(h[i].key) + 8 + fos_text_w(&fos_font_sm, h[i].label, 0);
++    int gap = 22, room = FOS_W - 48 - need;
++    if (n > 1 && room < gap * (n - 1)) gap = room / (n - 1);
++    if (gap < 8) gap = 8;
 +    int x = 24;
 +    for (int i = 0; i < n; i++)
 +    {
 +        x += ui_keycap(x, base, h[i].key) + 8;
-+        x += fos_text(cv, &fos_font_sm, x, base - 1, h[i].label, C_TEXT3, OPAQUE, 0) + 22;
++        x += fos_text(cv, &fos_font_sm, x, base - 1, h[i].label, C_TEXT3, OPAQUE, 0) + gap;
 +    }
 +}
 +

@@ -10,6 +10,9 @@
 
 #include <dryos.h>
 #include <module.h>
+#include <fio-ml.h>
+#include <notify_box.h>
+#include <tasks.h>
 #include "filmroll.h"
 
 /* defined in the module (filmroll.c); 0 until it is loaded */
@@ -31,3 +34,45 @@ int filmroll_overlays_active()
 {
     return filmos_overlays();
 }
+
+/* Without the module the camera would just show Magic Lantern's own menu,
+ * and nothing says why (#46). Once ML has had time to load its modules, say
+ * so on the screen, and in ML/FILMROLL.LOG. ML's module task (module.c):
+ * with "Disable all modules" on, it only lists the modules; after a power
+ * off that wasn't clean (LOADING.LCK left on the card) it skips them, and
+ * the list stays empty; otherwise it writes LOADING.LCK, which stays until
+ * a clean shutdown, and loads them. So the lock file can't tell these apart,
+ * the list can. ML's notify box holds 99 characters. */
+extern int module_autoload_disabled;    /* module.c */
+
+static void filmhook_note(const char *why)
+{
+    NotifyBox(15000, "M-Film didn't start: %s", why);
+    FILE *f = FIO_CreateFileOrAppend("ML/FILMROLL.LOG");
+    if (f)
+    {
+        char line[160];
+        snprintf(line, sizeof(line), "filmhook: the film OS module isn't loaded: %s\n", why);
+        FIO_WriteFile(f, line, strlen(line));
+        FIO_CloseFile(f);
+    }
+}
+
+static void filmhook_task()
+{
+    for (int i = 0; i < 30 && filmos_menu_open == (void *) ret_0; i++)
+        msleep(500);                    /* ML loads modules a few seconds after start-up */
+    if (filmos_menu_open != (void *) ret_0) return;
+    uint32_t size;
+    if (module_autoload_disabled)
+        filmhook_note("'Disable all modules' is on: MENU > Debug > Modules debug.");
+    else if (FIO_GetFileSize(MODULE_PATH "FILMOS.MO", &size) != 0)
+        filmhook_note("ML/modules/filmos.mo isn't on the card. Copy the zip again.");
+    else if (module_get_number("filmos") < 0)
+        filmhook_note("ML skipped its modules (battery pulled?). Switch off, then on.");
+    else
+        filmhook_note("its module didn't load. MENU > Modules says why.");
+}
+
+TASK_CREATE("filmhook_task", filmhook_task, 0, 0x1f, 0x1000);
+

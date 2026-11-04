@@ -38,7 +38,7 @@ static int settings[FS_COUNT] = {
     [FS_HUD] = 1, [FS_LEDS] = 1, [FS_FOCUS] = 1, [FS_WIND] = 1,
     [FS_APKEYS] = 0, [FS_LENS_WIDE] = 6, [FS_FSTOP] = 10,
     [FS_STARTUP] = 2, [FS_PLAYLOCK] = 1, [FS_BOOTANIM] = 1, [FS_DEBUG] = 0, [FS_MODE] = 0,
-    [FS_FILM] = 0, [FS_EXP] = 0,
+    [FS_FILM] = 0, [FS_EXP] = 0, [FS_SCR_FLIP] = 0,
 };
 static struct fos_roll roll = { 1, 12, 1, 36, 14, 0, "2026-10-21 18:02", 3,
     { { 14, "21:47", "2" }, { 13, "21:40", "2" }, { 12, "21:33", "2.8" } } };
@@ -63,12 +63,49 @@ static void dump()
     last_dump = now_ms;
 }
 
+/* FOS_OVERDRAW=1: "Canon" scribbles on the screen every 700 ms, as the 60D
+ * and 550D do, and the port tells the film OS (fos_ui_overdrawn), as the
+ * camera's check does. Every scribbled row must be painted again within
+ * three frames, or the screen on show doesn't repaint all of itself. */
+static uint8_t overdrawn_row[FOS_H];
+static int overdraw_wait, overdraw_n, overdraw_missed;
+
+static void overdraw_step()
+{
+    static int on = -1, last = 0;
+    if (on < 0) on = getenv("FOS_OVERDRAW") != 0;
+    if (!on) return;
+    if (overdraw_wait && --overdraw_wait == 0)
+    {
+        int y0 = -1, y1 = -1;
+        for (int y = 0; y < FOS_H; y++) if (overdrawn_row[y]) { if (y0 < 0) y0 = y; y1 = y; }
+        if (y0 >= 0)
+        {
+            overdraw_missed++;
+            fprintf(stderr, "[%6d ms] overdraw: rows %d-%d not painted again\n", now_ms, y0, y1);
+            memset(overdrawn_row, 0, sizeof(overdrawn_row));
+        }
+    }
+    if (overdraw_wait || now_ms - last < 700) return;
+    last = now_ms;
+    int y0 = 40 + (overdraw_n * 97) % 360, x0 = 60 + (overdraw_n * 151) % 480;
+    for (int y = y0; y < y0 + 30; y++)
+    {
+        memset(&screen[y * FOS_W + x0], 255, 160);
+        overdrawn_row[y] = 1;
+    }
+    overdraw_n++;
+    overdraw_wait = 3;
+    fos_ui_overdrawn();
+}
+
 void fos_port_sleep(int ms)
 {
     /* FOS_FULL=1: every frame redrawn whole, to check the partial redraws */
     static int full = -1;
     if (full < 0) full = getenv("FOS_FULL") != 0;
     if (full) ui_clobbered = 1;
+    overdraw_step();
     if (frame_dirty)
     {
         now_ms += FRAME_MS;
@@ -93,7 +130,10 @@ int fos_port_abort()
 void fos_port_present(const uint8_t *rows, int pitch, int y0, int y1)
 {
     for (int y = y0; y < y1; y++)
+    {
         memcpy(&screen[y * FOS_W], &rows[(y - y0) * pitch], FOS_W);
+        overdrawn_row[y] = 0;
+    }
     frame_dirty = 1;
 }
 
@@ -135,7 +175,12 @@ void *fos_port_alloc(int size) { return malloc(size); }
 void fos_port_free(void *p) { free(p); }
 
 void fos_port_roll(struct fos_roll *r) { *r = roll; }
-int  fos_port_get(int s) { return s >= 0 && s < FS_COUNT ? settings[s] : 0; }
+int  fos_port_get(int s)
+{
+    /* the screen orientation is only on swivel screens: not on the EOS M, unless FOS_SWIVEL=1 */
+    if (s == FS_SCR_FLIP && !getenv("FOS_SWIVEL")) return -1;
+    return s >= 0 && s < FS_COUNT ? settings[s] : 0;
+}
 void fos_port_set(int s, int v)
 {
     if (s >= 0 && s < FS_COUNT) settings[s] = v;
@@ -234,5 +279,6 @@ int main(int argc, char **argv)
     fos_ui_run(open);
     if (frame_dirty) dump();
     fprintf(stderr, "%d frames, %d ms\n", frame_no, now_ms);
+    if (overdraw_n) fprintf(stderr, "overdraw: %d scribbles, %d not painted again\n", overdraw_n, overdraw_missed);
     return 0;
 }

@@ -88,6 +88,7 @@ static CONFIG_INT("filmroll.scr_std",   scr_std,          0);   /* screen colour
 static CONFIG_INT("filmroll.scr_sat",   scr_sat,          0);   /* -6..6 */
 static CONFIG_INT("filmroll.scr_warm",  scr_warm,         0);
 static CONFIG_INT("filmroll.scr_bright", scr_bright,      0);
+static CONFIG_INT("filmroll.scr_flip",  scr_flip,         0);   /* 0 Canon's hinge, 1 normal, 2 upside down, 3 mirrored */
 
 /* roll state, kept across power cycles */
 static CONFIG_INT("filmroll.loaded",    roll_loaded,      0);
@@ -115,6 +116,8 @@ static struct { int no; char time[6]; char fstop[6]; } recent[FOS_RECENT];
 static int nrecent = 0;
 static char loaded_at[20];
 static int recent_valid = 0;
+static int last_shot_ms = -100000;      /* when poll_frames last saw a new frame */
+static volatile int last_key_ms = 0;    /* when a button other than the shutter was last pressed (handle_filmroll_keys) */
 
 /* ---------------------------------------------------------------- debug log */
 
@@ -166,6 +169,11 @@ static void update_log_path()
 
 static void log_append(const char *text)
 {
+    /* At start-up, filmroll_init runs before the settings are loaded (it logs
+     * "roll 0 loaded 0"), so the path wasn't set, and frames shot after a
+     * restart before any film OS page was opened had nowhere to go (#17). */
+    if (!log_path[0] && roll_loaded)
+        update_log_path();
     FILE *f = FIO_CreateFileOrAppend(log_path);
     if (!f)
     {
@@ -441,6 +449,7 @@ static void poll_frames()
         write_header(" - continued from the previous DCIM folder");
     }
 
+    last_shot_ms = get_ms_clock();
     dbg("frames: file %d -> %d, logging %d", prev, now, count);
     for (int i = 1; i <= count; i++)
         record_frame((prev + i - 1) % 9999 + 1);
@@ -613,6 +622,8 @@ int fos_port_ms()
     return get_ms_clock();
 }
 
+static void ui_overdrawn_check();
+
 void fos_port_sleep(int ms)
 {
     msleep(ms);
@@ -638,6 +649,7 @@ void fos_port_sleep(int ms)
         palette_ours();
         ui_last_palette = now;
     }
+    ui_overdrawn_check();
 }
 
 int fos_port_key()
@@ -672,6 +684,72 @@ int fos_port_abort()
     return 0;
 }
 
+/* Canon drawing over our screen. On some DSLRs Canon keeps drawing its own
+ * screen straight onto the one we show, with its buffer held or not: over
+ * the top plate on the 50D and 500D (#43 #44), over the film OS on the 60D
+ * (its exposure scale, #25 #49) and the 550D (its battery icon, #50). Each
+ * row we put on the screen leaves a sum of what it holds (the film OS's rows
+ * as they're presented, the plate's after it is drawn: the two never show at
+ * once, so they share it). Every 50 ms half the rows are read back; a row
+ * that no longer matches means Canon drew there, and the screen is painted
+ * again at once. If it never matches for 2 s (Canon drawing all the time,
+ * or a camera that doesn't read back what we wrote), the check rests for
+ * 5 s, then 10, up to a minute, so it can't keep painting without end. */
+static uint16_t shown_sum[FOS_H];        /* 16 bits a row: 1 KB less at boot, and a 1 in 65,536 miss */
+
+static uint16_t row_sum(const uint8_t *row)
+{
+    const uint32_t *w = (const uint32_t *) row;
+    uint32_t a = 0, b = 0;
+    for (int x = 0; x < FOS_W / 4; x += 2) { a += w[x]; b += a; }   /* every other 4 pixels */
+    uint32_t h = a ^ (b << 1);
+    return (uint16_t) (h ^ (h >> 16));
+}
+
+struct overdraw_check { const char *what; int half, in_a_row, rest, resting_until, times; };
+
+/* 1 if Canon has drawn over vram since its rows' sums were taken */
+static int overdrawn(struct overdraw_check *o, const uint8_t *vram)
+{
+    int now = get_ms_clock();
+    if (o->resting_until && now - o->resting_until < 0) return 0;
+    o->resting_until = 0;
+    o->half ^= 1;
+    int y = o->half;
+    for (; y < FOS_H; y += 2)
+        if (row_sum(vram + y * BMPPITCH) != shown_sum[y])
+            break;
+    if (y >= FOS_H)
+    {
+        o->in_a_row = 0;
+        o->rest = 0;
+        return 0;
+    }
+    if (++o->in_a_row > 40)
+    {
+        o->in_a_row = 0;
+        o->rest = o->rest ? MIN(o->rest * 2, 60000) : 5000;
+        o->resting_until = (now + o->rest) ? now + o->rest : 1;
+        dbg("%s: drawn over for 2 s on end (row %d), not checking for %d s", o->what, y, o->rest / 1000);
+        return 0;
+    }
+    if (o->times++ % 50 == 0) dbg("%s: Canon drew over it (%d times, row %d)", o->what, o->times, y);
+    return 1;
+}
+
+static void ui_overdrawn_check()
+{
+    static struct overdraw_check check = { .what = "film os" };
+    static int last = 0;
+    int now = get_ms_clock();
+    if (now - last < 50) return;
+    last = now;
+    uint8_t *vram = bmp_vram_real();
+    if (!vram || !DISPLAY_IS_ON) return;
+    if (overdrawn(&check, vram))
+        fos_ui_overdrawn();
+}
+
 void fos_port_present(const uint8_t *rows, int pitch, int y0, int y1)
 {
     uint8_t *vram = bmp_vram_real();
@@ -680,7 +758,10 @@ void fos_port_present(const uint8_t *rows, int pitch, int y0, int y1)
     y0 = COERCE(y0, 0, FOS_H);
     y1 = COERCE(y1, y0, FOS_H);
     for (int y = y0; y < y1; y++)
+    {
         memcpy(vram + y * BMPPITCH, rows + (y - y0) * pitch, FOS_W);
+        shown_sum[y] = row_sum(vram + y * BMPPITCH);
+    }
 }
 
 void fos_port_palette()
@@ -851,6 +932,57 @@ void fos_port_roll(struct fos_roll *r)
     }
 }
 
+/* Screen orientation on the swivel screens (60D, 600D, 650D, 700D, 70D, #49).
+ * Canon turns the whole screen, its own and ours, by the hinge's switch. A
+ * broken switch leaves it the wrong way round, and Canon's menu has nothing
+ * to set it by hand; ML's Display menu does it once, until the switch says
+ * otherwise. With an orientation set here, Canon's NormalDisplay /
+ * ReverseDisplay / MirrorDisplay put it back whenever the camera changes it
+ * (Canon's 0 normal, 1 reverse, 2 mirror, as in ML's display_orientation_toggle).
+ * Back on Auto, the screen goes back to the way Canon last turned it. */
+#if defined(CONFIG_VARIANGLE_DISPLAY) && defined(DISPLAY_ORIENTATION)
+#define CAN_FLIP 1
+extern void NormalDisplay();
+extern void ReverseDisplay();
+extern void MirrorDisplay();
+
+static void flip_to(int o)
+{
+    if (o == 0) NormalDisplay();
+    else if (o == 1) ReverseDisplay();
+    else MirrorDisplay();
+}
+
+static void flip_step(int now_please)
+{
+    static int canon_had = -1, we_set = -1, last = 0, times = 0;
+    if (!DISPLAY_IS_ON) return;
+    int o = DISPLAY_ORIENTATION;
+    if (o < 0 || o > 2) return;
+    if (!scr_flip)
+    {
+        /* back to Auto: the way Canon last turned it */
+        if (canon_had >= 0 && o != canon_had) flip_to(canon_had);
+        canon_had = we_set = -1;
+        return;
+    }
+    int want = COERCE(scr_flip - 1, 0, 2);
+    if (o == want) return;
+    int now = get_ms_clock();
+    if (!now_please && last && now - last < 300) return;   /* give Canon's change time to land */
+    last = now ? now : 1;
+    /* not the way we last set it: Canon turned it, and that is the hinge's
+     * latest word (the first time, its word from before). Auto goes back to that */
+    if (o != we_set) canon_had = o;
+    if (times++ < 20) dbg("screen: orientation %d (Canon's %d), set %d", o, canon_had, want);
+    we_set = want;
+    flip_to(want);
+}
+#else
+#define CAN_FLIP 0
+static void flip_step(int now_please) { (void) now_please; }
+#endif
+
 static int *setting_var(int s)
 {
     switch (s)
@@ -873,6 +1005,7 @@ static int *setting_var(int s)
         case FS_SCR_SAT:    return &scr_sat;
         case FS_SCR_WARM:   return &scr_warm;
         case FS_SCR_BRIGHT: return &scr_bright;
+        case FS_SCR_FLIP:   return &scr_flip;
     }
     return 0;
 }
@@ -881,6 +1014,7 @@ int fos_port_get(int s)
 {
     int *v = setting_var(s);
     if (s == FS_FSTOP) return current_fstop();
+    if (s == FS_SCR_FLIP && !CAN_FLIP) return -1;
     return v ? *v : 0;
 }
 
@@ -889,6 +1023,7 @@ void fos_port_set(int s, int value)
     int *v = setting_var(s);
     if (v) *v = value;
     hud_dirty = 1;
+    if (s == FS_SCR_FLIP) flip_step(1);
     /* screen colour: the whole film OS changes at once */
     if (s == FS_SCR_STD || s == FS_SCR_SAT || s == FS_SCR_WARM || s == FS_SCR_BRIGHT)
     {
@@ -1074,6 +1209,30 @@ static void hud_clear()
         fos_hud_clear(vram, BMPPITCH, &hud_pal);
 }
 
+#if !FOS_LV_ONLY
+/* The top plate's watchdog (Canon drawing over our screen, above): checked
+ * every 50 ms while the plate is up, from hud_step and the main loop. */
+static volatile int plate_on_screen = 0;
+
+static void plate_sums()
+{
+    uint8_t *vram = bmp_vram();
+    if (!vram) return;
+    for (int y = 0; y < FOS_H; y++)
+        shown_sum[y] = row_sum(vram + y * BMPPITCH);
+}
+
+static int plate_overdrawn()
+{
+    static struct overdraw_check check = { .what = "hud: the plate" };
+    if (!plate_on_screen || hud_dirty) return 0;    /* not up, or about to be drawn anyway */
+    uint8_t *vram = bmp_vram();
+    if (!vram || !overdrawn(&check, vram)) return 0;
+    hud_dirty = 1;
+    return 1;
+}
+#endif
+
 /* one HUD refresh; called from the main loop */
 static void hud_step()
 {
@@ -1123,12 +1282,19 @@ static void hud_step()
     {
         int now = get_ms_clock();
         if (!gone_since) gone_since = now ? now : 1;
-        if (ui_running || now - gone_since > 700)
+        /* and while a frame is being taken and saved (job_state), or just was:
+         * the screen comes back to ours by itself, so Canon's needn't show for
+         * the second or so in between (#17) */
+        int shooting = lens_info.job_state || get_halfshutter_pressed() || now - last_shot_ms < 2500;
+        /* a button (Q, MENU, INFO, the dial...) pressed as ours went, or since: that's
+         * Canon's screen being asked for, not a blink, so it gets it at once */
+        int asked = last_key_ms && last_key_ms - gone_since > -200;
+        if (ui_running || asked || (now - gone_since > 700 && !shooting) || now - gone_since > 4000)
         {
             canon_held = 0;
             gone_since = 0;
             if (!ui_running) canon_gui_enable_front_buffer(1);
-            dbg("hud: Canon's screen given back%s", ui_running ? " (to the film OS)" : "");
+            dbg("hud: Canon's screen given back%s", ui_running ? " (to the film OS)" : asked ? " (a button)" : "");
         }
     }
 #endif
@@ -1141,6 +1307,9 @@ static void hud_step()
         if (vram && display_idle() && !ui_running) fos_hud_plate_clear(vram, BMPPITCH, &hud_pal);
 #endif
         plate_drawn = 0;
+#if !FOS_LV_ONLY
+        plate_on_screen = 0;
+#endif
         last_sig = -1;
     }
 
@@ -1156,6 +1325,9 @@ static void hud_step()
         return;
     }
     drawn = 1;
+#if !FOS_LV_ONLY
+    plate_overdrawn();
+#endif
 
     int now = get_ms_clock();
     int lit = !leds_on_half || get_halfshutter_pressed() || now < leds_until;
@@ -1173,6 +1345,10 @@ static void hud_step()
         last_draw = now;
         hud_draw(lit, blink, plate);
         plate_drawn = plate;
+#if !FOS_LV_ONLY
+        plate_on_screen = plate;
+        if (plate) plate_sums();
+#endif
     }
 }
 
@@ -1309,6 +1485,12 @@ static unsigned int lv_key(unsigned int key)
 int handle_filmroll_keys(struct event *event)
 {
     int key = module_translate_key(event->param, MODULE_KEY_PORTABLE);
+    if (key && key != MODULE_KEY_PRESS_HALFSHUTTER && key != MODULE_KEY_UNPRESS_HALFSHUTTER &&
+        key != MODULE_KEY_PRESS_FULLSHUTTER && key != MODULE_KEY_UNPRESS_FULLSHUTTER)
+    {
+        int now = get_ms_clock();
+        last_key_ms = now ? now : 1;
+    }
     if (ui_running)
     {
 #ifdef BGMT_UNPRESS_LEFT
@@ -1477,7 +1659,14 @@ static void filmroll_task()
         }
         else if (end_due && !ROLL_FINISHED) end_due = 0;
         if (k % 2 == 0)
+        {
             hud_step();                     /* every 100 ms */
+            flip_step(0);
+        }
+#if !FOS_LV_ONLY
+        else if (plate_overdrawn())
+            hud_step();                     /* Canon drew over the plate: at once */
+#endif
 
         int now = get_ms_clock();
         if (now - last_alive > 60000)

@@ -108,6 +108,8 @@ enum
     FS_FILM, FS_EXP,
     FS_SCR_STD,         /* screen colour: 0 Canon's conversion, 1 Rec.709 */
     FS_SCR_SAT, FS_SCR_WARM, FS_SCR_BRIGHT,     /* -FOS_SCR_STEPS..FOS_SCR_STEPS */
+    FS_SCR_FLIP,        /* swivel screens: 0 as Canon's hinge says, 1 normal, 2 upside down, 3 mirrored;
+                           the port answers -1 on a camera that can't, and the item isn't shown */
     FS_COUNT
 };
 #define FOS_SCR_STEPS 6
@@ -218,6 +220,7 @@ void fos_hud_plate_clear(uint8_t *vram, int pitch, const struct fos_hud_palette 
 
 void fos_ui_init();
 void fos_ui_run(int screen);
+void fos_ui_overdrawn();            /* the port saw something else draw on the screen: paint it all again */
 
 /* canister art, fos_film.c; quality 2 = everything, 1 = no texture
  * filtering, 0 = no reflections either (the UI lowers it on a slow camera) */

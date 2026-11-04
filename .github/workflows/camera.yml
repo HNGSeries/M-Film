@@ -44,7 +44,7 @@ jobs:
       - name: Toolchain and Magic Lantern (the commit the fork is made against)
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq gcc-arm-none-eabi binutils-arm-none-eabi zip
+          sudo apt-get install -y -qq gcc-arm-none-eabi binutils-arm-none-eabi libnewlib-arm-none-eabi zip qemu-user
           python -m pip install -q numpy scipy pillow segno docutils
           git clone -q --filter=blob:none https://github.com/reticulatedpines/magiclantern_simplified.git "$HOME/ml/magiclantern_simplified"
           git -C "$HOME/ml/magiclantern_simplified" checkout -q ed3e7c0dfacfdeaf3349dee73edf9e3621217462
@@ -93,7 +93,7 @@ jobs:
       - name: Toolchain and Magic Lantern (the commit the fork is made against)
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq gcc-arm-none-eabi binutils-arm-none-eabi zip
+          sudo apt-get install -y -qq gcc-arm-none-eabi binutils-arm-none-eabi libnewlib-arm-none-eabi zip qemu-user
           python -m pip install -q numpy scipy pillow segno docutils
           git clone -q --filter=blob:none https://github.com/reticulatedpines/magiclantern_simplified.git "$HOME/ml/magiclantern_simplified"
           git -C "$HOME/ml/magiclantern_simplified" checkout -q ed3e7c0dfacfdeaf3349dee73edf9e3621217462
@@ -132,7 +132,7 @@ jobs:
       - name: Toolchain and Magic Lantern (the commit the fork is made against)
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq gcc-arm-none-eabi binutils-arm-none-eabi zip
+          sudo apt-get install -y -qq gcc-arm-none-eabi binutils-arm-none-eabi libnewlib-arm-none-eabi zip qemu-user
           python -m pip install -q numpy scipy pillow segno docutils
           git clone -q --filter=blob:none https://github.com/reticulatedpines/magiclantern_simplified.git "$HOME/ml/magiclantern_simplified"
           git -C "$HOME/ml/magiclantern_simplified" checkout -q ed3e7c0dfacfdeaf3349dee73edf9e3621217462
