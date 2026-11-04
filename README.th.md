@@ -230,16 +230,17 @@ M-Film ทำบน EOS M และใช้ได้จริงบนรุ่
 กดป้ายมุมขวาบน → *Sign in with Google* แล้วเลือก *Get it monthly* หรือ *Get it for life* จ่ายเงินแล้วโปรแกรมเปลี่ยนเป็น Full เองในไม่กี่วินาที
 1 บัญชีใช้ได้ **2 เครื่อง**พร้อมกัน (เครื่องที่ 2 ก็ login ด้วยบัญชี Google เดียวกัน) ยกเลิกรายเดือนได้ทุกเมื่อในโปรแกรม
 (*Manage the subscription*) ใช้ได้ต่อจนครบเดือนที่จ่ายแล้ว
+[นโยบายความเป็นส่วนตัว](https://darkrooms-licence.suphalapruksasathit.workers.dev/privacy): รูปของคุณไม่ออกจากคอมเลย
 
 ### ดาวน์โหลด
 
 | คอมของคุณ | ไฟล์ | เปิดยังไง |
 |---|---|---|
-| **Windows 10 / 11** | `Darkrooms-windows-x64.zip` | แตกไฟล์ แล้วเปิด `Darkrooms.exe` ถ้า Windows เตือน: *More info* → *Run anyway* |
+| **Windows 10 / 11** | `Darkrooms-windows-x64.zip` | แตกไฟล์ เปิดโฟลเดอร์ `Darkrooms` แล้วเปิด `Darkrooms.exe` ถ้า Windows เตือน: *More info* → *Run anyway* |
 | **Mac ชิป Intel** | `Darkrooms-macos-intel.zip` | แตกไฟล์ ลากไปไว้ใน Applications แล้วเปิด ครั้งแรกไปที่ *System Settings → Privacy & Security → Open Anyway* (macOS 14 ลงไป: คลิกขวา → Open) |
 | **Mac ชิป Apple silicon** | `Darkrooms-macos-apple-silicon.zip` | เหมือนกัน |
 
-โหลดได้จาก **[release ของ Darkrooms](../../releases?q=Darkrooms&expanded=true)** (ตัวใหม่สุดอยู่บนสุด) ขนาดประมาณ 25–45 MB โปรแกรมยังไม่ได้ sign กับ Apple หรือ
+โหลดได้จาก **[release ของ Darkrooms](../../releases?q=Darkrooms&expanded=true)** (ตัวใหม่สุดอยู่บนสุด) ขนาดประมาณ 30–50 MB โปรแกรมยังไม่ได้ sign กับ Apple หรือ
 Microsoft ครั้งแรกจึงมีคำเตือน
 
 ---

@@ -235,16 +235,17 @@ Click the badge at the top right → *Sign in with Google*, then *Get it monthly
 Darkrooms switches to Full by itself within a few seconds. One account works on **two computers** at a time
 (sign in on the other one with the same Google account). Cancel the monthly plan any time in the program
 (*Manage the subscription*): it stays on until the end of the month paid for.
+[Privacy](https://darkrooms-licence.suphalapruksasathit.workers.dev/privacy): your pictures never leave your computer.
 
 ### Download
 
 | Your computer | Get | Open it |
 |---|---|---|
-| **Windows 10 / 11** | `Darkrooms-windows-x64.zip` | Unzip, run `Darkrooms.exe`. If Windows warns: *More info* → *Run anyway*. |
+| **Windows 10 / 11** | `Darkrooms-windows-x64.zip` | Unzip, open the `Darkrooms` folder, run `Darkrooms.exe`. If Windows warns: *More info* → *Run anyway*. |
 | **Mac with Intel** | `Darkrooms-macos-intel.zip` | Unzip, drag to Applications and open it. The first time: *System Settings → Privacy & Security → Open Anyway* (macOS 14 and older: right-click → Open). |
 | **Mac with Apple silicon** | `Darkrooms-macos-apple-silicon.zip` | Same. |
 
-From the **[Darkrooms releases](../../releases?q=Darkrooms&expanded=true)** (the newest is at the top). About 25–45 MB. The program isn't signed with Apple or
+From the **[Darkrooms releases](../../releases?q=Darkrooms&expanded=true)** (the newest is at the top). About 30–50 MB. The program isn't signed with Apple or
 Microsoft yet, hence the warning the first time.
 
 ---
