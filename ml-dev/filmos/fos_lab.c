@@ -340,6 +340,36 @@ static void frames_log(void *ctx, const char *folder, const char *name, int numb
     read_log(path, &rd);
 }
 
+/* open a frame's file (path: ...DCIM/100CANON/IMG_0012.CR2), by Canon's
+ * name for it if that isn't the log's. The log's name is Magic Lantern's file
+ * prefix and the file number, and Canon's name can differ:
+ *  - in Adobe RGB the prefix's first letter is '_' (IMG_0012 -> _MG_0012,
+ *    and a user prefix ABCD0012 -> _BCD0012);
+ *  - on the 5D Mark III the prefix is the user one (C59A) even while the
+ *    camera names its files IMG_ or _MG_ (#31).
+ * So, keeping the number: the first letter '_', then Canon's own two. The
+ * name that opens stays in path; when none does, path is as it was. */
+static void *open_frame_file(char *path)
+{
+    void *f = fos_port_open(path, 0);
+    if (f) return f;
+    char *base = strrchr(path, '/');
+    base = base ? base + 1 : path;
+    if (strlen(base) != 12 || base[8] != '.') return 0;    /* PPPPnnnn.CR2 */
+    char was[4];
+    memcpy(was, base, 4);
+    const char *try[3] = { was, "IMG_", "_MG_" };
+    for (int k = 0; k < 3 && !f; k++)
+    {
+        memcpy(base, try[k], 4);
+        if (!k) base[0] = '_';
+        if (k && !memcmp(base, was, 4)) continue;       /* tried already */
+        f = fos_port_open(path, 0);
+    }
+    if (!f) memcpy(base, was, 4);
+    return f;
+}
+
 int fos_lab_frames(int roll, struct fos_lab_frame *frames, int max)
 {
     memset(frames, 0, sizeof(*frames) * max);
@@ -356,36 +386,21 @@ int fos_lab_frames(int roll, struct fos_lab_frame *frames, int max)
     for (int i = 0; i < n; i++)
     {
         if (!frames[i].cr2[0]) { frames[i].missing = 1; continue; }
-        void *f = fos_port_open(frames[i].cr2, 0);
-        if (!f)
+        void *f = open_frame_file(frames[i].cr2);
+        if (f) { fos_port_close(f); continue; }
+        frames[i].missing = 1;
+        /* shot with Image quality set to a JPEG one: Canon's .JPG of the
+         * same name is there instead, and the darkroom can say so */
+        char *ext = strrchr(frames[i].cr2, '.');
+        if (!ext || strcmp(ext, ".CR2")) continue;
+        memcpy(ext, ".JPG", 4);
+        f = open_frame_file(frames[i].cr2);
+        if (f)
         {
-            /* The log's name may not be the file's: it is Magic Lantern's file
-             * prefix and the file number, and Canon's name differs:
-             *  - in Adobe RGB the prefix's first letter is '_' (IMG_0012 ->
-             *    _MG_0012, and a user prefix ABCD0012 -> _BCD0012);
-             *  - on the 5D Mark III the prefix is the user one (C59A) even
-             *    while the camera names its files IMG_ or _MG_ (#31).
-             * So, keeping the number: the first letter '_', then Canon's own
-             * two. The name that opens stays in cr2. */
-            char *base = strrchr(frames[i].cr2, '/');
-            base = base ? base + 1 : frames[i].cr2;
-            if (strlen(base) == 12 && base[8] == '.')      /* PPPPnnnn.CR2 */
-            {
-                char was[4];
-                memcpy(was, base, 4);
-                const char *try[3] = { was, "IMG_", "_MG_" };
-                for (int k = 0; k < 3 && !f; k++)
-                {
-                    memcpy(base, try[k], 4);
-                    if (!k) base[0] = '_';
-                    if (k && !memcmp(base, was, 4)) continue;       /* tried already */
-                    f = fos_port_open(frames[i].cr2, 0);
-                }
-                if (!f) memcpy(base, was, 4);
-            }
+            fos_port_close(f);
+            frames[i].jpeg = 1;         /* cr2 names the JPEG now */
         }
-        if (f) fos_port_close(f);
-        else frames[i].missing = 1;
+        else memcpy(ext, ".CR2", 4);
     }
     return n;
 }
