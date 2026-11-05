@@ -289,10 +289,6 @@ static void apply_film(int index)
     lens_set_rawiso(iso_to_raw(f->iso));
 }
 
-/* Film is shot blind: the darkroom develops the RAWs, and there is no
- * image review to peek at. ML doesn't change these Canon settings itself
- * (writing the picture quality property can upset Canon's firmware), so
- * it asks for them. */
 /* each frame is saved with a full-size RAW (RAW, or RAW+JPEG), so the
  * darkroom can develop it; a JPEG, mRAW or sRAW alone it can't */
 static int saves_raw()
@@ -300,10 +296,14 @@ static int saves_raw()
     return (pic_quality & 0x60000) && !(pic_quality & 0xF);     /* raw bits, raw size 0 */
 }
 
+/* Film is shot blind: the darkroom develops the RAWs, and there is no
+ * image review to peek at. ML doesn't change these Canon settings itself
+ * (writing the picture quality property can upset Canon's firmware), so
+ * it asks for them. RAW+JPEG is fine: the darkroom uses the RAW. */
 static void film_capture_check()
 {
     if (!roll_loaded) return;
-    int raw = (pic_quality & 0xFE00FF) == (PICQ_RAW & 0xFE00FF);
+    int raw = saves_raw();
     int review_off = image_review_time == 0;
     if (raw && review_off) return;
     dbg("capture: quality %x, review %d", pic_quality, image_review_time);

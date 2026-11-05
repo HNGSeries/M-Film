@@ -383,11 +383,19 @@ int fos_lab_frames(int roll, struct fos_lab_frame *frames, int max)
     }
     /* a frame whose file has gone (deleted on the camera, or never a RAW)
      * can't be developed */
+    char seen[4] = "";                  /* the prefix of Canon's names on this roll */
     for (int i = 0; i < n; i++)
     {
         if (!frames[i].cr2[0]) { frames[i].missing = 1; continue; }
         void *f = open_frame_file(frames[i].cr2);
-        if (f) { fos_port_close(f); continue; }
+        if (f)
+        {
+            fos_port_close(f);
+            const char *base = strrchr(frames[i].cr2, '/');
+            base = base ? base + 1 : frames[i].cr2;
+            if (!seen[0] && strlen(base) == 12) memcpy(seen, base, 4);
+            continue;
+        }
         frames[i].missing = 1;
         /* shot with Image quality set to a JPEG one: Canon's .JPG of the
          * same name is there instead, and the darkroom can say so */
@@ -401,6 +409,16 @@ int fos_lab_frames(int roll, struct fos_lab_frame *frames, int max)
             frames[i].jpeg = 1;         /* cr2 names the JPEG now */
         }
         else memcpy(ext, ".CR2", 4);
+    }
+    /* a file that isn't there by any name is called by the roll's other
+     * names, as the camera would have named it: _MG_0012.CR2 in Adobe RGB,
+     * not the log's IMG_0012.CR2 (#17) */
+    for (int i = 0; i < n && seen[0]; i++)
+    {
+        if (!frames[i].missing || frames[i].jpeg || !frames[i].cr2[0]) continue;
+        char *base = strrchr(frames[i].cr2, '/');
+        base = base ? base + 1 : frames[i].cr2;
+        if (strlen(base) == 12 && base[8] == '.') memcpy(base, seen, 4);
     }
     return n;
 }

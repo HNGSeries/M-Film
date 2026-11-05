@@ -24,6 +24,18 @@ permissions:
   contents: write
 
 jobs:
+  # the darkroom on the PC simulator, on a card of rolls it has to find or explain: shot as JPEG,
+  # Adobe RGB with a file deleted, across the IMG_9999 wrap (ml-dev/filmos/sim/cardtest.sh)
+  darkroom:
+    runs-on: ubuntu-24.04
+    name: darkroom (simulator)
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the simulator
+        run: make -C ml-dev/filmos/sim out/sim
+      - name: Develop the problem rolls
+        run: bash ml-dev/filmos/sim/cardtest.sh
+
   camera:
     strategy:
       fail-fast: false
@@ -157,7 +169,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    needs: [camera, camera-module]
+    needs: [darkroom, camera, camera-module]
     if: ${{ startsWith(github.ref, 'refs/tags/v') || inputs.tag != '' }}
     runs-on: ubuntu-latest
     steps:

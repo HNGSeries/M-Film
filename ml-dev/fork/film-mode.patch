@@ -736,7 +736,7 @@ index 000000000..808a82ba0
 +
 diff --git a/src/filmroll.c b/src/filmroll.c
 new file mode 100644
-index 000000000..e09bf2bbd
+index 000000000..60362f5f5
 --- /dev/null
 +++ b/src/filmroll.c
 @@ -0,0 +1,1711 @@
@@ -1031,10 +1031,6 @@ index 000000000..e09bf2bbd
 +    lens_set_rawiso(iso_to_raw(f->iso));
 +}
 +
-+/* Film is shot blind: the darkroom develops the RAWs, and there is no
-+ * image review to peek at. ML doesn't change these Canon settings itself
-+ * (writing the picture quality property can upset Canon's firmware), so
-+ * it asks for them. */
 +/* each frame is saved with a full-size RAW (RAW, or RAW+JPEG), so the
 + * darkroom can develop it; a JPEG, mRAW or sRAW alone it can't */
 +static int saves_raw()
@@ -1042,10 +1038,14 @@ index 000000000..e09bf2bbd
 +    return (pic_quality & 0x60000) && !(pic_quality & 0xF);     /* raw bits, raw size 0 */
 +}
 +
++/* Film is shot blind: the darkroom develops the RAWs, and there is no
++ * image review to peek at. ML doesn't change these Canon settings itself
++ * (writing the picture quality property can upset Canon's firmware), so
++ * it asks for them. RAW+JPEG is fine: the darkroom uses the RAW. */
 +static void film_capture_check()
 +{
 +    if (!roll_loaded) return;
-+    int raw = (pic_quality & 0xFE00FF) == (PICQ_RAW & 0xFE00FF);
++    int raw = saves_raw();
 +    int review_off = image_review_time == 0;
 +    if (raw && review_off) return;
 +    dbg("capture: quality %x, review %d", pic_quality, image_review_time);
@@ -13847,10 +13847,10 @@ index 000000000..ae60ddb83
 +#endif
 diff --git a/src/fos_lab.c b/src/fos_lab.c
 new file mode 100644
-index 000000000..e0668e7db
+index 000000000..85cbb827d
 --- /dev/null
 +++ b/src/fos_lab.c
-@@ -0,0 +1,406 @@
+@@ -0,0 +1,424 @@
 +/* fos_lab: the rolls on the card and their prints, for the darkroom.
 + *
 + * A roll is what its logs say: DCIM/xxxCANON/ROLL_nnn.TXT, written by the
@@ -14236,11 +14236,19 @@ index 000000000..e0668e7db
 +    }
 +    /* a frame whose file has gone (deleted on the camera, or never a RAW)
 +     * can't be developed */
++    char seen[4] = "";                  /* the prefix of Canon's names on this roll */
 +    for (int i = 0; i < n; i++)
 +    {
 +        if (!frames[i].cr2[0]) { frames[i].missing = 1; continue; }
 +        void *f = open_frame_file(frames[i].cr2);
-+        if (f) { fos_port_close(f); continue; }
++        if (f)
++        {
++            fos_port_close(f);
++            const char *base = strrchr(frames[i].cr2, '/');
++            base = base ? base + 1 : frames[i].cr2;
++            if (!seen[0] && strlen(base) == 12) memcpy(seen, base, 4);
++            continue;
++        }
 +        frames[i].missing = 1;
 +        /* shot with Image quality set to a JPEG one: Canon's .JPG of the
 +         * same name is there instead, and the darkroom can say so */
@@ -14254,6 +14262,16 @@ index 000000000..e0668e7db
 +            frames[i].jpeg = 1;         /* cr2 names the JPEG now */
 +        }
 +        else memcpy(ext, ".CR2", 4);
++    }
++    /* a file that isn't there by any name is called by the roll's other
++     * names, as the camera would have named it: _MG_0012.CR2 in Adobe RGB,
++     * not the log's IMG_0012.CR2 (#17) */
++    for (int i = 0; i < n && seen[0]; i++)
++    {
++        if (!frames[i].missing || frames[i].jpeg || !frames[i].cr2[0]) continue;
++        char *base = strrchr(frames[i].cr2, '/');
++        base = base ? base + 1 : frames[i].cr2;
++        if (strlen(base) == 12 && base[8] == '.') memcpy(base, seen, 4);
 +    }
 +    return n;
 +}
