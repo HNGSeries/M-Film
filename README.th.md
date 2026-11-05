@@ -14,7 +14,7 @@
 [![เลี้ยงกาแฟผู้พัฒนา](https://img.shields.io/badge/%E0%B9%80%E0%B8%A5%E0%B8%B5%E0%B9%89%E0%B8%A2%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B9%81%E0%B8%9F%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%9E%E0%B8%B1%E0%B8%92%E0%B8%99%E0%B8%B2-ffdd00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buy.stripe.com/7sY14p8d93QE5Ny5M58so02)
 
 [![License GPL-2.0](https://img.shields.io/badge/license-GPL--2.0-3b352f)](LICENSE)
-[![Cameras](https://img.shields.io/badge/cameras-8%20work%20%C2%B7%205%20with%20a%20problem%20%C2%B7%202%20in%20testing-3b352f)](#กล้องที่รองรับ)
+[![Cameras](https://img.shields.io/badge/cameras-9%20work%20%C2%B7%205%20with%20a%20problem%20%C2%B7%201%20in%20testing-3b352f)](#กล้องที่รองรับ)
 [![Films](https://img.shields.io/badge/films-72-3b352f)](FILMS.md)
 
 [English](README.md) · **ภาษาไทย** · [ฟิล์ม](#ฟิล์ม-72-แบบ) · [กล้องที่รองรับ](#กล้องที่รองรับ) · [Darkrooms](#ล้างบนคอม-darkrooms) · [คู่มือในกล้อง](docs/MANUAL.th.md) · [ทำต่อยอด](PORTING.md)
@@ -155,7 +155,7 @@ M-Film ทำบน EOS M และใช้ได้จริงบนรุ่
 | Canon EOS 650D / Rebel T4i / Kiss X6i | 1.0.4 | ⚠️ ไม่มีห้องมืดในกล้อง (ล้างด้วย Darkrooms) | build เต็มจอดำ ([#34](../../issues/34)) ผู้ทดสอบลองแบบไม่มีห้องมืดแล้วเปิดได้ ตั้งแต่ 0.1.3 ออกแบบนั้น ล้างบนคอม | `M-Film-camera-650D.104.zip` (ทดสอบ: `-module.zip`) |
 | Canon EOS 700D / Rebel T5i / Kiss X7i | 1.1.5 | ⚠️ ไม่มีห้องมืดในกล้อง (ล้างด้วย Darkrooms) | build เต็มจอดำ ([#19](../../issues/19)) ตั้งแต่ 0.1.3 ออกแบบไม่มีห้องมืด เหมือน 650D รอคนลอง | `M-Film-camera-700D.115.zip` (ทดสอบ: `-module.zip`) |
 | Canon EOS 6D | 1.1.6 | ✅ **ใช้ได้** | ใช้ได้ตั้งแต่ 0.1.2 ([#17](../../issues/17), [#22](../../issues/22)) | `M-Film-camera-6D.116.zip` (ทดสอบ: `-module.zip`) |
-| Canon EOS 70D | 1.1.2 | 🧪 build ได้แล้ว รอคนทดสอบ | film OS แบบโมดูลพอดีหน่วยความจำตอนบูต (511,744 จาก 605,952 ไบต์) รอคนลองเป็นคนแรก | `M-Film-camera-70D.112.zip` |
+| Canon EOS 70D | 1.1.2 | ✅ **ใช้ได้** | ใช้ได้ แบบ film OS เป็นโมดูล ([#40](../../issues/40)) | `M-Film-camera-70D.112.zip` |
 | Canon EOS 5D Mark III (firmware 1.1.3) | 1.1.3 | ⚠️ ลองแล้ว ยังมีปัญหา | เปิดและถ่ายได้ ห้องมืดในกล้องหาไฟล์ RAW ไม่เจอ ([#31](../../issues/31)) แก้แล้วใน 0.1.3 | `M-Film-camera-5D3.113.zip` (ทดสอบ: `-module.zip`) |
 | Canon EOS 5D Mark III (firmware 1.2.3) | 1.2.3 | ⚠️ ลองแล้ว ยังมีปัญหา | เปิดและถ่ายได้ ห้องมืดในกล้องหาไฟล์ RAW ไม่เจอ ([#16](../../issues/16), [#37](../../issues/37)) แก้แล้วใน 0.1.3 | `M-Film-camera-5D3.123.zip` (ทดสอบ: `-module.zip`) |
 | Canon EOS 550D / Rebel T2i / Kiss X4 | 1.0.9 | ✅ **ใช้ได้** | ใช้ได้ตั้งแต่ 0.1.5 แบบโมดูล ห้องมืดในกล้องครบ ([#48](../../issues/48), [#50](../../issues/50)) | `M-Film-camera-550D.109.zip` |
