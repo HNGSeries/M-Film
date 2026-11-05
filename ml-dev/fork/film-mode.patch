@@ -736,10 +736,10 @@ index 000000000..808a82ba0
 +
 diff --git a/src/filmroll.c b/src/filmroll.c
 new file mode 100644
-index 000000000..6f7eac8e0
+index 000000000..60362f5f5
 --- /dev/null
 +++ b/src/filmroll.c
-@@ -0,0 +1,1687 @@
+@@ -0,0 +1,1711 @@
 +/* filmroll: a Canon camera as a film camera (built into this ML fork).
 + * Made on the EOS M; 100D, 650D, 700D and others build from the same code.
 + *
@@ -1031,14 +1031,21 @@ index 000000000..6f7eac8e0
 +    lens_set_rawiso(iso_to_raw(f->iso));
 +}
 +
++/* each frame is saved with a full-size RAW (RAW, or RAW+JPEG), so the
++ * darkroom can develop it; a JPEG, mRAW or sRAW alone it can't */
++static int saves_raw()
++{
++    return (pic_quality & 0x60000) && !(pic_quality & 0xF);     /* raw bits, raw size 0 */
++}
++
 +/* Film is shot blind: the darkroom develops the RAWs, and there is no
 + * image review to peek at. ML doesn't change these Canon settings itself
 + * (writing the picture quality property can upset Canon's firmware), so
-+ * it asks for them. */
++ * it asks for them. RAW+JPEG is fine: the darkroom uses the RAW. */
 +static void film_capture_check()
 +{
 +    if (!roll_loaded) return;
-+    int raw = (pic_quality & 0xFE00FF) == (PICQ_RAW & 0xFE00FF);
++    int raw = saves_raw();
 +    int review_off = image_review_time == 0;
 +    if (raw && review_off) return;
 +    dbg("capture: quality %x, review %d", pic_quality, image_review_time);
@@ -1141,6 +1148,15 @@ index 000000000..6f7eac8e0
 +             frames_shot, get_file_prefix(), file_number, when, aperture);
 +    log_append(line);
 +
++    /* the warning at loading is easy to miss, and then a whole roll can't
++     * be developed: say it with each frame */
++    if (!saves_raw())
++    {
++        dbg("frame %d: quality %x, no RAW", frames_shot, pic_quality);
++        beep();
++        NotifyBox(5000, "Frame %d is a JPEG: the darkroom can't develop it. Set Image quality RAW", frames_shot);
++    }
++
 +    for (int i = MIN(nrecent, FOS_RECENT - 1); i > 0; i--)
 +        recent[i] = recent[i - 1];
 +    recent[0].no = frames_shot;
@@ -1182,19 +1198,27 @@ index 000000000..6f7eac8e0
 +    if (prev < 0 || count > 50)
 +        return;                         /* card swap or counter reset: just resync */
 +
-+    if (get_shooting_card()->folder_number != roll_folder)
-+    {
-+        /* Canon started a new folder; start a log there too so each folder
-+         * develops on its own (frame numbers keep counting) */
-+        roll_folder = get_shooting_card()->folder_number;
-+        update_log_path();
-+        write_header(" - continued from the previous DCIM folder");
-+    }
++    /* Canon started a new folder; start a log there too so each folder
++     * develops on its own (frame numbers keep counting). It does that when
++     * the file number goes past 9999, so the files up to IMG_9999 of this
++     * batch are still in the old folder, and go in its log (#17). */
++    int folder = get_shooting_card()->folder_number;
++    int first_new = folder == roll_folder ? count + 1   /* none */
++                  : now < prev ? 9999 - prev + 1        /* the first after IMG_9999 */
++                  : 1;
 +
 +    last_shot_ms = get_ms_clock();
 +    dbg("frames: file %d -> %d, logging %d", prev, now, count);
 +    for (int i = 1; i <= count; i++)
++    {
++        if (i == first_new)
++        {
++            roll_folder = folder;
++            update_log_path();
++            write_header(" - continued from the previous DCIM folder");
++        }
 +        record_frame((prev + i - 1) % 9999 + 1);
++    }
 +}
 +
 +/* ---------------------------------------------------------------- the film OS host */
@@ -2706,10 +2730,10 @@ index 000000000..1df742bc0
 +#endif
 diff --git a/src/fos_dark.c b/src/fos_dark.c
 new file mode 100644
-index 000000000..eabb19f9c
+index 000000000..8e447445e
 --- /dev/null
 +++ b/src/fos_dark.c
-@@ -0,0 +1,1345 @@
+@@ -0,0 +1,1408 @@
 +/* fos_dark: the darkroom.
 + *
 + * Rolls that have been shot and rewound wait here to be developed. The
@@ -3098,6 +3122,7 @@ index 000000000..eabb19f9c
 +static struct fos_dev *dev;
 +static int frame_t0;
 +static int total_frames, done_frames, failed_frames, rolls_done;
++static int jpeg_frames;                 /* of the failed ones, shot as JPEG */
 +static int finished, asking_stop;
 +static struct spring stop_sheet;
 +static int dv_t;
@@ -3238,13 +3263,25 @@ index 000000000..eabb19f9c
 +            if (f->missing)
 +            {
 +                char msg[120];
-+                snprintf(msg, sizeof(msg), "darkroom: roll %03d frame %d: no RAW file %s", cur_roll, f->no, f->cr2);
++                const char *base = strrchr(f->cr2, '/');
++                base = base ? base + 1 : f->cr2;
++                snprintf(msg, sizeof(msg), "darkroom: roll %03d frame %d: %s %s", cur_roll, f->no,
++                         f->jpeg ? "shot as JPEG, no RAW:" : "no RAW file", f->cr2);
 +                fos_port_log(msg);
++                /* the panel shows it on two lines, split at the dash */
++                if (f->jpeg)
 +                {
-+                    const char *base = strrchr(f->cr2, '/');
++                    jpeg_frames++;
++                    if (jpeg_frames == 1)
++                        snprintf(last_error, sizeof(last_error), "%.8s was shot as JPEG " T_MDASH " set Image quality to RAW", base);
++                    else
++                        snprintf(last_error, sizeof(last_error), "%d frames were shot as JPEG " T_MDASH " set Image quality to RAW",
++                                 jpeg_frames);
++                }
++                else if (!jpeg_frames)
++                {
 +                    if (f->cr2[0])
-+                        snprintf(last_error, sizeof(last_error), "%s isn't on the card " T_MDASH " was it shot in RAW?",
-+                                 base ? base + 1 : f->cr2);
++                        snprintf(last_error, sizeof(last_error), "%s isn't on the card " T_MDASH " was it deleted?", base);
 +                    else
 +                        snprintf(last_error, sizeof(last_error), "No RAW file " T_MDASH " shoot with Image quality RAW");
 +                }
@@ -3343,6 +3380,7 @@ index 000000000..eabb19f9c
 +    if (!dark_mem()) nqueue = 0;
 +    rescan();
 +    total_frames = done_frames = failed_frames = rolls_done = 0;
++    jpeg_frames = 0;
 +    for (int i = 0; i < nqueue; i++)
 +    {
 +        int ri = roll_index(queue[i]);
@@ -3667,6 +3705,44 @@ index 000000000..eabb19f9c
 +    return "";
 +}
 +
++/* s centred at cx, on two lines if it is wider than w: split at its dash
++ * (" - "), or else at the last space that fits */
++static void text_lines_c(const struct fos_font *f, int cx, int y, int dy, int w, const char *s, fcol c)
++{
++    if (fos_text_w(f, s, 0) <= w)
++    {
++        fos_text_c(cv, f, cx, y, s, c, OPAQUE, 0);
++        return;
++    }
++    char a[96], b[96];
++    const char *dash = strstr(s, " " T_MDASH " ");
++    int cut = -1, next = -1;
++    if (dash)
++    {
++        cut = (int) (dash - s);
++        next = cut + (int) strlen(" " T_MDASH " ");
++        snprintf(a, sizeof(a), "%.*s", cut, s);
++        if (fos_text_w(f, a, 0) > w) cut = -1;
++    }
++    if (cut < 0)
++        for (int i = (int) strlen(s) - 1; i > 0; i--)
++        {
++            if (s[i] != ' ') continue;
++            snprintf(a, sizeof(a), "%.*s", i, s);
++            if (fos_text_w(f, a, 0) <= w) { cut = i; next = i + 1; break; }
++        }
++    if (cut < 0)
++    {
++        fos_text_c(cv, f, cx, y, s, c, OPAQUE, 0);
++        return;
++    }
++    snprintf(a, sizeof(a), "%.*s", cut, s);
++    snprintf(b, sizeof(b), "%s", s + next);
++    if (b[0] >= 'a' && b[0] <= 'z') b[0] += 'A' - 'a';      /* a sentence of its own */
++    fos_text_c(cv, f, cx, y, a, c, OPAQUE, 0);
++    fos_text_c(cv, f, cx, y + dy, b, c, OPAQUE, 0);
++}
++
 +static void draw_panel()
 +{
 +    int x0 = 440, x1 = FOS_W - 12;
@@ -3684,7 +3760,7 @@ index 000000000..eabb19f9c
 +        {
 +            snprintf(b, sizeof(b), "%d frame%s could not be developed", failed_frames, failed_frames == 1 ? "" : "s");
 +            fos_text_c(cv, &fos_font_sm, PANEL_CX, 372, b, SL_TEXT2, OPAQUE, 0);
-+            fos_text_c(cv, &fos_font_xs, PANEL_CX, 394, last_error, SL_TEXT3, OPAQUE, 0);
++            text_lines_c(&fos_font_xs, PANEL_CX, 394, 16, FOS_W - 12 - 440, last_error, SL_TEXT3);
 +        }
 +    }
 +    else
@@ -4027,6 +4103,17 @@ index 000000000..eabb19f9c
 +        char b[64];
 +        snprintf(b, sizeof(b), pv_mode ? "Frame %d was not developed" : "No contact sheet", pv_cur);
 +        ui_photo_text(&fos_font_md, 360, 244, b, 0, 1);
++        /* and why, when the darkroom couldn't */
++        const struct fos_lab_frame *m = pv_mode && pv_cur >= 1 && pv_cur <= FOS_MAX_FRAMES ? &pv_meta[pv_cur - 1] : 0;
++        if (m && m->missing)
++        {
++            const char *base = strrchr(m->cr2, '/');
++            base = base ? base + 1 : m->cr2;
++            if (m->jpeg) snprintf(b, sizeof(b), "%.8s was shot as JPEG: set Image quality to RAW", base);
++            else if (m->cr2[0]) snprintf(b, sizeof(b), "%s isn't on the card", base);
++            else snprintf(b, sizeof(b), "No RAW file was logged for it");
++            ui_photo_text(&fos_font_sm, 360, 274, b, 0, 1);
++        }
 +    }
 +    const struct fos_lab_roll *r = &rolls[pv_roll];
 +    if (!pv_mode)
@@ -6184,10 +6271,10 @@ index 000000000..fd6efba0a
 +}
 diff --git a/src/fos_dev.h b/src/fos_dev.h
 new file mode 100644
-index 000000000..e5241836d
+index 000000000..e1c9b0b58
 --- /dev/null
 +++ b/src/fos_dev.h
-@@ -0,0 +1,168 @@
+@@ -0,0 +1,169 @@
 +/* fos_dev: developing film in the camera.
 + *
 + * A frame's CR2 RAW becomes a print for the screen: 720 x 480 in its own
@@ -6341,6 +6428,7 @@ index 000000000..e5241836d
 +    int no;
 +    char cr2[64];
 +    int missing;                /* the file isn't there (deleted, or shot as JPEG) */
++    int jpeg;                   /* missing, and shot as JPEG: cr2 names its .JPG */
 +    char when[17];
 +    char fstop[6];
 +};
@@ -13759,10 +13847,10 @@ index 000000000..ae60ddb83
 +#endif
 diff --git a/src/fos_lab.c b/src/fos_lab.c
 new file mode 100644
-index 000000000..7e07e044b
+index 000000000..85cbb827d
 --- /dev/null
 +++ b/src/fos_lab.c
-@@ -0,0 +1,391 @@
+@@ -0,0 +1,424 @@
 +/* fos_lab: the rolls on the card and their prints, for the darkroom.
 + *
 + * A roll is what its logs say: DCIM/xxxCANON/ROLL_nnn.TXT, written by the
@@ -14105,6 +14193,36 @@ index 000000000..7e07e044b
 +    read_log(path, &rd);
 +}
 +
++/* open a frame's file (path: ...DCIM/100CANON/IMG_0012.CR2), by Canon's
++ * name for it if that isn't the log's. The log's name is Magic Lantern's file
++ * prefix and the file number, and Canon's name can differ:
++ *  - in Adobe RGB the prefix's first letter is '_' (IMG_0012 -> _MG_0012,
++ *    and a user prefix ABCD0012 -> _BCD0012);
++ *  - on the 5D Mark III the prefix is the user one (C59A) even while the
++ *    camera names its files IMG_ or _MG_ (#31).
++ * So, keeping the number: the first letter '_', then Canon's own two. The
++ * name that opens stays in path; when none does, path is as it was. */
++static void *open_frame_file(char *path)
++{
++    void *f = fos_port_open(path, 0);
++    if (f) return f;
++    char *base = strrchr(path, '/');
++    base = base ? base + 1 : path;
++    if (strlen(base) != 12 || base[8] != '.') return 0;    /* PPPPnnnn.CR2 */
++    char was[4];
++    memcpy(was, base, 4);
++    const char *try[3] = { was, "IMG_", "_MG_" };
++    for (int k = 0; k < 3 && !f; k++)
++    {
++        memcpy(base, try[k], 4);
++        if (!k) base[0] = '_';
++        if (k && !memcmp(base, was, 4)) continue;       /* tried already */
++        f = fos_port_open(path, 0);
++    }
++    if (!f) memcpy(base, was, 4);
++    return f;
++}
++
 +int fos_lab_frames(int roll, struct fos_lab_frame *frames, int max)
 +{
 +    memset(frames, 0, sizeof(*frames) * max);
@@ -14118,39 +14236,42 @@ index 000000000..7e07e044b
 +    }
 +    /* a frame whose file has gone (deleted on the camera, or never a RAW)
 +     * can't be developed */
++    char seen[4] = "";                  /* the prefix of Canon's names on this roll */
 +    for (int i = 0; i < n; i++)
 +    {
 +        if (!frames[i].cr2[0]) { frames[i].missing = 1; continue; }
-+        void *f = fos_port_open(frames[i].cr2, 0);
-+        if (!f)
++        void *f = open_frame_file(frames[i].cr2);
++        if (f)
 +        {
-+            /* The log's name may not be the file's: it is Magic Lantern's file
-+             * prefix and the file number, and Canon's name differs:
-+             *  - in Adobe RGB the prefix's first letter is '_' (IMG_0012 ->
-+             *    _MG_0012, and a user prefix ABCD0012 -> _BCD0012);
-+             *  - on the 5D Mark III the prefix is the user one (C59A) even
-+             *    while the camera names its files IMG_ or _MG_ (#31).
-+             * So, keeping the number: the first letter '_', then Canon's own
-+             * two. The name that opens stays in cr2. */
-+            char *base = strrchr(frames[i].cr2, '/');
++            fos_port_close(f);
++            const char *base = strrchr(frames[i].cr2, '/');
 +            base = base ? base + 1 : frames[i].cr2;
-+            if (strlen(base) == 12 && base[8] == '.')      /* PPPPnnnn.CR2 */
-+            {
-+                char was[4];
-+                memcpy(was, base, 4);
-+                const char *try[3] = { was, "IMG_", "_MG_" };
-+                for (int k = 0; k < 3 && !f; k++)
-+                {
-+                    memcpy(base, try[k], 4);
-+                    if (!k) base[0] = '_';
-+                    if (k && !memcmp(base, was, 4)) continue;       /* tried already */
-+                    f = fos_port_open(frames[i].cr2, 0);
-+                }
-+                if (!f) memcpy(base, was, 4);
-+            }
++            if (!seen[0] && strlen(base) == 12) memcpy(seen, base, 4);
++            continue;
 +        }
-+        if (f) fos_port_close(f);
-+        else frames[i].missing = 1;
++        frames[i].missing = 1;
++        /* shot with Image quality set to a JPEG one: Canon's .JPG of the
++         * same name is there instead, and the darkroom can say so */
++        char *ext = strrchr(frames[i].cr2, '.');
++        if (!ext || strcmp(ext, ".CR2")) continue;
++        memcpy(ext, ".JPG", 4);
++        f = open_frame_file(frames[i].cr2);
++        if (f)
++        {
++            fos_port_close(f);
++            frames[i].jpeg = 1;         /* cr2 names the JPEG now */
++        }
++        else memcpy(ext, ".CR2", 4);
++    }
++    /* a file that isn't there by any name is called by the roll's other
++     * names, as the camera would have named it: _MG_0012.CR2 in Adobe RGB,
++     * not the log's IMG_0012.CR2 (#17) */
++    for (int i = 0; i < n && seen[0]; i++)
++    {
++        if (!frames[i].missing || frames[i].jpeg || !frames[i].cr2[0]) continue;
++        char *base = strrchr(frames[i].cr2, '/');
++        base = base ? base + 1 : frames[i].cr2;
++        if (strlen(base) == 12 && base[8] == '.') memcpy(base, seen, 4);
 +    }
 +    return n;
 +}

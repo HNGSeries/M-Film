@@ -151,6 +151,7 @@ struct fos_lab_frame
     int no;
     char cr2[64];
     int missing;                /* the file isn't there (deleted, or shot as JPEG) */
+    int jpeg;                   /* missing, and shot as JPEG: cr2 names its .JPG */
     char when[17];
     char fstop[6];
 };

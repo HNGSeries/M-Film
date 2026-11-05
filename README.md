@@ -14,7 +14,7 @@ The camera side is free and open, for everyone.
 [![Buy the developer a coffee](https://img.shields.io/badge/Buy%20the%20developer%20a%20coffee-ffdd00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buy.stripe.com/7sY14p8d93QE5Ny5M58so02)
 
 [![License GPL-2.0](https://img.shields.io/badge/license-GPL--2.0-3b352f)](LICENSE)
-[![Cameras](https://img.shields.io/badge/cameras-9%20work%20%C2%B7%205%20with%20a%20problem%20%C2%B7%201%20in%20testing-3b352f)](#cameras)
+[![Cameras](https://img.shields.io/badge/cameras-8%20work%20%C2%B7%206%20with%20a%20problem%20%C2%B7%201%20in%20testing-3b352f)](#cameras)
 [![Films](https://img.shields.io/badge/films-72-3b352f)](FILMS.md)
 
 **English** · [ภาษาไทย](README.th.md) · [Films](#72-films) · [Cameras](#cameras) · [Darkrooms](#develop-on-your-computer-darkrooms) · [Take it further](PORTING.md)
@@ -155,11 +155,11 @@ still wrong. If you have one marked *needs a tester*, you can help: [TESTING.md]
 | Canon EOS 650D / Rebel T4i / Kiss X6i | 1.0.4 | ⚠️ Without the in-camera darkroom (develop with Darkrooms) | The full build gives a black screen ([#34](../../issues/34)); a tester's 650D starts without the darkroom. Released that way since 0.1.3: develop on a computer. | `M-Film-camera-650D.104.zip` (to test: `-module.zip`) |
 | Canon EOS 700D / Rebel T5i / Kiss X7i | 1.1.5 | ⚠️ Without the in-camera darkroom (develop with Darkrooms) | The full build gives a black screen ([#19](../../issues/19)). Released without the darkroom since 0.1.3, as for the 650D: waiting for a tester. | `M-Film-camera-700D.115.zip` (to test: `-module.zip`) |
 | Canon EOS 6D | 1.1.6 | ✅ **Works** | Works since 0.1.2 ([#17](../../issues/17), [#22](../../issues/22)). | `M-Film-camera-6D.116.zip` (to test: `-module.zip`) |
-| Canon EOS 70D | 1.1.2 | ✅ **Works** | Works, with the film OS as a module ([#40](../../issues/40)). | `M-Film-camera-70D.112.zip` |
+| Canon EOS 70D | 1.1.2 | ⚠️ Tried, known problem | 0.1.5 works on a tester's 70D, with the film OS as a module ([#40](../../issues/40)); on another, Magic Lantern installs but the camera then starts Canon's own firmware ([#58](../../issues/58)): more reports wanted. | `M-Film-camera-70D.112.zip` |
 | Canon EOS 5D Mark III (firmware 1.1.3) | 1.1.3 | ⚠️ Tried, known problem | Starts and shoots; the in-camera darkroom couldn't find the RAWs ([#31](../../issues/31)): fixed in 0.1.3. | `M-Film-camera-5D3.113.zip` (to test: `-module.zip`) |
 | Canon EOS 5D Mark III (firmware 1.2.3) | 1.2.3 | ⚠️ Tried, known problem | Starts and shoots; the in-camera darkroom couldn't find the RAWs ([#16](../../issues/16), [#37](../../issues/37)): fixed in 0.1.3. | `M-Film-camera-5D3.123.zip` (to test: `-module.zip`) |
 | Canon EOS 550D / Rebel T2i / Kiss X4 | 1.0.9 | ✅ **Works** | Works since 0.1.5, the film OS as a module, darkroom included ([#48](../../issues/48), [#50](../../issues/50)). | `M-Film-camera-550D.109.zip` |
-| Canon EOS 600D / Rebel T3i / Kiss X5 | 1.0.2 | ✅ **Works** | Works since 0.1.5, the film OS as a module ([#46](../../issues/46)). | `M-Film-camera-600D.102.zip` |
+| Canon EOS 600D / Rebel T3i / Kiss X5 | 1.0.2 | ✅ **Works** | Starts and shoots since 0.1.5, the film OS as a module ([#46](../../issues/46)). The in-camera darkroom isn't confirmed on it yet; shoot with Image quality RAW. | `M-Film-camera-600D.102.zip` |
 | Canon EOS 60D | 1.1.1 | ✅ **Works** | Works since 0.1.3 ([#25](../../issues/25)). 0.1.5: Screen orientation for a broken hinge switch ([#49](../../issues/49)). | `M-Film-camera-60D.111.zip` (to test: `-module.zip`) |
 | Canon EOS 1100D / Rebel T3 / Kiss X50 | 1.0.5 | 🧪 Builds, needs a tester | The film OS as a module fits its boot memory (493,056 of 524,032 bytes). Needs a first tester. | `M-Film-camera-1100D.105.zip` |
 | Canon EOS 500D / Rebel T1i / Kiss X3 | 1.1.1 | ✅ **Works** | Works ([#44](../../issues/44)). 0.1.5 repaints when Canon draws over the plate. | `M-Film-camera-500D.111.zip` (to test: `-module.zip`) |
@@ -178,7 +178,9 @@ notes in [PORTING.md](PORTING.md).
 1. The camera needs exactly the Canon firmware in the table (MENU → last settings tab → *Firmware ver.*).
 2. Unzip the card files for your camera onto an SD card, put it in the camera and run *Firmware ver.* →
    update once. From then on M-Film starts with the camera from that card.
-3. Full steps, and how to go back: [TESTING.md](TESTING.md). Building it yourself:
+3. In Canon's menu set **Image quality** to **RAW** (RAW+JPEG works too) and **Image review** to **Off**.
+   The darkroom develops the RAWs: a frame shot as JPEG can't be developed.
+4. Full steps, and how to go back: [TESTING.md](TESTING.md). Building it yourself:
    `ml-dev/build_fork.sh <camera>`.
 
 ### Updating to a new version

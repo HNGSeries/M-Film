@@ -289,14 +289,21 @@ static void apply_film(int index)
     lens_set_rawiso(iso_to_raw(f->iso));
 }
 
+/* each frame is saved with a full-size RAW (RAW, or RAW+JPEG), so the
+ * darkroom can develop it; a JPEG, mRAW or sRAW alone it can't */
+static int saves_raw()
+{
+    return (pic_quality & 0x60000) && !(pic_quality & 0xF);     /* raw bits, raw size 0 */
+}
+
 /* Film is shot blind: the darkroom develops the RAWs, and there is no
  * image review to peek at. ML doesn't change these Canon settings itself
  * (writing the picture quality property can upset Canon's firmware), so
- * it asks for them. */
+ * it asks for them. RAW+JPEG is fine: the darkroom uses the RAW. */
 static void film_capture_check()
 {
     if (!roll_loaded) return;
-    int raw = (pic_quality & 0xFE00FF) == (PICQ_RAW & 0xFE00FF);
+    int raw = saves_raw();
     int review_off = image_review_time == 0;
     if (raw && review_off) return;
     dbg("capture: quality %x, review %d", pic_quality, image_review_time);
@@ -399,6 +406,15 @@ static void record_frame(int file_number)
              frames_shot, get_file_prefix(), file_number, when, aperture);
     log_append(line);
 
+    /* the warning at loading is easy to miss, and then a whole roll can't
+     * be developed: say it with each frame */
+    if (!saves_raw())
+    {
+        dbg("frame %d: quality %x, no RAW", frames_shot, pic_quality);
+        beep();
+        NotifyBox(5000, "Frame %d is a JPEG: the darkroom can't develop it. Set Image quality RAW", frames_shot);
+    }
+
     for (int i = MIN(nrecent, FOS_RECENT - 1); i > 0; i--)
         recent[i] = recent[i - 1];
     recent[0].no = frames_shot;
@@ -440,19 +456,27 @@ static void poll_frames()
     if (prev < 0 || count > 50)
         return;                         /* card swap or counter reset: just resync */
 
-    if (get_shooting_card()->folder_number != roll_folder)
-    {
-        /* Canon started a new folder; start a log there too so each folder
-         * develops on its own (frame numbers keep counting) */
-        roll_folder = get_shooting_card()->folder_number;
-        update_log_path();
-        write_header(" - continued from the previous DCIM folder");
-    }
+    /* Canon started a new folder; start a log there too so each folder
+     * develops on its own (frame numbers keep counting). It does that when
+     * the file number goes past 9999, so the files up to IMG_9999 of this
+     * batch are still in the old folder, and go in its log (#17). */
+    int folder = get_shooting_card()->folder_number;
+    int first_new = folder == roll_folder ? count + 1   /* none */
+                  : now < prev ? 9999 - prev + 1        /* the first after IMG_9999 */
+                  : 1;
 
     last_shot_ms = get_ms_clock();
     dbg("frames: file %d -> %d, logging %d", prev, now, count);
     for (int i = 1; i <= count; i++)
+    {
+        if (i == first_new)
+        {
+            roll_folder = folder;
+            update_log_path();
+            write_header(" - continued from the previous DCIM folder");
+        }
         record_frame((prev + i - 1) % 9999 + 1);
+    }
 }
 
 /* ---------------------------------------------------------------- the film OS host */

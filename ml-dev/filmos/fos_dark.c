@@ -386,6 +386,7 @@ static int cur_roll, cur_film, cur_frame;
 static struct fos_dev *dev;
 static int frame_t0;
 static int total_frames, done_frames, failed_frames, rolls_done;
+static int jpeg_frames;                 /* of the failed ones, shot as JPEG */
 static int finished, asking_stop;
 static struct spring stop_sheet;
 static int dv_t;
@@ -526,13 +527,25 @@ static void next_job()
             if (f->missing)
             {
                 char msg[120];
-                snprintf(msg, sizeof(msg), "darkroom: roll %03d frame %d: no RAW file %s", cur_roll, f->no, f->cr2);
+                const char *base = strrchr(f->cr2, '/');
+                base = base ? base + 1 : f->cr2;
+                snprintf(msg, sizeof(msg), "darkroom: roll %03d frame %d: %s %s", cur_roll, f->no,
+                         f->jpeg ? "shot as JPEG, no RAW:" : "no RAW file", f->cr2);
                 fos_port_log(msg);
+                /* the panel shows it on two lines, split at the dash */
+                if (f->jpeg)
                 {
-                    const char *base = strrchr(f->cr2, '/');
+                    jpeg_frames++;
+                    if (jpeg_frames == 1)
+                        snprintf(last_error, sizeof(last_error), "%.8s was shot as JPEG " T_MDASH " set Image quality to RAW", base);
+                    else
+                        snprintf(last_error, sizeof(last_error), "%d frames were shot as JPEG " T_MDASH " set Image quality to RAW",
+                                 jpeg_frames);
+                }
+                else if (!jpeg_frames)
+                {
                     if (f->cr2[0])
-                        snprintf(last_error, sizeof(last_error), "%s isn't on the card " T_MDASH " was it shot in RAW?",
-                                 base ? base + 1 : f->cr2);
+                        snprintf(last_error, sizeof(last_error), "%s isn't on the card " T_MDASH " was it deleted?", base);
                     else
                         snprintf(last_error, sizeof(last_error), "No RAW file " T_MDASH " shoot with Image quality RAW");
                 }
@@ -631,6 +644,7 @@ void develop_enter(int arg)
     if (!dark_mem()) nqueue = 0;
     rescan();
     total_frames = done_frames = failed_frames = rolls_done = 0;
+    jpeg_frames = 0;
     for (int i = 0; i < nqueue; i++)
     {
         int ri = roll_index(queue[i]);
@@ -955,6 +969,44 @@ static const char *stage_name()
     return "";
 }
 
+/* s centred at cx, on two lines if it is wider than w: split at its dash
+ * (" - "), or else at the last space that fits */
+static void text_lines_c(const struct fos_font *f, int cx, int y, int dy, int w, const char *s, fcol c)
+{
+    if (fos_text_w(f, s, 0) <= w)
+    {
+        fos_text_c(cv, f, cx, y, s, c, OPAQUE, 0);
+        return;
+    }
+    char a[96], b[96];
+    const char *dash = strstr(s, " " T_MDASH " ");
+    int cut = -1, next = -1;
+    if (dash)
+    {
+        cut = (int) (dash - s);
+        next = cut + (int) strlen(" " T_MDASH " ");
+        snprintf(a, sizeof(a), "%.*s", cut, s);
+        if (fos_text_w(f, a, 0) > w) cut = -1;
+    }
+    if (cut < 0)
+        for (int i = (int) strlen(s) - 1; i > 0; i--)
+        {
+            if (s[i] != ' ') continue;
+            snprintf(a, sizeof(a), "%.*s", i, s);
+            if (fos_text_w(f, a, 0) <= w) { cut = i; next = i + 1; break; }
+        }
+    if (cut < 0)
+    {
+        fos_text_c(cv, f, cx, y, s, c, OPAQUE, 0);
+        return;
+    }
+    snprintf(a, sizeof(a), "%.*s", cut, s);
+    snprintf(b, sizeof(b), "%s", s + next);
+    if (b[0] >= 'a' && b[0] <= 'z') b[0] += 'A' - 'a';      /* a sentence of its own */
+    fos_text_c(cv, f, cx, y, a, c, OPAQUE, 0);
+    fos_text_c(cv, f, cx, y + dy, b, c, OPAQUE, 0);
+}
+
 static void draw_panel()
 {
     int x0 = 440, x1 = FOS_W - 12;
@@ -972,7 +1024,7 @@ static void draw_panel()
         {
             snprintf(b, sizeof(b), "%d frame%s could not be developed", failed_frames, failed_frames == 1 ? "" : "s");
             fos_text_c(cv, &fos_font_sm, PANEL_CX, 372, b, SL_TEXT2, OPAQUE, 0);
-            fos_text_c(cv, &fos_font_xs, PANEL_CX, 394, last_error, SL_TEXT3, OPAQUE, 0);
+            text_lines_c(&fos_font_xs, PANEL_CX, 394, 16, FOS_W - 12 - 440, last_error, SL_TEXT3);
         }
     }
     else
@@ -1315,6 +1367,17 @@ void prints_draw()
         char b[64];
         snprintf(b, sizeof(b), pv_mode ? "Frame %d was not developed" : "No contact sheet", pv_cur);
         ui_photo_text(&fos_font_md, 360, 244, b, 0, 1);
+        /* and why, when the darkroom couldn't */
+        const struct fos_lab_frame *m = pv_mode && pv_cur >= 1 && pv_cur <= FOS_MAX_FRAMES ? &pv_meta[pv_cur - 1] : 0;
+        if (m && m->missing)
+        {
+            const char *base = strrchr(m->cr2, '/');
+            base = base ? base + 1 : m->cr2;
+            if (m->jpeg) snprintf(b, sizeof(b), "%.8s was shot as JPEG: set Image quality to RAW", base);
+            else if (m->cr2[0]) snprintf(b, sizeof(b), "%s isn't on the card", base);
+            else snprintf(b, sizeof(b), "No RAW file was logged for it");
+            ui_photo_text(&fos_font_sm, 360, 274, b, 0, 1);
+        }
     }
     const struct fos_lab_roll *r = &rolls[pv_roll];
     if (!pv_mode)

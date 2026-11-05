@@ -51,6 +51,8 @@ instead, the module didn't load: its line in the *Modules* tab says why. Tell us
 2. Camera off, card in, camera on. MENU → *Firmware ver.* → update (first time only: this lets the
    camera start Magic Lantern from the card).
 3. Switch the camera off and on.
+4. In Canon's menu set **Image quality** to **RAW** (RAW+JPEG works too) and **Image review** to
+   **Off**. The in-camera darkroom develops the RAWs: frames shot as JPEG can't be developed.
 
 ## 3. What to try, and what to tell us
 
